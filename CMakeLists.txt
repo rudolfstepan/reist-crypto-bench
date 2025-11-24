@@ -16,3 +16,6 @@ target_link_libraries(bench_chacha_reist PRIVATE reist_mod)
 
 add_executable(bench_modadd_suite src/bench_modadd_suite.cpp)
 target_link_libraries(bench_modadd_suite PRIVATE reist_mod)
+
+add_executable(bench_poly_mod src/bench_poly_mod.cpp)
+target_link_libraries(bench_poly_mod PRIVATE reist_mod)

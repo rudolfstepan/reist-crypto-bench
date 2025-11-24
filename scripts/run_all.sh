@@ -20,3 +20,8 @@ echo "Running bench_chacha_reist..."
 echo
 echo "Running bench_modadd_suite..."
 ./bench_modadd_suite 20000000
+
+echo
+echo "Running bench_poly_mod..."
+./bench_poly_mod
+

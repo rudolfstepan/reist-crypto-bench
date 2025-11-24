@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.S": "c",
+        "fstream": "cpp",
+        "chrono": "cpp",
+        "cstdint": "cpp",
+        "iomanip": "cpp",
+        "vector": "cpp",
+        "iostream": "cpp"
+    }
+}

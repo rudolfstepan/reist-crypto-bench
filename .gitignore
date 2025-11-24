@@ -1,0 +1,18 @@
+# C++ / build
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Binaries
+bench_modular
+bench_chacha_reist
+*.exe
+*.out
+*.o
+*.obj
+
+# Misc
+*.log
+*.tmp

@@ -75,15 +75,6 @@ static uint32_t reist_poly_scalar(
     return acc;
 }
 
-
-#if REIST_HAS_NEON
-static uint32_t reist_poly_neon(
-    const std::vector<uint32_t>& a,
-    const std::vector<uint32_t>& b,
-    std::vector<uint32_t>& out,
-    uint32_t q,
-    uint64_t reps)
-{
 // ============================================================================
 // REIST polynomial add (NEON, 4-lane vektorisiert)
 // out[i..i+3] = (a[i..i+3] + b[i..i+3]) mod q
@@ -134,19 +125,7 @@ static uint32_t reist_poly_neon(
 
     return acc;
 }
-}
-#else
-static uint32_t reist_poly_neon(
-    const std::vector<uint32_t>&,
-    const std::vector<uint32_t>&,
-    std::vector<uint32_t>&,
-    uint32_t,
-    uint64_t)
-{
-    // Dummy fallback für x86 oder ARM ohne NEON
-    return 0;
-}
-#endif
+
 
 // ============================================================================
 // Adaptive Benchmark: skaliert reps bis mind. target Sekunden erreicht sind

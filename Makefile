@@ -62,3 +62,7 @@ run: all
 	@$(BUILD_DIR)/bench_hashmix || true
 	@echo
 
+	@echo "Running bench_reist_arm..."
+	@$(BUILD_DIR)/bench_reist_arm || true
+	@echo
+	

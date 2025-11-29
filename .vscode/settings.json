@@ -7,6 +7,7 @@
         "iomanip": "cpp",
         "vector": "cpp",
         "iostream": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "cassert": "cpp"
     }
 }

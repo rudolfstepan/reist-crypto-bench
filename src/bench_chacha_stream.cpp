@@ -63,14 +63,14 @@ double time_stream(F&& f, std::size_t blocks) {
 }
 
 int main(int argc, char** argv) {
+    // Usage: bench_chacha_stream [blocks] [B]
     std::size_t blocks = 1'000'000; // 1e6 * 64 bytes = 64 MB
-
-    if (argc >= 2) {
-        blocks = static_cast<std::size_t>(std::stoull(argv[1]));
-    }
+    uint32_t B = 0xCAFEBABE;
+    if (argc >= 2) blocks = static_cast<std::size_t>(std::stoull(argv[1]));
+    if (argc >= 3) B = static_cast<uint32_t>(std::stoul(argv[2]));
 
     uint32_t in[16];
-    for (int i = 0; i < 16; ++i) in[i] = i * 0x9E3779B9u;
+    for (int i = 0; i < 16; ++i) in[i] = i * B;
 
     uint32_t out[16];
     std::vector<uint32_t> sink(16);

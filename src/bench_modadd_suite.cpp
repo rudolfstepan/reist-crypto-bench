@@ -61,57 +61,52 @@ static std::int64_t bench_reist_sym(std::int64_t B, std::int64_t N, std::int64_t
 }
 
 int main(int argc, char** argv) {
-    // Total iterations per modulus.
-    // You can override via argv[1].
-    std::int64_t N = 50'000'000;
+    // Usage:
+    //   bench_modadd_suite [N] [B]
+    // If B is provided, only that modulus is benchmarked (runtime parameter).
+    // Otherwise, all default moduli are used (constant scenario).
 
-    if (argc >= 2) {
-        N = std::stoll(argv[1]);
-    }
+    std::int64_t N = 50'000'000;
+    if (argc >= 2) N = std::stoll(argv[1]);
     if (N <= 0) {
         std::cerr << "N must be > 0\n";
         return 1;
     }
 
-    // A set of "interesting" moduli:
-    // - small prime (hashing, PRNG)
-    // - medium prime
-    // - large prime ~ 1e9
-    // - non-prime / power-of-two-ish cases
-    std::vector<std::int64_t> moduli = {
-        257,
-        997,
-        10007,
-        1000003,
-        10000019,
-        1000000007  // classical mod for hashes
-    };
+    std::vector<std::int64_t> moduli;
+    if (argc >= 3) {
+        // Runtime parameter scenario
+        moduli.push_back(std::stoll(argv[2]));
+    } else {
+        // Constant scenario (default moduli)
+        moduli = {
+            257,
+            997,
+            10007,
+            1000003,
+            10000019,
+            1000000007
+        };
+    }
 
-    // step chosen so that it is not a trivial multiple of B
     std::int64_t step = 3;
-
     std::vector<Result> results;
     results.reserve(moduli.size() * 2);
 
     std::cout << std::fixed << std::setprecision(6);
-
     std::cout << "REIST modular-add benchmark suite\n";
     std::cout << "Total iterations per modulus N = " << N << "\n";
     std::cout << "step = " << step << "\n\n";
-
     std::cout << "Running benchmarks...\n\n";
 
     for (auto B : moduli) {
         std::cout << "Modulus B = " << B << "\n";
-
-        // Classic
         std::uint64_t sink1 = 0;
         double t_classic = time_loop([&](std::int64_t n){
             sink1 = bench_classic_mod(B, n, step);
         }, N);
         results.push_back({B, N, "classic_mod", t_classic});
 
-        // REIST
         std::int64_t sink2 = 0;
         double t_reist = time_loop([&](std::int64_t n){
             sink2 = bench_reist_sym(B, n, step);

@@ -23,29 +23,11 @@ endif
 # Set compiler flags based on arch
 # --------------------------------
 ifeq ($(ARCH),aarch64)
-    # ============================
-    # ARM64 / AArch64 Optimierung
-    # ============================
-    CXXFLAGS := -O3 -Ofast \
-                -march=armv8-a+simd \
-                -mtune=generic \
-                -funroll-loops -flto \
-                -ffast-math -fomit-frame-pointer \
-                -std=c++20 -Iinclude
-
-    # Hinweis:
-    # -march=armv8-a+simd aktiviert NEON/AdvSIMD
-    # clang auf ARM ist meist 10–25 % schneller als g++
-
+	CXXFLAGS_OPT := -O3 -Ofast -march=armv8-a+simd -mtune=generic -funroll-loops -flto -ffast-math -fomit-frame-pointer -std=c++20 -Iinclude
+	CXXFLAGS_NOOPT := -O0 -march=armv8-a+simd -mtune=generic -std=c++20 -Iinclude
 else
-    # ============================
-    # x86_64 Optimierung
-    # ============================
-    CXXFLAGS := -O3 -Ofast \
-                -march=native -mtune=native \
-                -funroll-loops -flto \
-                -fomit-frame-pointer \
-                -std=c++20 -Iinclude
+	CXXFLAGS_OPT := -O3 -Ofast -march=native -mtune=native -funroll-loops -flto -fomit-frame-pointer -std=c++20 -Iinclude
+	CXXFLAGS_NOOPT := -O0 -march=native -mtune=native -std=c++20 -Iinclude
 endif
 
 # --------------------------------
@@ -55,18 +37,26 @@ SRC_DIR   := src
 BUILD_DIR := build
 
 # find all .cpp files
-SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
+ifeq ($(ARCH),aarch64)
+	SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
+else
+	SOURCES := $(filter-out $(SRC_DIR)/bench_reist_arm.cpp,$(wildcard $(SRC_DIR)/*.cpp))
+endif
 # derive output binaries
-BINS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%,$(SOURCES))
+BINS_OPT := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%_opt,$(SOURCES))
+BINS_NOOPT := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%_noopt,$(SOURCES))
 
-all: $(BUILD_DIR) $(BINS)
+all: $(BUILD_DIR) $(BINS_OPT) $(BINS_NOOPT)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 # compile each source into build/<binary>
-$(BUILD_DIR)/%: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $< -o $@
+$(BUILD_DIR)/%_opt: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS_OPT) $< -o $@
+
+$(BUILD_DIR)/%_noopt: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS_NOOPT) $< -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -74,38 +64,74 @@ clean:
 list:
 	@echo "Architecture: $(ARCH)"
 	@echo "Compiler: $(CXX)"
-	@echo "Flags: $(CXXFLAGS)"
+	@echo "Optimized Flags: $(CXXFLAGS_OPT)"
+	@echo "No-Opt Flags: $(CXXFLAGS_NOOPT)"
 	@echo "Sources: $(SOURCES)"
-	@echo "Binaries: $(BINS)"
+	@echo "Optimized Binaries: $(BINS_OPT)"
+	@echo "No-Opt Binaries: $(BINS_NOOPT)"
 
 # ======================================
-# Run all benchmarks automatically
-# ======================================
+
+# Run all optimized benchmarks
+run_optimized: all
+	@echo "Running bench_modadd_suite (O3)..."
+	@$(BUILD_DIR)/bench_modadd_suite_opt || true
+	@echo
+
+	@echo "Running bench_poly_mod (O3)..."
+	@$(BUILD_DIR)/bench_poly_mod_opt || true
+	@echo
+
+	@echo "Running bench_modular (O3)..."
+	@$(BUILD_DIR)/bench_modular_opt || true
+	@echo
+
+	@echo "Running bench_chacha_reist (O3)..."
+	@$(BUILD_DIR)/bench_chacha_reist_opt || true
+	@echo
+
+	@echo "Running bench_chacha_stream (O3)..."
+	@$(BUILD_DIR)/bench_chacha_stream_opt || true
+	@echo
+
+	@echo "Running bench_hashmix (O3)..."
+	@$(BUILD_DIR)/bench_hashmix_opt || true
+	@echo
+
+ifeq ($(ARCH),aarch64)
+	@echo "Running bench_reist_arm (O3)..."
+	@$(BUILD_DIR)/bench_reist_arm_opt || true
+	@echo
+endif
+
+# Run all no-opt benchmarks
 run: all
-	@echo "Running bench_modadd_suite..."
-	@$(BUILD_DIR)/bench_modadd_suite || true
+	@echo "Running bench_modadd_suite (O0)..."
+	@$(BUILD_DIR)/bench_modadd_suite_noopt || true
 	@echo
 
-	@echo "Running bench_poly_mod..."
-	@$(BUILD_DIR)/bench_poly_mod || true
+	@echo "Running bench_poly_mod (O0)..."
+	@$(BUILD_DIR)/bench_poly_mod_noopt || true
 	@echo
 
-	@echo "Running bench_modular..."
-	@$(BUILD_DIR)/bench_modular || true
+	@echo "Running bench_modular (O0)..."
+	@$(BUILD_DIR)/bench_modular_noopt || true
 	@echo
 
-	@echo "Running bench_chacha_reist..."
-	@$(BUILD_DIR)/bench_chacha_reist || true
+	@echo "Running bench_chacha_reist (O0)..."
+	@$(BUILD_DIR)/bench_chacha_reist_noopt || true
 	@echo
 
-	@echo "Running bench_chacha_stream..."
-	@$(BUILD_DIR)/bench_chacha_stream || true
+	@echo "Running bench_chacha_stream (O0)..."
+	@$(BUILD_DIR)/bench_chacha_stream_noopt || true
 	@echo
 
-	@echo "Running bench_hashmix..."
-	@$(BUILD_DIR)/bench_hashmix || true
+	@echo "Running bench_hashmix (O0)..."
+	@$(BUILD_DIR)/bench_hashmix_noopt || true
 	@echo
 
-	@echo "Running bench_reist_arm..."
-	@$(BUILD_DIR)/bench_reist_arm || true
+ifeq ($(ARCH),aarch64)
+	@echo "Running bench_reist_arm (O0)..."
+	@$(BUILD_DIR)/bench_reist_arm_noopt || true
 	@echo
+endif

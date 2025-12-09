@@ -67,17 +67,22 @@ int main(int argc, char** argv)
 {
     int N    = 1024;     // Polynomgrad
     int reps = 50000;    // Anzahl Wiederholungen
+    std::vector<int32_t> moduli;
 
     if (argc >= 2) N    = std::stoi(argv[1]);
     if (argc >= 3) reps = std::stoi(argv[2]);
-
-    // Größere, nicht-Potenz-von-2 Moduli, um echte Divisionspfade zu erzwingen
-    std::vector<int32_t> moduli = {
-        1000003,
-        10000019,
-        100000007,
-        1000000007
-    };
+    if (argc >= 4) {
+        // Runtime parameter scenario
+        moduli.push_back(std::stoi(argv[3]));
+    } else {
+        // Constant scenario (default moduli)
+        moduli = {
+            1000003,
+            10000019,
+            100000007,
+            1000000007
+        };
+    }
 
     std::mt19937 rng(12345);
 
@@ -93,12 +98,9 @@ int main(int argc, char** argv)
     csv << "q,N,reps,classic,reist,speedup\n";
 
     std::vector<int32_t> a(N), b(N), out(N);
-
-    // etwas breiterer Bereich, damit Summen sicher über q/2 hinauslaufen
     std::uniform_int_distribution<int32_t> dist(-500000, 500000);
 
     for (int32_t q : moduli) {
-        // Zufällige Polynome erzeugen
         for (int i = 0; i < N; ++i) {
             a[i] = dist(rng);
             b[i] = dist(rng);

@@ -1,8 +1,10 @@
+
 #include <iostream>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <iomanip>
+#include <string>
 
 using namespace std;
 
@@ -10,11 +12,8 @@ inline uint32_t std_add(uint32_t a, uint32_t b) {
     return a + b;
 }
 
-// Here we conceptually keep a hook for a REIST-style addition.
-// On commodity CPUs this is simulated with an extra operation,
-// but in dedicated hardware this would be a cheaper "signed-add-only" pathway.
 inline uint32_t reist_add32(uint32_t a, uint32_t b) {
-    return a + b; // placeholder: hardware-level REIST optimization would live here
+    return a + b;
 }
 
 #define ROTL32(x,n) ((x << n) | (x >> (32 - n)))
@@ -36,7 +35,6 @@ inline void chacha_qr_reist(uint32_t s[16]) {
 void chacha_block_std(uint32_t out[16], const uint32_t in[16]) {
     uint32_t x[16];
     memcpy(x, in, 64);
-
     for (int i = 0; i < 10; ++i) {
         chacha_qr_std(x);
         chacha_qr_std(x);
@@ -47,7 +45,6 @@ void chacha_block_std(uint32_t out[16], const uint32_t in[16]) {
 void chacha_block_reist(uint32_t out[16], const uint32_t in[16]) {
     uint32_t x[16];
     memcpy(x, in, 64);
-
     for (int i = 0; i < 10; ++i) {
         chacha_qr_reist(x);
         chacha_qr_reist(x);
@@ -63,19 +60,23 @@ double bench(F func, int iters) {
     return chrono::duration<double>(t1 - t0).count();
 }
 
-int main() {
-    constexpr int N = 1'000'000;
+int main(int argc, char** argv) {
+    // Usage: bench_chacha_reist [N] [B]
+    int N = 1'000'000;
+    uint32_t B = 0xCAFEBABE;
+    if (argc >= 2) N = std::stoi(argv[1]);
+    if (argc >= 3) B = static_cast<uint32_t>(std::stoul(argv[2]));
 
     cout << fixed << setprecision(6);
 
     {
-        uint32_t a = 0x12345678, b = 0xCAFEBABE;
+        uint32_t a = 0x12345678;
         double t_std = bench([&](int n){
-            for (int i = 0; i < n; ++i) a = std_add(a, b);
+            for (int i = 0; i < n; ++i) a = std_add(a, B);
         }, N);
 
         double t_reist = bench([&](int n){
-            for (int i = 0; i < n; ++i) a = reist_add32(a, b);
+            for (int i = 0; i < n; ++i) a = reist_add32(a, B);
         }, N);
 
         cout << "\n--- Modular Addition (32-bit) ---\n";

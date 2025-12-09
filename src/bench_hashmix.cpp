@@ -41,20 +41,26 @@ double time_loop(F&& f, std::uint64_t iters) {
 
 int main(int argc, char** argv) {
     std::uint64_t N = 100'000'000;
+    std::vector<std::uint64_t> moduli;
+    std::uint64_t A = 6364136223846793005ULL;
+    std::uint64_t B = 1442695040888963407ULL;
 
-    if (argc >= 2) {
-        N = std::stoull(argv[1]);
+    // Usage: bench_hashmix [N] [B]
+    if (argc >= 2) N = std::stoull(argv[1]);
+    if (argc >= 3) B = std::stoull(argv[2]);
+
+    if (argc >= 4) {
+        // Runtime parameter scenario for modulus
+        moduli.push_back(std::stoull(argv[3]));
+    } else {
+        // Constant scenario (default moduli)
+        moduli = {
+            1'000'003ULL,
+            10'000'019ULL,
+            100'000'007ULL,
+            1'000'000'007ULL
+        };
     }
-
-    std::vector<std::uint64_t> moduli = {
-        1'000'003ULL,
-        10'000'019ULL,
-        100'000'007ULL,
-        1'000'000'007ULL
-    };
-
-    const std::uint64_t A = 6364136223846793005ULL;
-    const std::uint64_t B = 1442695040888963407ULL;
 
     std::cout << std::fixed << std::setprecision(6);
     std::cout << "Hashmix benchmark (classic % vs REIST reduction)";

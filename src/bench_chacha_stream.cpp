@@ -4,6 +4,11 @@
 #include <cstring>
 #include <vector>
 #include <iomanip>
+#include <fstream>
+#include <unistd.h>
+#include <cstdio>
+#include <string>
+#include <cctype>
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -69,6 +74,45 @@ int main(int argc, char** argv) {
     if (argc >= 2) blocks = static_cast<std::size_t>(std::stoull(argv[1]));
     if (argc >= 3) B = static_cast<uint32_t>(std::stoul(argv[2]));
 
+    // Collect system info
+    std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
+    {
+        std::ifstream cpuinfo("/proc/cpuinfo");
+        std::string line;
+        while (std::getline(cpuinfo, line)) {
+            if (line.find("model name") != std::string::npos) {
+                cpu_model = line.substr(line.find(":") + 2);
+            }
+            if (line.find("cpu MHz") != std::string::npos) {
+                cpu_mhz = line.substr(line.find(":") + 2);
+            }
+        }
+    }
+    {
+        std::ifstream meminfo("/proc/meminfo");
+        std::string line;
+        if (std::getline(meminfo, line)) {
+            if (line.find("MemTotal") != std::string::npos) {
+                mem_total = line.substr(line.find(":") + 2);
+            }
+        }
+    }
+    char hn[256];
+    if (gethostname(hn, sizeof(hn)) == 0) hostname = hn;
+    {
+        FILE* fp = popen("uname -o", "r");
+        if (fp) {
+            char buf[128];
+            if (fgets(buf, sizeof(buf), fp)) {
+                os_name = std::string(buf);
+                if (!os_name.empty() && os_name.back() == '\n') {
+                    os_name.pop_back();
+                }
+            }
+            pclose(fp);
+        }
+    }
+
     uint32_t in[16];
     for (int i = 0; i < 16; ++i) in[i] = i * B;
 
@@ -76,6 +120,16 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> sink(16);
 
     std::cout << std::fixed << std::setprecision(6);
+    std::cout << "========================================\n";
+    std::cout << "ChaCha20 Stream Benchmark\n";
+    std::cout << "========================================\n";
+    std::cout << "System Information:\n";
+    std::cout << "  Hostname: " << hostname << "\n";
+    std::cout << "  OS: " << os_name << "\n";
+    std::cout << "  CPU Model: " << cpu_model << "\n";
+    std::cout << "  CPU MHz: " << cpu_mhz << "\n";
+    std::cout << "  Memory: " << mem_total << "\n";
+    std::cout << "========================================\n\n";
 
     double t_std = time_stream([&](std::size_t n){
         for (std::size_t i = 0; i < n; ++i) {

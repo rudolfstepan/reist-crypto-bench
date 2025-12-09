@@ -5,6 +5,10 @@
 #include <cstdint>
 #include <iomanip>
 #include <fstream>
+#include <unistd.h>
+#include <cstdio>
+#include <string>
+#include <cctype>
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -86,8 +90,56 @@ int main(int argc, char** argv)
 
     std::mt19937 rng(12345);
 
+    // Collect system info
+    std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
+    {
+        std::ifstream cpuinfo("/proc/cpuinfo");
+        std::string line;
+        while (std::getline(cpuinfo, line)) {
+            if (line.find("model name") != std::string::npos) {
+                cpu_model = line.substr(line.find(":") + 2);
+            }
+            if (line.find("cpu MHz") != std::string::npos) {
+                cpu_mhz = line.substr(line.find(":") + 2);
+            }
+        }
+    }
+    {
+        std::ifstream meminfo("/proc/meminfo");
+        std::string line;
+        if (std::getline(meminfo, line)) {
+            if (line.find("MemTotal") != std::string::npos) {
+                mem_total = line.substr(line.find(":") + 2);
+            }
+        }
+    }
+    char hn[256];
+    if (gethostname(hn, sizeof(hn)) == 0) hostname = hn;
+    {
+        FILE* fp = popen("uname -o", "r");
+        if (fp) {
+            char buf[128];
+            if (fgets(buf, sizeof(buf), fp)) {
+                os_name = std::string(buf);
+                if (!os_name.empty() && os_name.back() == '\n') {
+                    os_name.pop_back();
+                }
+            }
+            pclose(fp);
+        }
+    }
+
     std::cout << std::fixed << std::setprecision(6);
+    std::cout << "========================================\n";
     std::cout << "Polynomial Modular Add Benchmark (NTRU-style, large q)\n";
+    std::cout << "========================================\n";
+    std::cout << "System Information:\n";
+    std::cout << "  Hostname: " << hostname << "\n";
+    std::cout << "  OS: " << os_name << "\n";
+    std::cout << "  CPU Model: " << cpu_model << "\n";
+    std::cout << "  CPU MHz: " << cpu_mhz << "\n";
+    std::cout << "  Memory: " << mem_total << "\n";
+    std::cout << "========================================\n\n";
     std::cout << "N = " << N << ", reps = " << reps << "\n\n";
 
     std::ofstream csv("results_poly_mod.csv");

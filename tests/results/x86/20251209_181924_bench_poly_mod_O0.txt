@@ -1,0 +1,34 @@
+========================================
+Polynomial Modular Add Benchmark (NTRU-style, large q)
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 3187.200
+  Memory:       32706668 kB
+========================================
+
+N = 1024, reps = 50000
+
+q = 1000003
+  classic : 0.126077 s
+  REIST   : 0.145475 s
+  speedup : 0.866659x
+
+q = 10000019
+  classic : 0.120638 s
+  REIST   : 0.145816 s
+  speedup : 0.827332x
+
+q = 100000007
+  classic : 0.121150 s
+  REIST   : 0.145143 s
+  speedup : 0.834693x
+
+q = 1000000007
+  classic : 0.122922 s
+  REIST   : 0.142661 s
+  speedup : 0.861637x
+
+CSV written to results_poly_mod.csv

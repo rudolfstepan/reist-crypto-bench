@@ -9,7 +9,7 @@ This repository provides a complete benchmark suite for evaluating REIST divisio
 Run a complete benchmark with a single command:
 
 ```bash
-make all && make run && make run_optimized && make doc
+make all && make run && make run_optimized && make report
 ```
 
 This will:

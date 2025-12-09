@@ -1,0 +1,24 @@
+Polynomial Modular Add Benchmark (NTRU-style, large q)
+N = 1024, reps = 50000
+
+q = 1000003
+  classic : 0.156683 s
+  REIST   : 0.172593 s
+  speedup : 0.907816x
+
+q = 10000019
+  classic : 0.148959 s
+  REIST   : 0.172165 s
+  speedup : 0.865210x
+
+q = 100000007
+  classic : 0.157906 s
+  REIST   : 0.175274 s
+  speedup : 0.900905x
+
+q = 1000000007
+  classic : 0.151510 s
+  REIST   : 0.177120 s
+  speedup : 0.855406x
+
+CSV written to results_poly_mod.csv

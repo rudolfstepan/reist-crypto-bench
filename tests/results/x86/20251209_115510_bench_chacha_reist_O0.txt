@@ -1,0 +1,10 @@
+
+--- Modular Addition (32-bit) ---
+std_add    : 0.001612 s
+reist_add32: 0.001629 s
+Speed ratio: 0.989556x (std / REIST)
+
+--- ChaCha20-like Cipher-Speed ---
+Classic : 0.144619 s (442.542361 MB/s)
+REIST   : 0.179499 s (356.548305 MB/s)
+Speed ratio: 0.805682x (classic / REIST)

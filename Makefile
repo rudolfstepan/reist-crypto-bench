@@ -125,16 +125,16 @@ endif
 	@RESULT_TIMESTAMP=$(TIMESTAMP) python3 scripts/plot_benchmarks.py || echo "WARNING: plotting script failed"
 
 # Generate comprehensive benchmark documentation comparing O0 vs O3
-doc:
+report:
 	@echo "=========================================="
 	@echo "Generating Benchmark Documentation"
 	@echo "=========================================="
-	@python3 scripts/generate_benchmark_doc.py
+	@python3 scripts/generate_benchmark_report.py
 	@echo ""
 	@echo "Documentation generated successfully!"
 	@echo "Check tests/results/$(if $(filter aarch64,$(ARCH)),arm,x86)/ for the report"
 
-.PHONY: all clean list run run_optimized doc
+.PHONY: all clean list run run_optimized report
 
 # Run all no-opt benchmarks
 run: all

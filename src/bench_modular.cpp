@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <string>
 #include <cctype>
-#include "reist_mod.hpp"
+#include "../include/reist_mod.hpp"
 
 using namespace std;
 

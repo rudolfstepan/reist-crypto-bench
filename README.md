@@ -193,7 +193,7 @@ reist-crypto-bench/
 | `make all` | Build all benchmarks with both O0 and O3 optimization levels |
 | `make run` | Execute all benchmarks with O0 (no optimization) |
 | `make run_optimized` | Execute all benchmarks with O3 (full optimization + native tuning) |
-| `make doc` | Generate comprehensive benchmark report with charts |
+| `make report` | Generate comprehensive benchmark report with charts |
 | `make clean` | Remove all build artifacts |
 | `make list` | Show build configuration (arch, compiler, flags) |
 

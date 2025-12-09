@@ -12,23 +12,23 @@ System Information:
 N = 1024, reps = 50000
 
 q = 1000003
-  classic : 0.058129 s
-  REIST   : 0.003824 s
-  speedup : 15.202590x
+  classic : 0.124557 s
+  REIST   : 0.141761 s
+  speedup : 0.878642x
 
 q = 10000019
-  classic : 0.057555 s
-  REIST   : 0.003816 s
-  speedup : 15.081833x
+  classic : 0.123049 s
+  REIST   : 0.144402 s
+  speedup : 0.852129x
 
 q = 100000007
-  classic : 0.058515 s
-  REIST   : 0.003802 s
-  speedup : 15.391982x
+  classic : 0.125661 s
+  REIST   : 0.145333 s
+  speedup : 0.864644x
 
 q = 1000000007
-  classic : 0.056800 s
-  REIST   : 0.003907 s
-  speedup : 14.536508x
+  classic : 0.121999 s
+  REIST   : 0.140180 s
+  speedup : 0.870303x
 
 CSV written to results_poly_mod.csv

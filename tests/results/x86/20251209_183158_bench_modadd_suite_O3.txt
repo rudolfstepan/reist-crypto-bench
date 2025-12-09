@@ -15,39 +15,39 @@ step = 3
 Running benchmarks...
 
 Modulus B = 257
-  classic_mod: 0.195447 s
-  reist_sym  : 0.022021 s
-  speedup    : 8.875477x (classic / REIST)
+  classic_mod: 0.194080 s
+  reist_sym  : 0.020300 s
+  speedup    : 9.560382x (classic / REIST)
   sinks: 151 / -106
 
 Modulus B = 997
-  classic_mod: 0.196180 s
-  reist_sym  : 0.021144 s
-  speedup    : 9.278368x (classic / REIST)
+  classic_mod: 0.186455 s
+  reist_sym  : 0.020518 s
+  speedup    : 9.087188x (classic / REIST)
   sinks: 353 / 353
 
 Modulus B = 10007
-  classic_mod: 0.195274 s
-  reist_sym  : 0.021755 s
-  speedup    : 8.976063x (classic / REIST)
+  classic_mod: 0.186988 s
+  reist_sym  : 0.022089 s
+  speedup    : 8.465081x (classic / REIST)
   sinks: 5077 / -4930
 
 Modulus B = 1000003
-  classic_mod: 0.196456 s
-  reist_sym  : 0.021510 s
-  speedup    : 9.133340x (classic / REIST)
+  classic_mod: 0.194315 s
+  reist_sym  : 0.020487 s
+  speedup    : 9.484573x (classic / REIST)
   sinks: 999553 / -450
 
 Modulus B = 10000019
-  classic_mod: 0.190712 s
-  reist_sym  : 0.021446 s
-  speedup    : 8.892733x (classic / REIST)
+  classic_mod: 0.187362 s
+  reist_sym  : 0.021613 s
+  speedup    : 8.668818x (classic / REIST)
   sinks: 9999734 / -285
 
 Modulus B = 1000000007
-  classic_mod: 0.194143 s
-  reist_sym  : 0.021327 s
-  speedup    : 9.103037x (classic / REIST)
+  classic_mod: 0.195057 s
+  reist_sym  : 0.021307 s
+  speedup    : 9.154679x (classic / REIST)
   sinks: 150000000 / 150000000
 
 CSV written to results_modadd_suite.csv

@@ -11,8 +11,8 @@ System Information:
 
 ChaCha20-like keystream benchmark (61.035156 MB total)
 
-Classic : 0.000032 s (1970989.498322 MB/s)
-REIST   : 0.000032 s (1982160.555005 MB/s)
-Speed ratio (classic / REIST): 1.005668x
+Classic : 0.140105 s (456.801427 MB/s)
+REIST   : 0.161616 s (396.001031 MB/s)
+Speed ratio (classic / REIST): 0.866900x
 
 Sink XOR: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 

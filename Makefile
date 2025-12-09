@@ -72,66 +72,102 @@ list:
 
 # ======================================
 
-# Run all optimized benchmarks
+
+# Timestamp for results
+TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
+RESULT_DIR := tests/results/$(if $(filter aarch64,$(ARCH)),arm,x86)
+
 run_optimized: all
+	@mkdir -p $(RESULT_DIR)
 	@echo "Running bench_modadd_suite (O3)..."
-	@$(BUILD_DIR)/bench_modadd_suite_opt || true
+	@$(BUILD_DIR)/bench_modadd_suite_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modadd_suite_O3.txt || true
 	@echo
 
 	@echo "Running bench_poly_mod (O3)..."
-	@$(BUILD_DIR)/bench_poly_mod_opt || true
+	@$(BUILD_DIR)/bench_poly_mod_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_poly_mod_O3.txt || true
 	@echo
 
 	@echo "Running bench_modular (O3)..."
-	@$(BUILD_DIR)/bench_modular_opt || true
+	@$(BUILD_DIR)/bench_modular_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modular_O3.txt || true
 	@echo
 
 	@echo "Running bench_chacha_reist (O3)..."
-	@$(BUILD_DIR)/bench_chacha_reist_opt || true
+	@$(BUILD_DIR)/bench_chacha_reist_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_reist_O3.txt || true
 	@echo
 
 	@echo "Running bench_chacha_stream (O3)..."
-	@$(BUILD_DIR)/bench_chacha_stream_opt || true
+	@$(BUILD_DIR)/bench_chacha_stream_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_stream_O3.txt || true
 	@echo
 
 	@echo "Running bench_hashmix (O3)..."
-	@$(BUILD_DIR)/bench_hashmix_opt || true
+	@$(BUILD_DIR)/bench_hashmix_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_O3.txt || true
 	@echo
 
 ifeq ($(ARCH),aarch64)
 	@echo "Running bench_reist_arm (O3)..."
-	@$(BUILD_DIR)/bench_reist_arm_opt || true
+	@$(BUILD_DIR)/bench_reist_arm_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_reist_arm_O3.txt || true
 	@echo
 endif
 
+	@if [ -f results_modadd_suite.csv ]; then \
+		mv results_modadd_suite.csv $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv; \
+		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv"; \
+	else \
+		echo "WARNING: results_modadd_suite.csv not found"; \
+	fi
+	@if [ -f results_poly_mod.csv ]; then \
+		mv results_poly_mod.csv $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv; \
+		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv"; \
+	else \
+		echo "WARNING: results_poly_mod.csv not found"; \
+	fi
+	@echo "Generating plots..."
+	@RESULT_TIMESTAMP=$(TIMESTAMP) python3 scripts/plot_benchmarks.py || echo "WARNING: plotting script failed"
+
 # Run all no-opt benchmarks
 run: all
+	@mkdir -p $(RESULT_DIR)
 	@echo "Running bench_modadd_suite (O0)..."
-	@$(BUILD_DIR)/bench_modadd_suite_noopt || true
+	@$(BUILD_DIR)/bench_modadd_suite_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modadd_suite_O0.txt || true
 	@echo
 
 	@echo "Running bench_poly_mod (O0)..."
-	@$(BUILD_DIR)/bench_poly_mod_noopt || true
+	@$(BUILD_DIR)/bench_poly_mod_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_poly_mod_O0.txt || true
 	@echo
 
 	@echo "Running bench_modular (O0)..."
-	@$(BUILD_DIR)/bench_modular_noopt || true
+	@$(BUILD_DIR)/bench_modular_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modular_O0.txt || true
 	@echo
 
 	@echo "Running bench_chacha_reist (O0)..."
-	@$(BUILD_DIR)/bench_chacha_reist_noopt || true
+	@$(BUILD_DIR)/bench_chacha_reist_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_reist_O0.txt || true
 	@echo
 
 	@echo "Running bench_chacha_stream (O0)..."
-	@$(BUILD_DIR)/bench_chacha_stream_noopt || true
+	@$(BUILD_DIR)/bench_chacha_stream_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_stream_O0.txt || true
 	@echo
 
 	@echo "Running bench_hashmix (O0)..."
-	@$(BUILD_DIR)/bench_hashmix_noopt || true
+	@$(BUILD_DIR)/bench_hashmix_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_O0.txt || true
 	@echo
 
 ifeq ($(ARCH),aarch64)
 	@echo "Running bench_reist_arm (O0)..."
-	@$(BUILD_DIR)/bench_reist_arm_noopt || true
+	@$(BUILD_DIR)/bench_reist_arm_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_reist_arm_O0.txt || true
 	@echo
 endif
+
+	@if [ -f results_modadd_suite.csv ]; then \
+		mv results_modadd_suite.csv $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv; \
+		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv"; \
+	else \
+		echo "WARNING: results_modadd_suite.csv not found"; \
+	fi
+	@if [ -f results_poly_mod.csv ]; then \
+		mv results_poly_mod.csv $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv; \
+		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv"; \
+	else \
+		echo "WARNING: results_poly_mod.csv not found"; \
+	fi
+	@echo "Generating plots..."
+	@RESULT_TIMESTAMP=$(TIMESTAMP) python3 scripts/plot_benchmarks.py || echo "WARNING: plotting script failed"

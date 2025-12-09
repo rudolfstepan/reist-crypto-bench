@@ -1,0 +1,6 @@
+Modular benchmark with B = 257, N = 5000000
+
+--- Modular remainder ---
+classic  : 0.031965 s
+REIST    : 0.029637 s
+Speedup  : 1.078546x (classic / REIST)

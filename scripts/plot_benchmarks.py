@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import csv
 import os
-import math
-import argparse
+import glob
+from datetime import datetime
+
 import matplotlib.pyplot as plt
 
 def load_modadd(fname):
@@ -78,30 +79,54 @@ def plot_speedup_poly(csv_path, out_path):
     print("Saved", out_path)
 
 
+def resolve_result_file(result_dir, base_name, prefix):
+    """Return the result file matching the prefix when available, otherwise fall back to newest."""
+    if prefix:
+        candidate = os.path.join(result_dir, f"{prefix}_{base_name}")
+        if os.path.exists(candidate):
+            return candidate
+
+    pattern = os.path.join(result_dir, f"*_{base_name}")
+    matches = glob.glob(pattern)
+    if matches:
+        matches.sort(key=os.path.getmtime, reverse=True)
+        return matches[0]
+
+    fallback = os.path.join(result_dir, base_name)
+    return fallback if os.path.exists(fallback) else None
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Plot REIST benchmark CSV results.")
-    parser.add_argument(
-        "--csvdir",
-        type=str,
-        default=".",
-        help="Pfad zu den CSV-Dateien (Standard: aktuelles Verzeichnis)"
-    )
-    args = parser.parse_args()
+    import platform
 
-    csvdir = os.path.abspath(args.csvdir)
-
-    modadd_csv = os.path.join(csvdir, "results_modadd_suite.csv")
-    poly_csv   = os.path.join(csvdir, "results_poly_mod.csv")
-
-    if os.path.exists(modadd_csv):
-        plot_speedup_modadd(modadd_csv, os.path.join(csvdir, "plot_modadd_speedup.png"))
+    arch = platform.machine()
+    if arch == "aarch64":
+        result_dir = os.path.join("tests", "results", "arm")
     else:
-        print("Missing", modadd_csv)
+        result_dir = os.path.join("tests", "results", "x86")
 
-    if os.path.exists(poly_csv):
-        plot_speedup_poly(poly_csv, os.path.join(csvdir, "plot_poly_speedup.png"))
+    prefix = os.environ.get("RESULT_TIMESTAMP")
+
+    # Find matching results files
+    modadd_csv = resolve_result_file(result_dir, "results_modadd_suite.csv", prefix)
+    poly_csv   = resolve_result_file(result_dir, "results_poly_mod.csv", prefix)
+
+    # Timestamp for output images; reuse prefix when provided
+    timestamp = prefix or datetime.now().strftime("%Y%m%d_%H%M%S")
+    modadd_img = os.path.join(result_dir, f"{timestamp}_plot_modadd_speedup.png")
+    poly_img   = os.path.join(result_dir, f"{timestamp}_plot_poly_speedup.png")
+
+    if modadd_csv and os.path.exists(modadd_csv):
+        plot_speedup_modadd(modadd_csv, modadd_img)
     else:
-        print("Missing", poly_csv)
+        missing = f"{prefix}_results_modadd_suite.csv" if prefix else "latest results_modadd_suite.csv"
+        print("Missing", missing)
+
+    if poly_csv and os.path.exists(poly_csv):
+        plot_speedup_poly(poly_csv, poly_img)
+    else:
+        missing = f"{prefix}_results_poly_mod.csv" if prefix else "latest results_poly_mod.csv"
+        print("Missing", missing)
 
 
 if __name__ == "__main__":

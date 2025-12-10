@@ -1,0 +1,45 @@
+========================================
+ARM REIST Benchmark: scalar vs NEON
+========================================
+System Information:
+  Hostname: Arm-PC
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        8104540 kB
+========================================
+
+N = 1024 coefficients
+
+q = 1000003
+  classic scalar : 0.023889 s  (reps=2560)
+  REIST  scalar  : 0.034690 s  (reps=5120)
+  REIST  NEON    : 0.024046 s  (reps=5120)
+  speedup REIST scalar vs classic : 0.688637x
+  speedup REIST NEON   vs classic : 0.993468x
+  speedup NEON vs REIST scalar    : 1.442660x
+
+q = 10000019
+  classic scalar : 0.023902 s  (reps=2560)
+  REIST  scalar  : 0.034716 s  (reps=5120)
+  REIST  NEON    : 0.024056 s  (reps=5120)
+  speedup REIST scalar vs classic : 0.688497x
+  speedup REIST NEON   vs classic : 0.993600x
+  speedup NEON vs REIST scalar    : 1.443143x
+
+q = 100000007
+  classic scalar : 0.023884 s  (reps=2560)
+  REIST  scalar  : 0.034711 s  (reps=5120)
+  REIST  NEON    : 0.024054 s  (reps=5120)
+  speedup REIST scalar vs classic : 0.688095x
+  speedup REIST NEON   vs classic : 0.992943x
+  speedup NEON vs REIST scalar    : 1.443031x
+
+q = 1000000007
+  classic scalar : 0.023882 s  (reps=2560)
+  REIST  scalar  : 0.034626 s  (reps=5120)
+  REIST  NEON    : 0.024046 s  (reps=5120)
+  speedup REIST scalar vs classic : 0.689718x
+  speedup REIST NEON   vs classic : 0.993193x
+  speedup NEON vs REIST scalar    : 1.439999x
+

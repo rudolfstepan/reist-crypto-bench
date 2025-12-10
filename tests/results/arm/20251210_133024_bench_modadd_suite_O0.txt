@@ -1,0 +1,53 @@
+========================================
+REIST modular-add benchmark suite
+========================================
+System Information:
+  Hostname: Arm-PC
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        8104540 kB
+========================================
+
+Total iterations per modulus N = 50000000
+step = 3
+
+Running benchmarks...
+
+Modulus B = 257
+  classic_mod: 0.206607 s
+  reist_sym  : 0.107165 s
+  speedup    : 1.927940x (classic / REIST)
+  sinks: 151 / -106
+
+Modulus B = 997
+  classic_mod: 0.206441 s
+  reist_sym  : 0.105261 s
+  speedup    : 1.961228x (classic / REIST)
+  sinks: 353 / 353
+
+Modulus B = 10007
+  classic_mod: 0.206506 s
+  reist_sym  : 0.104705 s
+  speedup    : 1.972267x (classic / REIST)
+  sinks: 5077 / -4930
+
+Modulus B = 1000003
+  classic_mod: 0.206365 s
+  reist_sym  : 0.104646 s
+  speedup    : 1.972036x (classic / REIST)
+  sinks: 999553 / -450
+
+Modulus B = 10000019
+  classic_mod: 0.206436 s
+  reist_sym  : 0.104723 s
+  speedup    : 1.971248x (classic / REIST)
+  sinks: 9999734 / -285
+
+Modulus B = 1000000007
+  classic_mod: 0.206742 s
+  reist_sym  : 0.104642 s
+  speedup    : 1.975712x (classic / REIST)
+  sinks: 150000000 / 150000000
+
+CSV written to results_modadd_suite.csv

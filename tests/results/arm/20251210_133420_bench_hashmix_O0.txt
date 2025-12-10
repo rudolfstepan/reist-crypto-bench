@@ -1,0 +1,13 @@
+========================================
+Hashmix benchmark (classic % vs REIST reduction)
+========================================
+System Information:
+  Hostname: Arm-PC
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        8104540 kB
+========================================
+
+Iterations N = 100000000
+M = 1000003  classic : 0.928363  REIST   : 1.897148  speedup : 0.489347x (classic / REIST)  sink values: 7ce05 / 26f47M = 10000019  classic : 0.897589  REIST   : 1.868736  speedup : 0.480319x (classic / REIST)  sink values: 2e7c0e / 22daeaM = 100000007  classic : 0.876496  REIST   : 1.853584  speedup : 0.472866x (classic / REIST)  sink values: c81895 / 158db5dM = 1000000007  classic : 0.850958  REIST   : 1.832325  speedup : 0.464414x (classic / REIST)  sink values: b640eeb / 85136e5

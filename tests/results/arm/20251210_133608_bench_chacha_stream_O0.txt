@@ -1,0 +1,18 @@
+========================================
+ChaCha20 Stream Benchmark
+========================================
+System Information:
+  Hostname: Arm-PC
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        8104540 kB
+========================================
+
+ChaCha20-like keystream benchmark (61.035156 MB total)
+
+Classic : 0.490400 s (130.505636 MB/s)
+REIST   : 0.624589 s (102.467433 MB/s)
+Speed ratio (classic / REIST): 0.785157x
+
+Sink XOR: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 

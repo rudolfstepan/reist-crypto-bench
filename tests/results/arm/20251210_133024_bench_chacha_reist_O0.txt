@@ -1,0 +1,20 @@
+========================================
+ChaCha20 REIST Benchmark
+========================================
+System Information:
+  Hostname: Arm-PC
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        8104540 kB
+========================================
+
+--- Modular Addition (32-bit) ---
+std_add    : 0.003281 s
+reist_add32: 0.003267 s
+Speed ratio: 1.004432x (std / REIST)
+
+--- ChaCha20-like Cipher-Speed ---
+Classic : 0.453229 s (141.208831 MB/s)
+REIST   : 0.586553 s (109.112009 MB/s)
+Speed ratio: 0.772700x (classic / REIST)

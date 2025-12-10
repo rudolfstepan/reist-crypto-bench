@@ -1,0 +1,34 @@
+========================================
+Polynomial Modular Add Benchmark (NTRU-style, large q)
+========================================
+System Information:
+  Hostname: Arm-PC
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        8104540 kB
+========================================
+
+N = 1024, reps = 50000
+
+q = 1000003
+  classic : 0.225390 s
+  REIST   : 0.360548 s
+  speedup : 0.625132x
+
+q = 10000019
+  classic : 0.223416 s
+  REIST   : 0.360472 s
+  speedup : 0.619785x
+
+q = 100000007
+  classic : 0.223360 s
+  REIST   : 0.360555 s
+  speedup : 0.619490x
+
+q = 1000000007
+  classic : 0.226233 s
+  REIST   : 0.360626 s
+  speedup : 0.627334x
+
+CSV written to results_poly_mod.csv

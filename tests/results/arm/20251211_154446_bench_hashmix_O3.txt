@@ -1,0 +1,13 @@
+========================================
+Hashmix benchmark (classic % vs REIST reduction)
+========================================
+System Information:
+  Hostname: OpenWrt
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        4024948 kB
+========================================
+
+Iterations N = 100000000
+M = 1000003  classic : 1.649789  REIST   : 1.863122  speedup : 0.885497x (classic / REIST)  sink values: 7ce05 / 26f47M = 10000019  classic : 1.580854  REIST   : 1.795185  speedup : 0.880608x (classic / REIST)  sink values: 2e7c0e / 22daeaM = 100000007  classic : 1.533034  REIST   : 1.765228  speedup : 0.868462x (classic / REIST)  sink values: c81895 / 158db5dM = 1000000007  classic : 1.474223  REIST   : 1.716145  speedup : 0.859032x (classic / REIST)  sink values: b640eeb / 85136e5

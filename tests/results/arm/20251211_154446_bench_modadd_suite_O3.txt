@@ -1,0 +1,53 @@
+========================================
+REIST modular-add benchmark suite
+========================================
+System Information:
+  Hostname: OpenWrt
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        4024948 kB
+========================================
+
+Total iterations per modulus N = 50000000
+step = 3
+
+Running benchmarks...
+
+Modulus B = 257
+  classic_mod: 0.300617 s
+  reist_sym  : 0.139950 s
+  speedup    : 2.148027x (classic / REIST)
+  sinks: 151 / -106
+
+Modulus B = 997
+  classic_mod: 0.300280 s
+  reist_sym  : 0.137011 s
+  speedup    : 2.191644x (classic / REIST)
+  sinks: 353 / 353
+
+Modulus B = 10007
+  classic_mod: 0.300140 s
+  reist_sym  : 0.136189 s
+  speedup    : 2.203843x (classic / REIST)
+  sinks: 5077 / -4930
+
+Modulus B = 1000003
+  classic_mod: 0.300160 s
+  reist_sym  : 0.135902 s
+  speedup    : 2.208656x (classic / REIST)
+  sinks: 999553 / -450
+
+Modulus B = 10000019
+  classic_mod: 0.300139 s
+  reist_sym  : 0.134359 s
+  speedup    : 2.233863x (classic / REIST)
+  sinks: 9999734 / -285
+
+Modulus B = 1000000007
+  classic_mod: 0.300141 s
+  reist_sym  : 0.133700 s
+  speedup    : 2.244894x (classic / REIST)
+  sinks: 150000000 / 150000000
+
+CSV written to results_modadd_suite.csv

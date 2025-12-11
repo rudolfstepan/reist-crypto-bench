@@ -1,0 +1,18 @@
+========================================
+ChaCha20 Stream Benchmark
+========================================
+System Information:
+  Hostname: OpenWrt
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        4024948 kB
+========================================
+
+ChaCha20-like keystream benchmark (61.035156 MB total)
+
+Classic : 1.469390 s (43.555489 MB/s)
+REIST   : 1.702134 s (37.599869 MB/s)
+Speed ratio (classic / REIST): 0.863264x
+
+Sink XOR: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 

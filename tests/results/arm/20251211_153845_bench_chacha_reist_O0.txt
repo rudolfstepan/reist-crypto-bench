@@ -1,0 +1,20 @@
+========================================
+ChaCha20 REIST Benchmark
+========================================
+System Information:
+  Hostname: OpenWrt
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        4024948 kB
+========================================
+
+--- Modular Addition (32-bit) ---
+std_add    : 0.009935 s
+reist_add32: 0.009932 s
+Speed ratio: 1.000294x (std / REIST)
+
+--- ChaCha20-like Cipher-Speed ---
+Classic : 1.234973 s (51.822981 MB/s)
+REIST   : 1.481437 s (43.201307 MB/s)
+Speed ratio: 0.833632x (classic / REIST)

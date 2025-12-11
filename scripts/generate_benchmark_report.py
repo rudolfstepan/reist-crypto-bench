@@ -18,10 +18,11 @@ import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
 
+import argparse
+
 
 def is_arm_platform():
     return platform.machine() in ("aarch64", "arm64")
-
 
 # ---------------------------------------------------------------------------
 # Utility: architecture-specific result directory
@@ -40,27 +41,39 @@ def get_arch_result_dir():
 # Benchmark text result handling (O0 / O3)
 # ---------------------------------------------------------------------------
 
-def find_latest_results(result_dir, opt_level):
-    """Find the most recent benchmark results for a given optimization level."""
-    pattern = os.path.join(result_dir, f"*_O{opt_level}.txt")
-    files = glob.glob(pattern)
+def find_latest_results(result_dir, opt_level, prefix=None):
+    """
+    Find benchmark result files for given optimization level.
+    If prefix is provided, return only files matching that prefix.
+    Otherwise return the newest timestamp group.
+    """
+
+    pattern = os.path.join(result_dir, f"*_{opt_level}.txt")  # unchanged base pattern
+
+    # If explicit prefix was passed → try to match that prefix exactly
+    if prefix:
+        specific_pattern = os.path.join(result_dir, f"{prefix}_bench_*_O{opt_level}.txt")
+        matches = glob.glob(specific_pattern)
+        return matches  # may be empty; caller handles it
+
+    # Default behaviour: newest timestamp
+    files = glob.glob(os.path.join(result_dir, f"*_{opt_level}.txt"))
     if not files:
         return []
 
     timestamps = defaultdict(list)
     for f in files:
         basename = os.path.basename(f)
-        # Expect: YYYYMMDD_HHMMSS_bench_xxx_O0.txt
-        match = re.match(r'(\d{8}_\d{6})_', basename)
+        match = re.match(r"(\d{8}_\d{6})_", basename)
         if match:
-            timestamp = match.group(1)
-            timestamps[timestamp].append(f)
+            timestamps[match.group(1)].append(f)
 
     if not timestamps:
         return []
 
     latest_timestamp = max(timestamps.keys())
     return timestamps[latest_timestamp]
+
 
 
 def extract_system_info(txt_file):
@@ -744,8 +757,19 @@ def main():
     print(f"\nResult directory: {result_dir}")
 
     print("\nSearching for benchmark results...")
-    o0_files = find_latest_results(result_dir, 0)
-    o3_files = find_latest_results(result_dir, 3)
+    # Read prefix from CLI or environment
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prefix", type=str, default=None,
+                        help="Timestamp prefix (e.g. 20251210_153502) to load specific benchmark run")
+    args = parser.parse_args()
+
+    prefix = args.prefix or os.environ.get("RESULT_TIMESTAMP")
+
+    print(f"\nUsing prefix: {prefix if prefix else '(auto: newest timestamp)'}")
+
+    # Load benchmark results, now prefix-aware
+    o0_files = find_latest_results(result_dir, 0, prefix)
+    o3_files = find_latest_results(result_dir, 3, prefix)
 
     if not o0_files or not o3_files:
         print("ERROR: Could not find complete benchmark results for both O0 and O3")
@@ -774,7 +798,7 @@ def main():
         print(f"  Parsed O3: {bench_name}")
 
     print("\nGenerating comparison charts...")
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = prefix or datetime.now().strftime("%Y%m%d_%H%M%S")
     charts = create_comparison_charts(o0_data, o3_data, result_dir, timestamp)
 
     # ASM compilation + analysis

@@ -1,0 +1,45 @@
+========================================
+ARM REIST Benchmark: scalar vs NEON
+========================================
+System Information:
+  Hostname: OpenWrt
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        4024948 kB
+========================================
+
+N = 1024 coefficients
+
+q = 1000003
+  classic scalar : 0.026770 s  (reps=1280)
+  REIST  scalar  : 0.026598 s  (reps=20480)
+  REIST  NEON    : 0.029787 s  (reps=20480)
+  speedup REIST scalar vs classic : 1.006475x
+  speedup REIST NEON   vs classic : 0.898708x
+  speedup NEON vs REIST scalar    : 0.892926x
+
+q = 10000019
+  classic scalar : 0.026793 s  (reps=1280)
+  REIST  scalar  : 0.025164 s  (reps=20480)
+  REIST  NEON    : 0.029738 s  (reps=20480)
+  speedup REIST scalar vs classic : 1.064754x
+  speedup REIST NEON   vs classic : 0.900960x
+  speedup NEON vs REIST scalar    : 0.846168x
+
+q = 100000007
+  classic scalar : 0.026737 s  (reps=1280)
+  REIST  scalar  : 0.024219 s  (reps=20480)
+  REIST  NEON    : 0.029734 s  (reps=20480)
+  speedup REIST scalar vs classic : 1.103953x
+  speedup REIST NEON   vs classic : 0.899198x
+  speedup NEON vs REIST scalar    : 0.814526x
+
+q = 1000000007
+  classic scalar : 0.026721 s  (reps=1280)
+  REIST  scalar  : 0.025387 s  (reps=20480)
+  REIST  NEON    : 0.029716 s  (reps=20480)
+  speedup REIST scalar vs classic : 1.052533x
+  speedup REIST NEON   vs classic : 0.899201x
+  speedup NEON vs REIST scalar    : 0.854321x
+

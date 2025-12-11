@@ -1,0 +1,34 @@
+========================================
+Polynomial Modular Add Benchmark (NTRU-style, large q)
+========================================
+System Information:
+  Hostname: OpenWrt
+  OS: GNU/Linux
+  CPU Model: 
+  CPU MHz: 
+  Memory:        4024948 kB
+========================================
+
+N = 1024, reps = 50000
+
+q = 1000003
+  classic : 1.538845 s
+  REIST   : 2.086078 s
+  speedup : 0.737674x
+
+q = 10000019
+  classic : 1.538921 s
+  REIST   : 2.085580 s
+  speedup : 0.737886x
+
+q = 100000007
+  classic : 1.538983 s
+  REIST   : 2.085610 s
+  speedup : 0.737905x
+
+q = 1000000007
+  classic : 1.538683 s
+  REIST   : 2.086572 s
+  speedup : 0.737421x
+
+CSV written to results_poly_mod.csv

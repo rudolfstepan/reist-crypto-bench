@@ -2,10 +2,15 @@
 import csv
 import os
 import glob
+import argparse
 from datetime import datetime
-
+import platform
 import matplotlib.pyplot as plt
 
+
+# ---------------------------------------------------------
+# Data loading
+# ---------------------------------------------------------
 def load_modadd(fname):
     with open(fname, newline='') as f:
         rows = list(csv.DictReader(f))
@@ -32,6 +37,19 @@ def load_modadd(fname):
     return moduli, speedups
 
 
+def load_poly(fname):
+    qs, speedups = [], []
+    with open(fname, newline='') as f:
+        r = csv.DictReader(f)
+        for row in r:
+            qs.append(int(row["q"]))
+            speedups.append(float(row["speedup"]))
+    return qs, speedups
+
+
+# ---------------------------------------------------------
+# Plotting
+# ---------------------------------------------------------
 def plot_speedup_modadd(csv_path, out_path):
     moduli, speedups = load_modadd(csv_path)
     if not moduli:
@@ -48,17 +66,6 @@ def plot_speedup_modadd(csv_path, out_path):
     plt.savefig(out_path, bbox_inches="tight")
     plt.close()
     print("Saved", out_path)
-
-
-def load_poly(fname):
-    qs = []
-    speedups = []
-    with open(fname, newline='') as f:
-        r = csv.DictReader(f)
-        for row in r:
-            qs.append(int(row["q"]))
-            speedups.append(float(row["speedup"]))
-    return qs, speedups
 
 
 def plot_speedup_poly(csv_path, out_path):
@@ -79,8 +86,16 @@ def plot_speedup_poly(csv_path, out_path):
     print("Saved", out_path)
 
 
+# ---------------------------------------------------------
+# Result file resolver
+# ---------------------------------------------------------
 def resolve_result_file(result_dir, base_name, prefix):
-    """Return the result file matching the prefix when available, otherwise fall back to newest."""
+    """
+    Return file path based on:
+    1. exact prefix match (prefix_xxx.csv)
+    2. newest *_xxx.csv file
+    3. fallback xxx.csv if exists
+    """
     if prefix:
         candidate = os.path.join(result_dir, f"{prefix}_{base_name}")
         if os.path.exists(candidate):
@@ -96,37 +111,39 @@ def resolve_result_file(result_dir, base_name, prefix):
     return fallback if os.path.exists(fallback) else None
 
 
+# ---------------------------------------------------------
+# Main
+# ---------------------------------------------------------
 def main():
-    import platform
+    parser = argparse.ArgumentParser(description="Generate REIST benchmark plots from stored CSV data.")
+    parser.add_argument("--prefix", type=str, help="Timestamp prefix of result files", default=None)
+    args = parser.parse_args()
 
     arch = platform.machine()
-    if arch == "aarch64":
-        result_dir = os.path.join("tests", "results", "arm")
-    else:
-        result_dir = os.path.join("tests", "results", "x86")
+    result_dir = os.path.join("tests", "results", "arm" if arch == "aarch64" else "x86")
 
-    prefix = os.environ.get("RESULT_TIMESTAMP")
+    # Allow override via environment OR CLI
+    prefix = args.prefix or os.environ.get("RESULT_TIMESTAMP")
 
-    # Find matching results files
+    # Resolve CSV input files
     modadd_csv = resolve_result_file(result_dir, "results_modadd_suite.csv", prefix)
     poly_csv   = resolve_result_file(result_dir, "results_poly_mod.csv", prefix)
 
-    # Timestamp for output images; reuse prefix when provided
+    # Output timestamps
     timestamp = prefix or datetime.now().strftime("%Y%m%d_%H%M%S")
     modadd_img = os.path.join(result_dir, f"{timestamp}_plot_modadd_speedup.png")
     poly_img   = os.path.join(result_dir, f"{timestamp}_plot_poly_speedup.png")
 
-    if modadd_csv and os.path.exists(modadd_csv):
+    # Execute plots
+    if modadd_csv:
         plot_speedup_modadd(modadd_csv, modadd_img)
     else:
-        missing = f"{prefix}_results_modadd_suite.csv" if prefix else "latest results_modadd_suite.csv"
-        print("Missing", missing)
+        print("Missing modadd CSV for prefix:", prefix)
 
-    if poly_csv and os.path.exists(poly_csv):
+    if poly_csv:
         plot_speedup_poly(poly_csv, poly_img)
     else:
-        missing = f"{prefix}_results_poly_mod.csv" if prefix else "latest results_poly_mod.csv"
-        print("Missing", missing)
+        print("Missing poly CSV for prefix:", prefix)
 
 
 if __name__ == "__main__":

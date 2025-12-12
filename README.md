@@ -1,8 +1,47 @@
-# REIST Cryptographic Benchmark Suite
+# REIST Division – Cryptographic Benchmark Suite
 
-> **Comprehensive performance benchmarking for REIST (Redundant Signed Integer) arithmetic in cryptographic operations**
+**REIST Division (Remainder Extended Inversion and Subtraction Technique)**  
+is an implementation-oriented framework for **centered remainder arithmetic** and **signed modular correction**, introduced by **Rudolf Stepan (2025)**.
 
-This repository provides a complete benchmark suite for evaluating REIST division and signed-remainder arithmetic compared to classical modular operations. The benchmarks cover various cryptographic scenarios including modular arithmetic, polynomial operations, and cipher-like computations.
+This repository provides a comprehensive **cryptographic benchmark suite** for evaluating REIST-style symmetric remainder arithmetic against classical modulo-based arithmetic and Montgomery reduction on modern CPUs (x86-64, ARMv8-A).
+
+📄 **Scientific Paper (DOI):**  
+https://doi.org/10.5281/zenodo.17897540
+
+🌐 **Project Website (paper & context):**  
+https://intracom.at/papers/reist-division.html
+
+🔗 **Canonical Reference Repository:**  
+https://github.com/rudolfstepan/reist-crypto-bench
+
+---
+
+### What is REIST Division?
+
+REIST Division is **not a new cryptographic algorithm** and **not a cryptocurrency**.  
+It is a **formal and implementation-friendly reframing of integer division** using a **centered remainder interval**  
+[-B/2, B/2) where the remainder is treated as an explicit **signed correction term** rather than a passive residue.
+
+This viewpoint maps naturally to:
+- balanced modular arithmetic
+- branchless correction logic
+- SIMD-friendly modular addition
+- hardware-efficient arithmetic pipelines
+
+The benchmark suite in this repository evaluates how this formulation behaves under **real cryptographic workloads**, especially **modular and polynomial modular addition** as used in lattice-based cryptography.
+
+## What REIST is NOT
+
+To avoid ambiguity and search engine misclassification:
+
+- ❌ Not a cryptocurrency
+- ❌ Not a blockchain project
+- ❌ Not a token, coin or payment system
+- ❌ Not a replacement for Montgomery or Barrett reduction
+- ❌ Not a cryptographic primitive by itself
+
+REIST Division is a **general arithmetic framework** whose behavior is evaluated here using cryptographic workloads as a high-stress test environment.
+
 
 ## 🚀 Quick Start
 
@@ -561,14 +600,24 @@ Contributions are welcome! Areas of interest:
 
 ## 📖 Citation
 
-If you use this benchmark suite in your research, please cite:
+If you use REIST Division or this benchmark suite in academic or technical work, please cite the primary paper:
+
+```bibtex
+@article{stepan2025reist,
+  title   = {REIST Division: An Implementation-Oriented Framing of Centered Remainder Arithmetic for Modular Addition},
+  author  = {Rudolf Stepan},
+  year    = {2025},
+  doi     = {10.5281/zenodo.17611784},
+  url     = {https://intracom.at/papers/reist-division.html}
+}
+```
 
 ```bibtex
 @software{reist_crypto_bench,
-  title = {REIST Cryptographic Benchmark Suite},
+  title  = {REIST Cryptographic Benchmark Suite},
   author = {Rudolf Stepan},
-  year = {2025},
-  url = {https://github.com/rudolfstepan/reist-crypto-bench}
+  year   = {2025},
+  url    = {https://github.com/rudolfstepan/reist-crypto-bench}
 }
 ```
 
@@ -578,7 +627,12 @@ See `LICENSE` file for details.
 
 ## 🔗 Related Work
 
-- **REIST Division Theory**: See `docs/reist-division.pdf`
+- **REIST Division – Formal Paper (DOI)**  
+  https://doi.org/10.5281/zenodo.17897540
+
+- **REIST Division – Project Website**  
+  https://intracom.at/papers/reist-division.html
+
 - **Modular Arithmetic in Cryptography**: Standards like FIPS 186-4 (DSA)
 - **Lattice-Based Cryptography**: NIST PQC standardization
 - **Hardware Arithmetic**: Books on computer arithmetic and VLSI design

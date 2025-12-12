@@ -1,0 +1,13 @@
+========================================
+Hashmix benchmark (classic % vs REIST reduction)
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 3187.198
+  Memory:       32706676 kB
+========================================
+
+Iterations N = 100000000
+M = 1000003  classic : 0.389782  REIST   : 0.484345  speedup : 0.804762x (classic / REIST)  sink values: 7ce05 / 26f47M = 10000019  classic : 0.387007  REIST   : 0.484673  speedup : 0.798491x (classic / REIST)  sink values: 2e7c0e / 22daeaM = 100000007  classic : 0.383661  REIST   : 0.470261  speedup : 0.815846x (classic / REIST)  sink values: c81895 / 158db5dM = 1000000007  classic : 0.389965  REIST   : 0.481310  speedup : 0.810216x (classic / REIST)  sink values: b640eeb / 85136e5

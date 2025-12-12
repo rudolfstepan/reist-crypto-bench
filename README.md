@@ -151,6 +151,48 @@ Hash function mixing with modular reduction.
 M = 1000003  classic : 0.404142  REIST   : 0.636984  speedup : 0.634x
 ```
 
+### 7. **REIST vs Montgomery Arithmetic** (`bench_montgomery`) **[NEW]**
+Comprehensive comparison against Montgomery arithmetic, the industry-standard method for efficient modular operations.
+
+**What it tests:**
+- **Modular Addition**: Classic vs REIST vs Montgomery
+- **Modular Multiplication**: All three approaches compared
+- **Montgomery with conversion overhead**: Real-world usage scenario
+- Multiple moduli from 257 (8-bit) to 1,000,000,000,039 (40-bit)
+- 10,000,000 operations per test
+
+**Why it matters:**
+- **Montgomery arithmetic** is widely used in cryptography (RSA, ECC, DSA)
+- Shows REIST performance against a proven, optimized baseline
+- Demonstrates when each method excels:
+  - **REIST**: Best for additions and simple modular operations
+  - **Montgomery**: Optimal for multiplication chains (exponentiation)
+  - **Classic**: Baseline for comparison
+
+**Example output:**
+```
+Modulus = 257
+
+--- Modular Addition ---
+  Classic     : 0.003385 s
+  REIST       : 0.000934 s
+  Montgomery  : 0.000425 s
+  REIST speedup vs Classic    : 3.624x
+  Montgomery speedup vs Classic: 7.957x
+  REIST speedup vs Montgomery : 0.455x
+
+--- Modular Multiplication ---
+  Classic     : 0.003917 s
+  REIST       : 0.005205 s
+  Montgomery  : 0.002497 s
+  Montgomery speedup vs Classic: 1.569x
+```
+
+**Key insights:**
+- Montgomery excels at multiplication (requires fewer reductions)
+- REIST wins for addition-heavy workloads
+- Both significantly outperform classical modulo for non-power-of-2 moduli
+
 ---
 
 ## 🏗️ Repository Structure
@@ -166,6 +208,7 @@ reist-crypto-bench/
 │   ├── bench_chacha_reist.cpp # ChaCha20 block operations
 │   ├── bench_chacha_stream.cpp# ChaCha20 stream generation
 │   ├── bench_hashmix.cpp      # Hash-mix operations
+│   ├── bench_montgomery.cpp   # REIST vs Montgomery comparison
 │   └── bench_reist_arm.cpp    # ARM NEON optimizations (ARM only)
 ├── scripts/
 │   ├── plot_benchmarks.py     # Chart generation
@@ -277,6 +320,7 @@ Each benchmark accepts command-line arguments:
 | `bench_chacha_reist` | `[N] [B]` | `./bench_chacha_reist_opt 2000000 0xDEADBEEF` |
 | `bench_chacha_stream` | `[blocks] [B]` | `./bench_chacha_stream_opt 5000000` |
 | `bench_hashmix` | `[N] [B] [M]` | `./bench_hashmix_opt 500000000 6364136223846793005 1000003` |
+| `bench_montgomery` | `[N] [M]` | `./bench_montgomery_opt 50000000 65537` |
 
 ### System Information in Results
 

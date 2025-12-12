@@ -125,6 +125,8 @@ def parse_benchmark_results(txt_file):
             results = parse_hashmix(content)
         elif 'reist_arm' in bench_name:
             results = parse_reist_arm(content)
+        elif 'montgomery' in bench_name:
+            results = parse_montgomery(content)
 
     except Exception as e:
         print(f"Warning: Could not parse {txt_file}: {e}")
@@ -248,6 +250,55 @@ def parse_reist_arm(content):
             'neon_time': float(neon_time),
             'speedup': float(speedup)
         })
+    return results
+
+
+def parse_montgomery(content):
+    """Parse Montgomery benchmark results."""
+    results = {'moduli': []}
+    
+    # Split content by modulus sections
+    modulus_sections = re.split(r'========================================\s*\nModulus = (\d+)', content)
+    
+    for i in range(1, len(modulus_sections), 2):
+        modulus = int(modulus_sections[i])
+        section = modulus_sections[i + 1]
+        
+        modulus_data = {'modulus': modulus}
+        
+        # Parse modular addition section
+        add_match = re.search(
+            r'--- Modular Addition ---\s+Classic\s*:\s+([\d.]+)\s+s\s+REIST\s*:\s+([\d.]+)\s+s\s+'
+            r'Montgomery\s*:\s+([\d.]+)\s+s\s+REIST speedup vs Classic\s*:\s+([\d.]+)x\s+'
+            r'Montgomery speedup vs Classic:\s+([\d.]+)x\s+REIST speedup vs Montgomery\s*:\s+([\d.]+)x',
+            section
+        )
+        if add_match:
+            modulus_data['add_classic'] = float(add_match.group(1))
+            modulus_data['add_reist'] = float(add_match.group(2))
+            modulus_data['add_montgomery'] = float(add_match.group(3))
+            modulus_data['add_reist_speedup'] = float(add_match.group(4))
+            modulus_data['add_mont_speedup'] = float(add_match.group(5))
+            modulus_data['add_reist_vs_mont'] = float(add_match.group(6))
+        
+        # Parse modular multiplication section
+        mul_match = re.search(
+            r'--- Modular Multiplication ---\s+Classic\s*:\s+([\d.]+)\s+s\s+REIST\s*:\s+([\d.]+)\s+s\s+'
+            r'Montgomery\s*:\s+([\d.]+)\s+s\s+REIST speedup vs Classic\s*:\s+([\d.]+)x\s+'
+            r'Montgomery speedup vs Classic:\s+([\d.]+)x\s+REIST speedup vs Montgomery\s*:\s+([\d.]+)x',
+            section
+        )
+        if mul_match:
+            modulus_data['mul_classic'] = float(mul_match.group(1))
+            modulus_data['mul_reist'] = float(mul_match.group(2))
+            modulus_data['mul_montgomery'] = float(mul_match.group(3))
+            modulus_data['mul_reist_speedup'] = float(mul_match.group(4))
+            modulus_data['mul_mont_speedup'] = float(mul_match.group(5))
+            modulus_data['mul_reist_vs_mont'] = float(mul_match.group(6))
+        
+        if 'add_classic' in modulus_data or 'mul_classic' in modulus_data:
+            results['moduli'].append(modulus_data)
+    
     return results
 
 

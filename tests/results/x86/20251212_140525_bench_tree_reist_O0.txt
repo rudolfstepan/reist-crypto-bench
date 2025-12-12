@@ -1,0 +1,105 @@
+=============================================
+Tree-REIST v2 Benchmark (Division-Free)
+=============================================
+Iterations per modulus: 10000000
+
+---------------------------------------------
+Modulus = 257
+---------------------------------------------
+Classic modulo           : 0.035483 s
+REIST v1 scalar          : 0.015498 s
+REIST v1 int32 AVX2      : 0.018050 s
+Tree-REIST v2 scalar     : 0.038163 s
+Tree-REIST v2 int32      : 0.030582 s
+Tree-REIST v2 int32 AVX2 : 0.036614 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.289529x
+  REIST v1 AVX2 vs REIST v1 scalar  : 0.858609x
+  Tree-REIST scalar vs Classic      : 0.929783x
+  Tree-REIST int32 vs scalar        : 1.247893x
+  Tree-REIST AVX2 vs int32          : 0.835243x
+  Tree-REIST AVX2 vs REIST v1 scalar: 0.423278x
+  Tree-REIST AVX2 vs Classic        : 0.969108x
+
+Sink: 78
+
+---------------------------------------------
+Modulus = 65537
+---------------------------------------------
+Classic modulo           : 0.035448 s
+REIST v1 scalar          : 0.021070 s
+REIST v1 int32 AVX2      : 0.020605 s
+Tree-REIST v2 scalar     : 0.033284 s
+Tree-REIST v2 int32      : 0.028069 s
+Tree-REIST v2 int32 AVX2 : 0.036634 s
+Speedups:
+  REIST v1 scalar vs Classic        : 1.682346x
+  REIST v1 AVX2 vs REIST v1 scalar  : 1.022573x
+  Tree-REIST scalar vs Classic      : 1.065022x
+  Tree-REIST int32 vs scalar        : 1.185772x
+  Tree-REIST AVX2 vs int32          : 0.766211x
+  Tree-REIST AVX2 vs REIST v1 scalar: 0.575166x
+  Tree-REIST AVX2 vs Classic        : 0.967628x
+
+Sink: -22923
+
+---------------------------------------------
+Modulus = 1000003
+---------------------------------------------
+Classic modulo           : 0.035408 s
+REIST v1 scalar          : 0.015665 s
+REIST v1 int32 AVX2      : 0.017822 s
+Tree-REIST v2 scalar     : 0.036311 s
+Tree-REIST v2 int32      : 0.027094 s
+Tree-REIST v2 int32 AVX2 : 0.036436 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.260358x
+  REIST v1 AVX2 vs REIST v1 scalar  : 0.878950x
+  Tree-REIST scalar vs Classic      : 0.975124x
+  Tree-REIST int32 vs scalar        : 1.340212x
+  Tree-REIST AVX2 vs int32          : 0.743599x
+  Tree-REIST AVX2 vs REIST v1 scalar: 0.429927x
+  Tree-REIST AVX2 vs Classic        : 0.971789x
+
+Sink: -356707
+
+---------------------------------------------
+Modulus = 10000019
+---------------------------------------------
+Classic modulo           : 0.035332 s
+REIST v1 scalar          : 0.017684 s
+REIST v1 int32 AVX2      : 0.018161 s
+Tree-REIST v2 scalar     : 0.035070 s
+Tree-REIST v2 int32      : 0.025502 s
+Tree-REIST v2 int32 AVX2 : 0.037106 s
+Speedups:
+  REIST v1 scalar vs Classic        : 1.998006x
+  REIST v1 AVX2 vs REIST v1 scalar  : 0.973743x
+  Tree-REIST scalar vs Classic      : 1.007486x
+  Tree-REIST int32 vs scalar        : 1.375157x
+  Tree-REIST AVX2 vs int32          : 0.687283x
+  Tree-REIST AVX2 vs REIST v1 scalar: 0.476573x
+  Tree-REIST AVX2 vs Classic        : 0.952197x
+
+Sink: 2868419
+
+---------------------------------------------
+Modulus = 1000000007
+---------------------------------------------
+Classic modulo           : 0.035529 s
+REIST v1 scalar          : 0.012452 s
+REIST v1 int32 AVX2      : 0.017968 s
+Tree-REIST v2 scalar     : 0.032698 s
+Tree-REIST v2 int32      : 0.023245 s
+Tree-REIST v2 int32 AVX2 : 0.037667 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.853215x
+  REIST v1 AVX2 vs REIST v1 scalar  : 0.693000x
+  Tree-REIST scalar vs Classic      : 1.086565x
+  Tree-REIST int32 vs scalar        : 1.406666x
+  Tree-REIST AVX2 vs int32          : 0.617129x
+  Tree-REIST AVX2 vs REIST v1 scalar: 0.330589x
+  Tree-REIST AVX2 vs Classic        : 0.943240x
+
+Sink: -235023219
+

@@ -1,0 +1,17 @@
+========================================
+Modular Benchmark
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 3187.198
+  Memory:       32706676 kB
+========================================
+
+Benchmark with B = 257, N = 5000000
+
+--- Modular remainder ---
+classic  : 0.095079 s
+REIST    : 0.132830 s
+Speedup  : 0.715791x (classic / REIST)

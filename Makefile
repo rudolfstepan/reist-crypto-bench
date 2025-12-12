@@ -103,6 +103,15 @@ run_optimized: all
 	@$(BUILD_DIR)/bench_hashmix_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_O3.txt || true
 	@echo
 
+	@echo "Running bench_montgomery (O3)..."
+	@$(BUILD_DIR)/bench_montgomery_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_montgomery_O3.txt || true
+	@echo
+
+	@echo "Running bench_tree_reist (O3)..."
+	@$(BUILD_DIR)/bench_tree_reist_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_tree_reist_O3.txt || true
+	@echo
+
+
 ifeq ($(ARCH),aarch64)
 	@echo "Running bench_reist_arm (O3)..."
 	@$(BUILD_DIR)/bench_reist_arm_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_reist_arm_O3.txt || true
@@ -161,6 +170,14 @@ run: all
 
 	@echo "Running bench_hashmix (O0)..."
 	@$(BUILD_DIR)/bench_hashmix_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_O0.txt || true
+	@echo
+
+	@echo "Running bench_montgomery (O0)..."
+	@$(BUILD_DIR)/bench_montgomery_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_montgomery_O0.txt || true
+	@echo
+
+	@echo "Running bench_tree_reist (O0)..."
+	@$(BUILD_DIR)/bench_tree_reist_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_tree_reist_O0.txt || true
 	@echo
 
 ifeq ($(ARCH),aarch64)

@@ -5,10 +5,29 @@
 # - ARM64 / AArch64 (NEON + ARMv8-A tuning)
 # ================================
 
+
 # --------------------------------
-# Detect architecture
+# Detect OS and architecture
 # --------------------------------
-ARCH := $(shell uname -m)
+ifeq ($(OS),Windows_NT)
+	IS_WINDOWS := 1
+	MKDIR = if not exist $(1) mkdir $(1)
+	MOVE = move
+	PYTHON = python
+	RM = rmdir /S /Q $(1)
+	FILE_EXISTS = if exist $(1)
+	SLASH = \\
+	ARCH := x86_64
+else
+	IS_WINDOWS := 0
+	MKDIR = mkdir -p $(1)
+	MOVE = mv
+	PYTHON = python3
+	RM = rm -rf $(1)
+	FILE_EXISTS = [ -f $(1) ]
+	SLASH = /
+	ARCH := $(shell uname -m)
+endif
 
 # --------------------------------
 # Detect compiler (clang preferred)
@@ -49,7 +68,11 @@ BINS_NOOPT := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%_noopt,$(SOURCES))
 all: $(BUILD_DIR) $(BINS_OPT) $(BINS_NOOPT)
 
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+ifeq ($(IS_WINDOWS),1)
+	$(call MKDIR,$(BUILD_DIR))
+else
+	$(call MKDIR,$(BUILD_DIR))
+endif
 
 # compile each source into build/<binary>
 $(BUILD_DIR)/%_opt: $(SRC_DIR)/%.cpp
@@ -59,7 +82,11 @@ $(BUILD_DIR)/%_noopt: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS_NOOPT) $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)
+ifeq ($(IS_WINDOWS),1)
+	$(call RM,$(BUILD_DIR))
+else
+	$(call RM,$(BUILD_DIR))
+endif
 
 list:
 	@echo "Architecture: $(ARCH)"
@@ -74,129 +101,232 @@ list:
 
 
 # Timestamp for results
-TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
-RESULT_DIR := tests/results/$(if $(filter aarch64,$(ARCH)),arm,x86)
+ifeq ($(IS_WINDOWS),1)
+    TIMESTAMP := $(shell powershell -Command "Get-Date -Format 'yyyyMMdd_HHmmss'")
+    RESULT_DIR := tests\\results\\x86
+else
+    TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
+    RESULT_DIR := tests/results/$(if $(filter aarch64,$(ARCH)),arm,x86)
+endif
 
-run_optimized: all
+run_optimized:
+ifeq ($(IS_WINDOWS),1)
+	@if not exist $(RESULT_DIR) mkdir $(RESULT_DIR)
+else
 	@mkdir -p $(RESULT_DIR)
+endif
 	@echo "Running bench_modadd_suite (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_modadd_suite_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_modadd_suite_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_modadd_suite_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modadd_suite_O3.txt || true
+endif
 	@echo
 
 	@echo "Running bench_poly_mod (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_poly_mod_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_poly_mod_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_poly_mod_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_poly_mod_O3.txt || true
+endif
 	@echo
 
 	@echo "Running bench_modular (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_modular_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_modular_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_modular_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modular_O3.txt || true
+endif
 	@echo
 
 	@echo "Running bench_chacha_reist (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_chacha_reist_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_chacha_reist_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_chacha_reist_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_reist_O3.txt || true
+endif
 	@echo
 
 	@echo "Running bench_chacha_stream (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_chacha_stream_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_chacha_stream_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_chacha_stream_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_stream_O3.txt || true
+endif
 	@echo
 
 	@echo "Running bench_hashmix (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_hashmix_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_hashmix_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_hashmix_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_O3.txt || true
+endif
 	@echo
 
 	@echo "Running bench_montgomery (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_montgomery_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_montgomery_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_montgomery_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_montgomery_O3.txt || true
+endif
 	@echo
 
-	@echo "Running bench_tree_reist (O3)..."
-	@$(BUILD_DIR)/bench_tree_reist_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_tree_reist_O3.txt || true
+	@echo "Running bench_barret_reist (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_barret_reist_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_barret_reist_O3.txt 2>nul || echo.
+else
+	@$(BUILD_DIR)/bench_barret_reist_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_barret_reist_O3.txt || true
+endif
 	@echo
 
 
 ifeq ($(ARCH),aarch64)
 	@echo "Running bench_reist_arm (O3)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_reist_arm_opt > $(RESULT_DIR)\$(TIMESTAMP)_bench_reist_arm_O3.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_reist_arm_opt > $(RESULT_DIR)/$(TIMESTAMP)_bench_reist_arm_O3.txt || true
+endif
 	@echo
 endif
 
+ifeq ($(IS_WINDOWS),1)
+	@if exist results_modadd_suite.csv $(MOVE) results_modadd_suite.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_modadd_suite.csv
+	@if exist results_poly_mod.csv $(MOVE) results_poly_mod.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_poly_mod.csv
+	@echo Generating plots...
+	@set RESULT_TIMESTAMP=$(TIMESTAMP) && $(PYTHON) scripts\plot_benchmarks.py || echo WARNING: plotting script failed
+else
 	@if [ -f results_modadd_suite.csv ]; then \
-		mv results_modadd_suite.csv $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv; \
-		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv"; \
+		$(MOVE) results_modadd_suite.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_modadd_suite.csv; \
+		echo "Stored $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_modadd_suite.csv"; \
 	else \
 		echo "WARNING: results_modadd_suite.csv not found"; \
 	fi
 	@if [ -f results_poly_mod.csv ]; then \
-		mv results_poly_mod.csv $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv; \
-		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv"; \
+		$(MOVE) results_poly_mod.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_poly_mod.csv; \
+		echo "Stored $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_poly_mod.csv"; \
 	else \
 		echo "WARNING: results_poly_mod.csv not found"; \
 	fi
 	@echo "Generating plots..."
-	@RESULT_TIMESTAMP=$(TIMESTAMP) python3 scripts/plot_benchmarks.py || echo "WARNING: plotting script failed"
+	@RESULT_TIMESTAMP=$(TIMESTAMP) $(PYTHON) scripts/plot_benchmarks.py || echo "WARNING: plotting script failed"
+endif
 
 # Generate comprehensive benchmark documentation comparing O0 vs O3
 report:
 	@echo "=========================================="
 	@echo "Generating Benchmark Documentation"
 	@echo "=========================================="
-	@python3 scripts/generate_benchmark_report.py
+	@$(PYTHON) scripts$(SLASH)generate_benchmark_report.py
 	@echo ""
 	@echo "Documentation generated successfully!"
+ifeq ($(IS_WINDOWS),1)
+	@echo "Check tests\results\x86\ for the report"
+else
 	@echo "Check tests/results/$(if $(filter aarch64,$(ARCH)),arm,x86)/ for the report"
+endif
 
 .PHONY: all clean list run run_optimized report
 
 # Run all no-opt benchmarks
-run: all
+run:
+ifeq ($(IS_WINDOWS),1)
+	@if not exist $(RESULT_DIR) mkdir $(RESULT_DIR)
+else
 	@mkdir -p $(RESULT_DIR)
+endif
 	@echo "Running bench_modadd_suite (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_modadd_suite_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_modadd_suite_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_modadd_suite_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modadd_suite_O0.txt || true
+endif
 	@echo
 
 	@echo "Running bench_poly_mod (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_poly_mod_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_poly_mod_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_poly_mod_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_poly_mod_O0.txt || true
+endif
 	@echo
 
 	@echo "Running bench_modular (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_modular_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_modular_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_modular_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_modular_O0.txt || true
+endif
 	@echo
 
 	@echo "Running bench_chacha_reist (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_chacha_reist_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_chacha_reist_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_chacha_reist_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_reist_O0.txt || true
+endif
 	@echo
 
 	@echo "Running bench_chacha_stream (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_chacha_stream_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_chacha_stream_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_chacha_stream_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_stream_O0.txt || true
+endif
 	@echo
 
 	@echo "Running bench_hashmix (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_hashmix_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_hashmix_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_hashmix_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_O0.txt || true
+endif
 	@echo
 
 	@echo "Running bench_montgomery (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_montgomery_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_montgomery_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_montgomery_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_montgomery_O0.txt || true
+endif
 	@echo
 
-	@echo "Running bench_tree_reist (O0)..."
-	@$(BUILD_DIR)/bench_tree_reist_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_tree_reist_O0.txt || true
+	@echo "Running bench_barret_reist (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_barret_reist_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_barret_reist_O0.txt 2>nul || echo.
+else
+	@$(BUILD_DIR)/bench_barret_reist_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_barret_reist_O0.txt || true
+endif
 	@echo
 
 ifeq ($(ARCH),aarch64)
 	@echo "Running bench_reist_arm (O0)..."
+ifeq ($(IS_WINDOWS),1)
+	@$(BUILD_DIR)\bench_reist_arm_noopt > $(RESULT_DIR)\$(TIMESTAMP)_bench_reist_arm_O0.txt 2>nul || echo.
+else
 	@$(BUILD_DIR)/bench_reist_arm_noopt > $(RESULT_DIR)/$(TIMESTAMP)_bench_reist_arm_O0.txt || true
+endif
 	@echo
 endif
 
+ifeq ($(IS_WINDOWS),1)
+	@if exist results_modadd_suite.csv $(MOVE) results_modadd_suite.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_modadd_suite.csv
+	@if exist results_poly_mod.csv $(MOVE) results_poly_mod.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_poly_mod.csv
+	@echo Generating plots...
+	@set RESULT_TIMESTAMP=$(TIMESTAMP) && $(PYTHON) scripts\plot_benchmarks.py || echo WARNING: plotting script failed
+else
 	@if [ -f results_modadd_suite.csv ]; then \
-		mv results_modadd_suite.csv $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv; \
-		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_modadd_suite.csv"; \
+		$(MOVE) results_modadd_suite.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_modadd_suite.csv; \
+		echo "Stored $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_modadd_suite.csv"; \
 	else \
 		echo "WARNING: results_modadd_suite.csv not found"; \
 	fi
 	@if [ -f results_poly_mod.csv ]; then \
-		mv results_poly_mod.csv $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv; \
-		echo "Stored $(RESULT_DIR)/$(TIMESTAMP)_results_poly_mod.csv"; \
+		$(MOVE) results_poly_mod.csv $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_poly_mod.csv; \
+		echo "Stored $(RESULT_DIR)$(SLASH)$(TIMESTAMP)_results_poly_mod.csv"; \
 	else \
 		echo "WARNING: results_poly_mod.csv not found"; \
 	fi
 	@echo "Generating plots..."
-	@RESULT_TIMESTAMP=$(TIMESTAMP) python3 scripts/plot_benchmarks.py || echo "WARNING: plotting script failed"
+	@RESULT_TIMESTAMP=$(TIMESTAMP) $(PYTHON) scripts/plot_benchmarks.py || echo "WARNING: plotting script failed"
+endif

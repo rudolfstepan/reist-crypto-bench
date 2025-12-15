@@ -1,0 +1,105 @@
+=============================================
+Barret-REIST v2 Benchmark (Division-Free)
+=============================================
+Iterations per modulus: 10000000
+
+---------------------------------------------
+Modulus = 257
+---------------------------------------------
+Classic modulo           : 0.035331 s
+REIST v1 scalar          : 0.005329 s
+REIST v1 int32 AVX2      : 0.001239 s
+Barret-REIST v2 scalar     : 0.018870 s
+Barret-REIST v2 int32      : 0.020790 s
+Barret-REIST v2 int32 AVX2 : 0.005976 s
+Speedups:
+  REIST v1 scalar vs Classic        : 6.630074x
+  REIST v1 AVX2 vs REIST v1 scalar  : 4.300274x
+  Barret-REIST scalar vs Classic      : 1.872317x
+  Barret-REIST int32 vs scalar        : 0.907653x
+  Barret-REIST AVX2 vs int32          : 3.479165x
+  Barret-REIST AVX2 vs REIST v1 scalar: 0.891777x
+  Barret-REIST AVX2 vs Classic        : 5.912544x
+
+Sink: 78
+
+---------------------------------------------
+Modulus = 65537
+---------------------------------------------
+Classic modulo           : 0.035244 s
+REIST v1 scalar          : 0.005090 s
+REIST v1 int32 AVX2      : 0.001192 s
+Barret-REIST v2 scalar     : 0.018849 s
+Barret-REIST v2 int32      : 0.020471 s
+Barret-REIST v2 int32 AVX2 : 0.005667 s
+Speedups:
+  REIST v1 scalar vs Classic        : 6.924611x
+  REIST v1 AVX2 vs REIST v1 scalar  : 4.270874x
+  Barret-REIST scalar vs Classic      : 1.869741x
+  Barret-REIST int32 vs scalar        : 0.920772x
+  Barret-REIST AVX2 vs int32          : 3.612497x
+  Barret-REIST AVX2 vs REIST v1 scalar: 0.898144x
+  Barret-REIST AVX2 vs Classic        : 6.219295x
+
+Sink: -22923
+
+---------------------------------------------
+Modulus = 1000003
+---------------------------------------------
+Classic modulo           : 0.033501 s
+REIST v1 scalar          : 0.005063 s
+REIST v1 int32 AVX2      : 0.001202 s
+Barret-REIST v2 scalar     : 0.017793 s
+Barret-REIST v2 int32      : 0.019606 s
+Barret-REIST v2 int32 AVX2 : 0.005671 s
+Speedups:
+  REIST v1 scalar vs Classic        : 6.617442x
+  REIST v1 AVX2 vs REIST v1 scalar  : 4.211380x
+  Barret-REIST scalar vs Classic      : 1.882861x
+  Barret-REIST int32 vs scalar        : 0.907526x
+  Barret-REIST AVX2 vs int32          : 3.457028x
+  Barret-REIST AVX2 vs REIST v1 scalar: 0.892668x
+  Barret-REIST AVX2 vs Classic        : 5.907180x
+
+Sink: -356707
+
+---------------------------------------------
+Modulus = 10000019
+---------------------------------------------
+Classic modulo           : 0.033506 s
+REIST v1 scalar          : 0.004989 s
+REIST v1 int32 AVX2      : 0.001197 s
+Barret-REIST v2 scalar     : 0.017772 s
+Barret-REIST v2 int32      : 0.019573 s
+Barret-REIST v2 int32 AVX2 : 0.005622 s
+Speedups:
+  REIST v1 scalar vs Classic        : 6.715337x
+  REIST v1 AVX2 vs REIST v1 scalar  : 4.168254x
+  Barret-REIST scalar vs Classic      : 1.885255x
+  Barret-REIST int32 vs scalar        : 0.907987x
+  Barret-REIST AVX2 vs int32          : 3.481572x
+  Barret-REIST AVX2 vs REIST v1 scalar: 0.887478x
+  Barret-REIST AVX2 vs Classic        : 5.959712x
+
+Sink: 2868419
+
+---------------------------------------------
+Modulus = 1000000007
+---------------------------------------------
+Classic modulo           : 0.033508 s
+REIST v1 scalar          : 0.005103 s
+REIST v1 int32 AVX2      : 0.001202 s
+Barret-REIST v2 scalar     : 0.017917 s
+Barret-REIST v2 int32      : 0.019512 s
+Barret-REIST v2 int32 AVX2 : 0.005646 s
+Speedups:
+  REIST v1 scalar vs Classic        : 6.566720x
+  REIST v1 AVX2 vs REIST v1 scalar  : 4.244468x
+  Barret-REIST scalar vs Classic      : 1.870158x
+  Barret-REIST int32 vs scalar        : 0.918261x
+  Barret-REIST AVX2 vs int32          : 3.455916x
+  Barret-REIST AVX2 vs REIST v1 scalar: 0.903773x
+  Barret-REIST AVX2 vs Classic        : 5.934821x
+
+Sink: -235023219
+

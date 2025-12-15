@@ -1,0 +1,18 @@
+========================================
+ChaCha20 Stream Benchmark
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: Windows
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 3187
+  Memory: 65230 MB
+========================================
+
+ChaCha20-like keystream benchmark (61.035156 MB total)
+
+Classic : 0.000028 s (2253521.126761 MB/s)
+REIST   : 0.000028 s (2293906.810036 MB/s)
+Speed ratio (classic / REIST): 1.017921x
+
+Sink XOR: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 

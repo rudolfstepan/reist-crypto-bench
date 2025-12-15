@@ -1,0 +1,53 @@
+========================================
+REIST modular-add benchmark suite
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: Windows
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 3187
+  Memory: 65230 MB
+========================================
+
+Total iterations per modulus N = 50000000
+step = 3
+
+Running benchmarks...
+
+Modulus B = 257
+  classic_mod: 0.180389 s
+  reist_sym  : 0.019513 s
+  speedup    : 9.244750x (classic / REIST)
+  sinks: 151 / -106
+
+Modulus B = 997
+  classic_mod: 0.175905 s
+  reist_sym  : 0.019960 s
+  speedup    : 8.812689x (classic / REIST)
+  sinks: 353 / 353
+
+Modulus B = 10007
+  classic_mod: 0.176633 s
+  reist_sym  : 0.020452 s
+  speedup    : 8.636292x (classic / REIST)
+  sinks: 5077 / -4930
+
+Modulus B = 1000003
+  classic_mod: 0.185052 s
+  reist_sym  : 0.020502 s
+  speedup    : 9.025973x (classic / REIST)
+  sinks: 999553 / -450
+
+Modulus B = 10000019
+  classic_mod: 0.186131 s
+  reist_sym  : 0.020634 s
+  speedup    : 9.020495x (classic / REIST)
+  sinks: 9999734 / -285
+
+Modulus B = 1000000007
+  classic_mod: 0.186666 s
+  reist_sym  : 0.020389 s
+  speedup    : 9.155346x (classic / REIST)
+  sinks: 150000000 / 150000000
+
+CSV written to results_modadd_suite.csv

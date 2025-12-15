@@ -1,3 +1,4 @@
+#ifndef _WIN32
 #include <iostream>
 #include <chrono>
 #include <vector>
@@ -301,3 +302,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+#endif

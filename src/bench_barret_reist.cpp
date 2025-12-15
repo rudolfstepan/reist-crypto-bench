@@ -46,15 +46,15 @@ inline int64_t reist_v1_modadd_nodiv(int64_t a, int64_t b, int64_t n) {
 }
 
 // ============================================================
-// Tree-REIST v2 contexts (division-free)
+// Barret-REIST v2 contexts (division-free)
 // ============================================================
-struct TreeReistCtx {
+struct BarretReistCtx {
     int64_t  B;
     int64_t  half;
     uint64_t invB;
     int      shift;
 
-    explicit TreeReistCtx(int64_t modulus)
+    explicit BarretReistCtx(int64_t modulus)
         : B(modulus), half(modulus >> 1), shift(32) {
         // Fixed-point reciprocal; final correction yields centered remainder
         double inv = 1.0 / (double)B;
@@ -62,13 +62,13 @@ struct TreeReistCtx {
     }
 };
 
-struct TreeReistCtx32 {
+struct BarretReistCtx32 {
     int32_t  B;
     int32_t  half;
     uint32_t invB;
     int      shift;
 
-    explicit TreeReistCtx32(int32_t modulus)
+    explicit BarretReistCtx32(int32_t modulus)
         : B(modulus), half(modulus >> 1), shift(32) {
         double inv = 1.0 / (double)B;
         invB = (uint32_t)(inv * (1ULL << shift));
@@ -76,17 +76,24 @@ struct TreeReistCtx32 {
 };
 
 // ============================================================
-// Tree-REIST v2 scalar reducers
+// Barret-REIST v2 scalar reducers
 // ============================================================
-inline int64_t tree_reist_reduce(int64_t T, const TreeReistCtx& ctx) {
-    int64_t Q = (int64_t)(((__int128_t)T * ctx.invB) >> ctx.shift);
+inline int64_t Barret_reist_reduce(int64_t T, const BarretReistCtx& ctx) {
+    int64_t Q;
+#ifndef _WIN32
+    Q = (int64_t)(((__int128_t)T * ctx.invB) >> ctx.shift);
+#else
+    // Windows MSVC does not support __int128_t. Use 64-bit multiplication as fallback (less precise for large T).
+    Q = (int64_t)(((int64_t)T * (int64_t)ctx.invB) >> ctx.shift);
+    // NOTE: This fallback may lose precision for large T. For full 128-bit support, use a library like boost::multiprecision.
+#endif
     int64_t R = T - Q * ctx.B;
     if (R > ctx.half)        R -= ctx.B;
     else if (R <= -ctx.half) R += ctx.B;
     return R;
 }
 
-inline int32_t tree_reist_reduce32(int32_t T, const TreeReistCtx32& ctx) {
+inline int32_t Barret_reist_reduce32(int32_t T, const BarretReistCtx32& ctx) {
     int32_t Q = (int32_t)((int64_t(T) * ctx.invB) >> ctx.shift);
     int32_t R = T - Q * ctx.B;
     if (R > ctx.half)        R -= ctx.B;
@@ -115,7 +122,7 @@ static inline __m256i approx_q_avx2_i32(__m256i T, uint32_t invB) {
     return _mm256_unpacklo_epi32(q_even_32, q_odd_32);
 }
 
-static inline __m256i tree_reist_reduce32_avx2(__m256i T, const TreeReistCtx32& ctx) {
+static inline __m256i Barret_reist_reduce32_avx2(__m256i T, const BarretReistCtx32& ctx) {
     __m256i q  = approx_q_avx2_i32(T, ctx.invB);
     __m256i Bv = _mm256_set1_epi32(ctx.B);
     __m256i R  = _mm256_sub_epi32(T, _mm256_mullo_epi32(q, Bv));
@@ -172,7 +179,7 @@ int main() {
 
     std::cout << std::fixed << std::setprecision(6);
     std::cout << "=============================================\n";
-    std::cout << "Tree-REIST v2 Benchmark (Division-Free)\n";
+    std::cout << "Barret-REIST v2 Benchmark (Division-Free)\n";
     std::cout << "=============================================\n";
     std::cout << "Iterations per modulus: " << N << "\n\n";
 
@@ -185,7 +192,7 @@ int main() {
         int64_t a_classic = 1234567 % M;
         int64_t b_classic = 891011  % M;
 
-        // Centered seeds for REIST/Tree in [-half, half]
+        // Centered seeds for REIST/Barret in [-half, half]
         int64_t a0_64 = center64(1234567, M);
         int64_t b0_64 = center64(891011,  M);
 
@@ -195,8 +202,8 @@ int main() {
 
         volatile int64_t sink = 0;
 
-        TreeReistCtx ctx(M);
-        TreeReistCtx32 ctx32(M32);
+        BarretReistCtx ctx(M);
+        BarretReistCtx32 ctx32(M32);
 
         // Classic (non-centered semantics)
         double t_classic = time_loop([&](int64_t n) {
@@ -218,22 +225,22 @@ int main() {
             sink = x;
         }, N);
 
-        // Tree-REIST v2 scalar 64 (centered)
-        double t_tree = time_loop([&](int64_t n) {
+        // Barret-REIST v2 scalar 64 (centered)
+        double t_barret = time_loop([&](int64_t n) {
             int64_t x = a0_64;
             int64_t y = b0_64;
             for (int64_t i = 0; i < n; ++i) {
-                x = tree_reist_reduce(x + y, ctx);
+                x = Barret_reist_reduce(x + y, ctx);
             }
             sink = x;
         }, N);
 
-        // Tree-REIST v2 int32 scalar (centered)
-        double t_tree32 = time_loop([&](int64_t n) {
+        // Barret-REIST v2 int32 scalar (centered)
+        double t_barret32 = time_loop([&](int64_t n) {
             int32_t x = a0_32;
             int32_t y = b0_32;
             for (int64_t i = 0; i < n; ++i) {
-                x = tree_reist_reduce32((int32_t)(x + y), ctx32);
+                x = Barret_reist_reduce32((int32_t)(x + y), ctx32);
             }
             sink = x;
         }, N);
@@ -257,8 +264,8 @@ int main() {
             sink = out[0] ^ out[3] ^ out[7];
         }, N);
 
-        // Tree-REIST v2 int32 AVX2 (centered, scalar-equivalent ops via n>>3)
-        double t_tree32_avx2 = time_loop([&](int64_t n) {
+        // Barret-REIST v2 int32 AVX2 (centered, scalar-equivalent ops via n>>3)
+        double t_barret32_avx2 = time_loop([&](int64_t n) {
             __m256i x = _mm256_setr_epi32(
                 a0_32, center32(a0_32 + 1, M32), center32(a0_32 + 2, M32), center32(a0_32 + 3, M32),
                 center32(a0_32 + 4, M32), center32(a0_32 + 5, M32), center32(a0_32 + 6, M32), center32(a0_32 + 7, M32)
@@ -266,7 +273,7 @@ int main() {
             __m256i y = _mm256_set1_epi32(b0_32);
 
             for (int64_t i = 0; i < (n >> 3); ++i) {
-                x = tree_reist_reduce32_avx2(_mm256_add_epi32(x, y), ctx32);
+                x = Barret_reist_reduce32_avx2(_mm256_add_epi32(x, y), ctx32);
             }
 
             alignas(32) int32_t out[8];
@@ -280,10 +287,10 @@ int main() {
 #if HAVE_AVX2
         std::cout << "REIST v1 int32 AVX2      : " << t_reist_v1_avx2 << " s\n";
 #endif
-        std::cout << "Tree-REIST v2 scalar     : " << t_tree << " s\n";
-        std::cout << "Tree-REIST v2 int32      : " << t_tree32 << " s\n";
+        std::cout << "Barret-REIST v2 scalar     : " << t_barret << " s\n";
+        std::cout << "Barret-REIST v2 int32      : " << t_barret32 << " s\n";
 #if HAVE_AVX2
-        std::cout << "Tree-REIST v2 int32 AVX2 : " << t_tree32_avx2 << " s\n";
+        std::cout << "Barret-REIST v2 int32 AVX2 : " << t_barret32_avx2 << " s\n";
 #endif
 
         std::cout << "Speedups:\n";
@@ -291,12 +298,12 @@ int main() {
 #if HAVE_AVX2
         std::cout << "  REIST v1 AVX2 vs REIST v1 scalar  : " << (t_reist_v1 / t_reist_v1_avx2) << "x\n";
 #endif
-        std::cout << "  Tree-REIST scalar vs Classic      : " << (t_classic / t_tree) << "x\n";
-        std::cout << "  Tree-REIST int32 vs scalar        : " << (t_tree / t_tree32) << "x\n";
+        std::cout << "  Barret-REIST scalar vs Classic      : " << (t_classic / t_barret) << "x\n";
+        std::cout << "  Barret-REIST int32 vs scalar        : " << (t_barret / t_barret32) << "x\n";
 #if HAVE_AVX2
-        std::cout << "  Tree-REIST AVX2 vs int32          : " << (t_tree32 / t_tree32_avx2) << "x\n";
-        std::cout << "  Tree-REIST AVX2 vs REIST v1 scalar: " << (t_reist_v1 / t_tree32_avx2) << "x\n";
-        std::cout << "  Tree-REIST AVX2 vs Classic        : " << (t_classic / t_tree32_avx2) << "x\n";
+        std::cout << "  Barret-REIST AVX2 vs int32          : " << (t_barret32 / t_barret32_avx2) << "x\n";
+        std::cout << "  Barret-REIST AVX2 vs REIST v1 scalar: " << (t_reist_v1 / t_barret32_avx2) << "x\n";
+        std::cout << "  Barret-REIST AVX2 vs Classic        : " << (t_classic / t_barret32_avx2) << "x\n";
 #endif
         std::cout << "\nSink: " << sink << "\n\n";
     }

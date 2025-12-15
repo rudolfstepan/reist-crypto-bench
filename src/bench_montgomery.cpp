@@ -4,7 +4,12 @@
 #include <cstdint>
 #include <iomanip>
 #include <fstream>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <winsock2.h>
+#include <windows.h>
+#endif
 #include <cstdio>
 #include <string>
 #include <cctype>
@@ -174,8 +179,9 @@ int main(int argc, char** argv) {
         };
     }
     
-    // Collect system info
+      // Collect system info
     std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
+#ifndef _WIN32
     {
         std::ifstream cpuinfo("/proc/cpuinfo");
         std::string line;
@@ -212,6 +218,35 @@ int main(int argc, char** argv) {
             pclose(fp);
         }
     }
+#else
+    // Windows: get hostname
+    char hn[256];
+    DWORD hnSize = sizeof(hn);
+    if (GetComputerNameA(hn, &hnSize)) hostname = hn;
+    else hostname = "Unknown";
+    // Windows: get OS name
+    os_name = "Windows";
+    // Windows: get CPU info
+    HKEY hKey;
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        char buf[256];
+        DWORD bufSize = sizeof(buf);
+        if (RegQueryValueExA(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
+            cpu_model = std::string(buf);
+        }
+        bufSize = sizeof(buf);
+        if (RegQueryValueExA(hKey, "~MHz", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
+            cpu_mhz = std::to_string(*(DWORD*)buf);
+        }
+        RegCloseKey(hKey);
+    }
+    // Windows: get memory info
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof(statex);
+    if (GlobalMemoryStatusEx(&statex)) {
+        mem_total = std::to_string(statex.ullTotalPhys / (1024 * 1024)) + " MB";
+    }
+#endif
     
     std::cout << std::fixed << std::setprecision(6);
     std::cout << "========================================\n";

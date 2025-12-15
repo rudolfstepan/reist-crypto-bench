@@ -48,7 +48,7 @@ def find_latest_results(result_dir, opt_level, prefix=None):
     Otherwise return the newest timestamp group.
     """
 
-    pattern = os.path.join(result_dir, f"*_{opt_level}.txt")  # unchanged base pattern
+    pattern = os.path.join(result_dir, f"*_bench_*_O{opt_level}.txt")  # correct pattern
 
     # If explicit prefix was passed → try to match that prefix exactly
     if prefix:
@@ -57,7 +57,7 @@ def find_latest_results(result_dir, opt_level, prefix=None):
         return matches  # may be empty; caller handles it
 
     # Default behaviour: newest timestamp
-    files = glob.glob(os.path.join(result_dir, f"*_{opt_level}.txt"))
+    files = glob.glob(os.path.join(result_dir, f"*_bench_*_O{opt_level}.txt"))
     if not files:
         return []
 
@@ -76,29 +76,47 @@ def find_latest_results(result_dir, opt_level, prefix=None):
 
 
 
-def extract_system_info(txt_file):
-    """Extract system information from benchmark output file."""
+def extract_system_info(txt_files):
+    """Extract system information from benchmark output files. Try multiple files if needed."""
     system_info = {}
-    try:
-        with open(txt_file, 'r') as f:
-            content = f.read()
+    
+    # If it's a single file, wrap in list
+    if isinstance(txt_files, str):
+        txt_files = [txt_files]
+    
+    for txt_file in txt_files:
+        try:
+            with open(txt_file, 'r') as f:
+                content = f.read()
 
-        patterns = {
-            'hostname': r'Hostname:\s*(.+)',
-            'os':       r'OS:\s*(.+)',
-            'cpu_model': r'CPU Model:\s*(.+)',
-            'cpu_mhz':  r'CPU MHz:\s*(.+)',
-            'memory':   r'Memory:\s*(.+)'
-        }
+            # Skip empty files
+            if len(content.strip()) == 0:
+                continue
 
-        for key, pattern in patterns.items():
-            match = re.search(pattern, content)
-            if match:
-                system_info[key] = match.group(1).strip()
+            patterns = {
+                'hostname': r'Hostname:\s*(.+)',
+                'os':       r'OS:\s*(.+)',
+                'cpu_model': r'CPU Model:\s*(.+)',
+                'cpu_mhz':  r'CPU MHz:\s*(.+)',
+                'memory':   r'Memory:\s*(.+)'
+            }
 
-    except Exception as e:
-        print(f"Warning: Could not extract system info from {txt_file}: {e}")
+            found_any = False
+            for key, pattern in patterns.items():
+                match = re.search(pattern, content)
+                if match:
+                    system_info[key] = match.group(1).strip()
+                    found_any = True
 
+            # If we found system info in this file, return it
+            if found_any:
+                return system_info
+
+        except Exception as e:
+            print(f"Warning: Could not extract system info from {txt_file}: {e}")
+            continue
+
+    # If no system info found in any file, return empty dict
     return system_info
 
 
@@ -831,7 +849,7 @@ def main():
     print(f"Found {len(o0_files)} O0 benchmark files")
     print(f"Found {len(o3_files)} O3 benchmark files")
 
-    system_info = extract_system_info(o0_files[0] if o0_files else o3_files[0])
+    system_info = extract_system_info(o0_files + o3_files)
     print(f"\nSystem: {system_info.get('cpu_model', 'Unknown')}")
 
     print("\nParsing benchmark results...")

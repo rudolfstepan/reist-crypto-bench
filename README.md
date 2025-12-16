@@ -45,23 +45,52 @@ REIST Division is a **general arithmetic framework** whose behavior is evaluated
 
 ## 🚀 Quick Start
 
-Run a complete benchmark with a single command:
+Run a complete benchmark analysis with a single command:
 
 ```bash
-make all && make run && make run_optimized && make report
+make all
 ```
 
-This will:
-1. **Build** all benchmarks with O0 and O3 optimization levels
-2. **Run** benchmarks without optimization (O0 baseline)
-3. **Run** benchmarks with full optimization (O3 with architecture-specific tuning)
-4. **Generate** a comprehensive markdown report with charts comparing O0 vs O3 performance
+This **automated workflow** will:
+1. **Build** all benchmarks with three optimization levels (O0, O3, SIMD)
+2. **Run** benchmarks sequentially: O0 baseline → O3 optimized → SIMD vectorized
+3. **Generate** three-way optimization comparison plots
+4. **Create** a comprehensive markdown report with performance analysis and assembly inspection
+
+**Total runtime:** ~5-8 minutes depending on your system
 
 Results are stored in `tests/results/x86/` (or `tests/results/arm/` on ARM systems) with:
 - Timestamped `.txt` files containing detailed benchmark output with system information
-- `.csv` files with structured data for analysis
-- `.png` charts visualizing performance comparisons
-- `*_BENCHMARK_REPORT.md` - Complete publication-ready documentation
+- `.csv` files with structured data for analysis  
+- `*_optimization_comparison_*.png` charts showing three-way performance comparison (O0 vs O3 vs SIMD)
+- `*_BENCHMARK_REPORT.md` - Complete publication-ready documentation with assembly analysis
+
+---
+
+## 📊 Three-Way Optimization Analysis
+
+This benchmark suite provides **comprehensive optimization-level analysis** across three distinct compilation strategies:
+
+| Optimization Level | Purpose | Flags | Target Use Case |
+|-------------------|---------|-------|-----------------|
+| **O0 (Baseline)** | Unoptimized code behavior | `-O0 -fno-tree-vectorize` | Debug builds, compiler-agnostic performance |
+| **O3 (Optimized)** | Maximum scalar optimization | `-O3 -march=native -mtune=native` | Production builds, architecture-specific tuning |  
+| **SIMD (Vectorized)** | Explicit vectorization | `-O3 -march=native -mavx2` | High-performance computing, parallel workloads |
+
+### Key Benefits
+
+- **Performance Scaling**: Shows how REIST arithmetic responds to different optimization levels
+- **Architecture Analysis**: Demonstrates vectorization potential on modern CPUs
+- **Real-World Insights**: O0 reveals algorithmic efficiency, O3/SIMD show production performance  
+- **Comparison Fairness**: All algorithms tested under identical optimization conditions
+
+### Generated Analysis
+
+Each run produces:
+- **Three-way comparison charts** showing O0 → O3 → SIMD performance progression
+- **Assembly analysis** comparing optimized vs unoptimized code generation
+- **Speedup metrics** for each optimization transition
+- **Architecture-specific insights** (AVX2 vectorization on x86, NEON on ARM)
 
 ---
 
@@ -266,15 +295,31 @@ reist-crypto-bench/
 └── README.md                  # This file
 ```
 
+## ⚡ Prerequisites
+
+### Windows
+- **MinGW-w64** (recommended) or **Visual Studio Build Tools**
+- **Python 3.7+** with matplotlib (`pip install matplotlib`)
+- **GNU Make** (install via `winget install GnuWin32.Make` or use MinGW's make)
+
+### Linux/macOS  
+- **GCC 8+** or **Clang 10+**
+- **Python 3.7+** with matplotlib (`pip install matplotlib` or use package manager)
+- **GNU Make** (usually pre-installed)
+
+The build system automatically detects your platform and configures appropriate compiler flags.
+
 ## 🔧 Build System
 
 ### Makefile Commands
 
 | Command | Description |
 |---------|-------------|
-| `make all` | Build all benchmarks with both O0 and O3 optimization levels |
+| `make all` | **Complete workflow:** Build all + Run O0/O3/SIMD + Generate report |
 | `make run` | Execute all benchmarks with O0 (no optimization) |
 | `make run_optimized` | Execute all benchmarks with O3 (full optimization + native tuning) |
+| `make run_simd` | Execute all benchmarks with SIMD vectorization (AVX2/NEON) |
+| `make plot_comparison` | Generate three-way optimization comparison plots |
 | `make report` | Generate comprehensive benchmark report with charts |
 | `make clean` | Remove all build artifacts |
 | `make list` | Show build configuration (arch, compiler, flags) |
@@ -282,8 +327,11 @@ reist-crypto-bench/
 ### Automated Build & Benchmark
 
 The Makefile automatically:
-- ✅ **Detects architecture** (x86_64 or ARM64/aarch64)
-- ✅ **Selects best compiler** (Clang preferred, falls back to GCC)
+- ✅ **Cross-platform support** (Windows, Linux, macOS)
+- ✅ **Detects architecture** (x86_64 or ARM64/aarch64)  
+- ✅ **Selects best compiler** (MinGW on Windows, Clang/GCC on Unix)
+- ✅ **Three optimization levels**: O0 baseline, O3 optimized, SIMD vectorized
+- ✅ **Sequential execution**: Ensures benchmarks complete before analysis
 - ✅ **Applies optimal flags**:
   - x86_64: `-march=native -mtune=native` (uses AVX2, AVX-512 if available)
   - ARM64: `-march=armv8-a+simd` (enables NEON)
@@ -294,8 +342,9 @@ The Makefile automatically:
 
 | Level | Flags | Purpose |
 |-------|-------|---------|
-| **O0** | `-O0` | Baseline performance, no optimization |
-| **O3** | `-O3 -Ofast -march=native -funroll-loops -flto` | Maximum performance with aggressive optimization |
+| **O0** | `-O0 -fno-tree-vectorize` | Baseline performance, no optimization |
+| **O3** | `-O3 -march=native -mtune=native -flto` | Full optimization with architecture-specific tuning |
+| **SIMD** | `-O3 -march=native -mavx2 -flto` | Explicit SIMD vectorization (AVX2/NEON) |
 
 ### Alternative: CMake Build
 
@@ -313,25 +362,28 @@ Executables will be in `build/` directory.
 
 ### Complete Benchmark Suite (Recommended)
 
-Execute the full benchmark workflow in one command:
+Execute the complete automated benchmark workflow:
 
 ```bash
-make all && make run && make run_optimized && make doc
+make all
 ```
 
-**What happens:**
-1. ⚙️ Compiles all benchmarks (O0 + O3 variants)
-2. 🏃 Runs O0 benchmarks (baseline, ~2-3 minutes)
-3. 🚀 Runs O3 benchmarks (optimized, ~1-2 minutes)
-4. 📈 Generates comprehensive report with comparison charts
+**Sequential workflow (completely automated):**
+1. ⚙️ Compiles all benchmarks (O0, O3, SIMD variants)
+2. 🔢 Runs O0 benchmarks (baseline, ~2-3 minutes)
+3. 🚀 Runs O3 benchmarks (optimized, ~1-2 minutes)  
+4. ⚡ Runs SIMD benchmarks (vectorized, ~1-2 minutes)
+5. 📊 Generates three-way optimization comparison plots
+6. 📈 Creates comprehensive report with performance analysis and assembly inspection
 
 **Output files** (in `tests/results/x86/` or `tests/results/arm/`):
 ```
-20251209_180515_bench_modadd_suite_O0.txt
-20251209_180515_bench_modadd_suite_O3.txt
-20251209_180515_results_modadd_suite.csv
-20251209_180515_comparison_modadd.png
-20251209_180515_BENCHMARK_REPORT.md  ← Complete documentation
+20251216_102018_bench_modadd_suite_O0.txt
+20251216_102111_bench_modadd_suite_O3.txt  
+20251216_102125_bench_modadd_suite_SIMD.txt
+20251216_102144_optimization_comparison_modadd.png
+20251216_102144_optimization_comparison_poly.png
+20251216_102145_BENCHMARK_REPORT.md  ← Complete analysis
 ```
 
 ### Individual Benchmark Execution

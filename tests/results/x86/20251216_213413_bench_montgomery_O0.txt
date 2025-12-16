@@ -1,0 +1,230 @@
+========================================
+REIST vs Montgomery Arithmetic Benchmark
+========================================
+System Information:
+  Hostname: macmini
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz
+  CPU MHz: 3474.387
+  Memory:        8004944 kB
+========================================
+
+Total operations per modulus N = 10000000
+
+Testing scenarios:
+  1. Modular Addition
+  2. Modular Multiplication
+  3. Montgomery Multiplication (with conversion overhead)
+
+Running benchmarks...
+
+========================================
+Modulus = 257
+========================================
+
+--- Modular Addition ---
+  Classic     : 0.125172 s
+  REIST       : 0.157272 s
+  Montgomery  : 0.061960 s
+  REIST speedup vs Classic    : 0.795895x
+  Montgomery speedup vs Classic: 2.020195x
+  REIST speedup vs Montgomery : 0.393969x
+  Sinks: 72 / 72 / 72
+
+--- Modular Multiplication ---
+  Classic     : 0.152908 s
+  REIST       : 0.256903 s
+  Montgomery  : 0.185991 s
+  REIST speedup vs Classic    : 0.595199x
+  Montgomery speedup vs Classic: 0.822129x
+  REIST speedup vs Montgomery : 0.723972x
+  Sinks: 9 / 9 / 9
+
+--- Combined REIST Add + Montgomery Mul ---
+  Combined time : 0.510901 s
+  Sink: 0
+  Reference (Classic add + classic mul): 0.278080 s
+
+--- Montgomery Multiplication (with conversion) ---
+  Montgomery (full cycle): 0.689252 s
+  Overhead: 350.761366% vs Classic
+  Note: Montgomery is efficient when staying in Montgomery form
+        for multiple operations (e.g., modular exponentiation)
+  Note: REIST produces centered residues [-N/2, N/2),
+        Montgomery operates in [0, N) domain.
+
+========================================
+Modulus = 65537
+========================================
+
+--- Modular Addition ---
+  Classic     : 0.121935 s
+  REIST       : 0.156895 s
+  Montgomery  : 0.064764 s
+  REIST speedup vs Classic    : 0.777174x
+  Montgomery speedup vs Classic: 1.882759x
+  REIST speedup vs Montgomery : 0.412785x
+  Sinks: 1087 / 1087 / 1087
+
+--- Modular Multiplication ---
+  Classic     : 0.153465 s
+  REIST       : 0.304519 s
+  Montgomery  : 0.186043 s
+  REIST speedup vs Classic    : 0.503959x
+  Montgomery speedup vs Classic: 0.824891x
+  REIST speedup vs Montgomery : 0.610940x
+  Sinks: 2905 / 2905 / 2905
+
+--- Combined REIST Add + Montgomery Mul ---
+  Combined time : 0.460168 s
+  Sink: 0
+  Reference (Classic add + classic mul): 0.275400 s
+
+--- Montgomery Multiplication (with conversion) ---
+  Montgomery (full cycle): 0.632290 s
+  Overhead: 312.008596% vs Classic
+  Note: Montgomery is efficient when staying in Montgomery form
+        for multiple operations (e.g., modular exponentiation)
+  Note: REIST produces centered residues [-N/2, N/2),
+        Montgomery operates in [0, N) domain.
+
+========================================
+Modulus = 1000003
+========================================
+
+--- Modular Addition ---
+  Classic     : 0.125906 s
+  REIST       : 0.156679 s
+  Montgomery  : 0.066071 s
+  REIST speedup vs Classic    : 0.803593x
+  Montgomery speedup vs Classic: 1.905625x
+  REIST speedup vs Montgomery : 0.421695x
+  Sinks: 975654 / -24349 / 320148
+
+--- Modular Multiplication ---
+  Classic     : 0.155435 s
+  REIST       : 0.302265 s
+  Montgomery  : 0.186660 s
+  REIST speedup vs Classic    : 0.514234x
+  Montgomery speedup vs Classic: 0.832717x
+  REIST speedup vs Montgomery : 0.617538x
+  Sinks: 747401 / -252602 / 903010
+
+--- Combined REIST Add + Montgomery Mul ---
+  Combined time : 0.478537 s
+  Sink: 0
+  Reference (Classic add + classic mul): 0.281341 s
+
+--- Montgomery Multiplication (with conversion) ---
+  Montgomery (full cycle): 0.637151 s
+  Overhead: 309.914557% vs Classic
+  Note: Montgomery is efficient when staying in Montgomery form
+        for multiple operations (e.g., modular exponentiation)
+  Note: REIST produces centered residues [-N/2, N/2),
+        Montgomery operates in [0, N) domain.
+
+========================================
+Modulus = 10000019
+========================================
+
+--- Modular Addition ---
+  Classic     : 0.122680 s
+  REIST       : 0.158609 s
+  Montgomery  : 0.062185 s
+  REIST speedup vs Classic    : 0.773474x
+  Montgomery speedup vs Classic: 1.972827x
+  REIST speedup vs Montgomery : 0.392064x
+  Sinks: 8722454 / -1277565 / 355
+
+--- Modular Multiplication ---
+  Classic     : 0.155672 s
+  REIST       : 0.304928 s
+  Montgomery  : 0.185958 s
+  REIST speedup vs Classic    : 0.510519x
+  Montgomery speedup vs Classic: 0.837135x
+  REIST speedup vs Montgomery : 0.609840x
+  Sinks: 7058914 / -2941105 / 87793
+
+--- Combined REIST Add + Montgomery Mul ---
+  Combined time : 0.463532 s
+  Sink: 0
+  Reference (Classic add + classic mul): 0.278351 s
+
+--- Montgomery Multiplication (with conversion) ---
+  Montgomery (full cycle): 0.647222 s
+  Overhead: 315.761001% vs Classic
+  Note: Montgomery is efficient when staying in Montgomery form
+        for multiple operations (e.g., modular exponentiation)
+  Note: REIST produces centered residues [-N/2, N/2),
+        Montgomery operates in [0, N) domain.
+
+========================================
+Modulus = 1000000007
+========================================
+
+--- Modular Addition ---
+  Classic     : 0.125681 s
+  REIST       : 0.162197 s
+  Montgomery  : 0.063855 s
+  REIST speedup vs Classic    : 0.774867x
+  Montgomery speedup vs Classic: 1.968220x
+  REIST speedup vs Montgomery : 0.393689x
+  Sinks: 900007599 / -99992408 / 463974719
+
+--- Modular Multiplication ---
+  Classic     : 0.153120 s
+  REIST       : 0.310962 s
+  Montgomery  : 0.185828 s
+  REIST speedup vs Classic    : 0.492406x
+  Montgomery speedup vs Classic: 0.823984x
+  REIST speedup vs Montgomery : 0.597592x
+  Sinks: 223834525 / 223834525 / 681807464
+
+--- Combined REIST Add + Montgomery Mul ---
+  Combined time : 0.465018 s
+  Sink: 544078537
+  Reference (Classic add + classic mul): 0.278801 s
+
+--- Montgomery Multiplication (with conversion) ---
+  Montgomery (full cycle): 0.639331 s
+  Overhead: 317.537044% vs Classic
+  Note: Montgomery is efficient when staying in Montgomery form
+        for multiple operations (e.g., modular exponentiation)
+  Note: REIST produces centered residues [-N/2, N/2),
+        Montgomery operates in [0, N) domain.
+
+========================================
+Modulus = 1000000000039
+========================================
+
+--- Modular Addition ---
+  Classic     : 0.122912 s
+  REIST       : 0.166714 s
+  Montgomery  : 0.077622 s
+  REIST speedup vs Classic    : 0.737262x
+  Montgomery speedup vs Classic: 1.583469x
+  REIST speedup vs Montgomery : 0.465599x
+  Sinks: 678900012345 / -321099987694 / 854997109941
+
+--- Modular Multiplication ---
+  Classic     : 0.153886 s
+  REIST       : 0.315094 s
+  Montgomery  : 0.185585 s
+  REIST speedup vs Classic    : 0.488382x
+  Montgomery speedup vs Classic: 0.829196x
+  REIST speedup vs Montgomery : 0.588982x
+  Sinks: 299329581991 / 299329581991 / 608549548194
+
+--- Combined REIST Add + Montgomery Mul ---
+  Combined time : 0.740365 s
+  Sink: 307682813652
+  Reference (Classic add + classic mul): 0.276798 s
+
+--- Montgomery Multiplication (with conversion) ---
+  Montgomery (full cycle): 1.058669 s
+  Overhead: 587.955656% vs Classic
+  Note: Montgomery is efficient when staying in Montgomery form
+        for multiple operations (e.g., modular exponentiation)
+  Note: REIST produces centered residues [-N/2, N/2),
+        Montgomery operates in [0, N) domain.
+

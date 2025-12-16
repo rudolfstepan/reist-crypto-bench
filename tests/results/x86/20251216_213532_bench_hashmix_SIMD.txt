@@ -1,0 +1,13 @@
+========================================
+Hashmix benchmark (classic % vs REIST reduction)
+========================================
+System Information:
+  Hostname: macmini
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz
+  CPU MHz: 3300.752
+  Memory:        8004944 kB
+========================================
+
+Iterations N = 100000000
+M = 1000003  classic : 1.285137  REIST   : 1.720897  speedup : 0.746783x (classic / REIST)  sink values: 7ce05 / 26f47M = 10000019  classic : 1.233887  REIST   : 1.677087  speedup : 0.735732x (classic / REIST)  sink values: 2e7c0e / 22daeaM = 100000007  classic : 1.217683  REIST   : 1.653223  speedup : 0.736551x (classic / REIST)  sink values: c81895 / 158db5dM = 1000000007  classic : 1.184582  REIST   : 1.624897  speedup : 0.729020x (classic / REIST)  sink values: b640eeb / 85136e5

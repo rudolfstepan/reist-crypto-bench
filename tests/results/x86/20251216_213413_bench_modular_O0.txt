@@ -1,0 +1,17 @@
+========================================
+Modular Benchmark
+========================================
+System Information:
+  Hostname: macmini
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz
+  CPU MHz: 3365.988
+  Memory:        8004944 kB
+========================================
+
+Benchmark with B = 257, N = 5000000
+
+--- Modular remainder ---
+classic  : 0.300410 s
+REIST    : 0.440753 s
+Speedup  : 0.681582x (classic / REIST)

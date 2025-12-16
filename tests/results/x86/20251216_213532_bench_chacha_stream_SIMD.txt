@@ -1,0 +1,18 @@
+========================================
+ChaCha20 Stream Benchmark
+========================================
+System Information:
+  Hostname: macmini
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz
+  CPU MHz: 3400.059
+  Memory:        8004944 kB
+========================================
+
+ChaCha20-like keystream benchmark (61.035156 MB total)
+
+Classic : 0.000602 s (106319.356768 MB/s)
+REIST   : 0.000672 s (95306.880710 MB/s)
+Speed ratio (classic / REIST): 0.896421x
+
+Sink XOR: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 

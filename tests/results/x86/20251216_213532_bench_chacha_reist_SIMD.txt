@@ -1,0 +1,20 @@
+========================================
+ChaCha20 REIST Benchmark
+========================================
+System Information:
+  Hostname: macmini
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz
+  CPU MHz: 3400.059
+  Memory:        8004944 kB
+========================================
+
+--- Modular Addition (32-bit) ---
+std_add    : 0.000000 s
+reist_add32: 0.000000 s
+Speed ratio: 4.137931x (std / REIST)
+
+--- ChaCha20-like Cipher-Speed ---
+Classic : 0.000000 s (1882352941.176471 MB/s)
+REIST   : 0.000000 s (2000000000.000000 MB/s)
+Speed ratio: 1.062500x (classic / REIST)

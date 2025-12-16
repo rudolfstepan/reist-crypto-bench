@@ -1,0 +1,53 @@
+========================================
+REIST modular-add benchmark suite
+========================================
+System Information:
+  Hostname: macmini
+  OS: GNU/Linux
+  CPU Model: Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz
+  CPU MHz: 3404.004
+  Memory:        8004944 kB
+========================================
+
+Total iterations per modulus N = 50000000
+step = 3
+
+Running benchmarks...
+
+Modulus B = 257
+  classic_mod: 0.670541 s
+  reist_sym  : 0.139018 s
+  speedup    : 4.823425x (classic / REIST)
+  sinks: 151 / -106
+
+Modulus B = 997
+  classic_mod: 0.714102 s
+  reist_sym  : 0.132422 s
+  speedup    : 5.392623x (classic / REIST)
+  sinks: 353 / 353
+
+Modulus B = 10007
+  classic_mod: 0.677849 s
+  reist_sym  : 0.147136 s
+  speedup    : 4.606969x (classic / REIST)
+  sinks: 5077 / -4930
+
+Modulus B = 1000003
+  classic_mod: 0.688435 s
+  reist_sym  : 0.124848 s
+  speedup    : 5.514184x (classic / REIST)
+  sinks: 999553 / -450
+
+Modulus B = 10000019
+  classic_mod: 0.668367 s
+  reist_sym  : 0.129556 s
+  speedup    : 5.158897x (classic / REIST)
+  sinks: 9999734 / -285
+
+Modulus B = 1000000007
+  classic_mod: 0.662994 s
+  reist_sym  : 0.129028 s
+  speedup    : 5.138359x (classic / REIST)
+  sinks: 150000000 / 150000000
+
+CSV written to results_modadd_suite.csv

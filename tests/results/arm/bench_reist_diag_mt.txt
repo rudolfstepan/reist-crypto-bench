@@ -1,0 +1,31 @@
+REIST/REIST-Tree Performance Diagnosis (M2 Pro utilization)
+=========================================================
+
+Threads: 10
+Total iterations (all threads): 100000000
+
+Test 1: Pure Addition
+----------------------------------------------
+Scalar: 19.881 ms
+NEON  : 6.100 ms
+Speedup (NEON vs Scalar): 3.259x
+
+Test 2: Barrett Approximation (B=13)
+----------------------------------------------
+Scalar: 41.222 ms
+NEON  : 8.332 ms
+Speedup (NEON vs Scalar): 4.948x
+
+Test 3: Full Reduction + Centering (Tree-style, bounded)
+----------------------------------------------
+Scalar: 80.768 ms
+NEON  : 24.242 ms
+Speedup (NEON vs Scalar): 3.332x
+
+Test 4: Memory Bandwidth
+----------------------------------------------
+Scalar: 5.870 ms
+NEON  : 1.682 ms
+Speedup (NEON vs Scalar): 3.490x
+
+Sink: 26

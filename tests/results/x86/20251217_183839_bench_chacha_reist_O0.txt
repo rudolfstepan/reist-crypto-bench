@@ -1,0 +1,20 @@
+========================================
+ChaCha20 REIST Benchmark
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: Windows
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 3187
+  Memory: 65230 MB
+========================================
+
+--- Modular Addition (32-bit) ---
+std_add    : 0.001056 s
+reist_add32: 0.001058 s
+Speed ratio: 0.998299x (std / REIST)
+
+--- ChaCha20-like Cipher-Speed ---
+Classic : 0.128086 s (499.663508 MB/s)
+REIST   : 0.144508 s (442.881748 MB/s)
+Speed ratio: 0.886360x (classic / REIST)

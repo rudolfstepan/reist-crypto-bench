@@ -1,0 +1,119 @@
+========================================
+REIST vs Montgomery Arithmetic Benchmark
+========================================
+Total operations per modulus = 10000000
+
+========================================
+Modulus = 257
+========================================
+
+--- Modular Addition ---
+Classic     : 0.033486400 s
+REIST       : 0.024808800 s
+Montgomery  : 0.022118200 s
+
+--- Modular Multiplication ---
+Classic     : 0.080211300 s
+REIST       : 0.107079200 s
+Montgomery  : 0.034329300 s
+
+--- Full Cycle (with conversion) ---
+Classic full    : 0.061726000 s
+Montgomery full : 0.179690900 s
+Overhead vs classic: 191.110553089 %
+
+========================================
+Modulus = 65537
+========================================
+
+--- Modular Addition ---
+Classic     : 0.032450900 s
+REIST       : 0.023347600 s
+Montgomery  : 0.020926800 s
+
+--- Modular Multiplication ---
+Classic     : 0.077431700 s
+REIST       : 0.112809800 s
+Montgomery  : 0.034474400 s
+
+--- Full Cycle (with conversion) ---
+Classic full    : 0.062064300 s
+Montgomery full : 0.180785300 s
+Overhead vs classic: 191.287100636 %
+
+========================================
+Modulus = 1000003
+========================================
+
+--- Modular Addition ---
+Classic     : 0.033936400 s
+REIST       : 0.015999500 s
+Montgomery  : 0.016954400 s
+
+--- Modular Multiplication ---
+Classic     : 0.081300800 s
+REIST       : 0.141391400 s
+Montgomery  : 0.034026400 s
+
+--- Full Cycle (with conversion) ---
+Classic full    : 0.061704100 s
+Montgomery full : 0.180197500 s
+Overhead vs classic: 192.034889092 %
+
+========================================
+Modulus = 10000019
+========================================
+
+--- Modular Addition ---
+Classic     : 0.032488500 s
+REIST       : 0.028332100 s
+Montgomery  : 0.021687700 s
+
+--- Modular Multiplication ---
+Classic     : 0.076520700 s
+REIST       : 0.134815400 s
+Montgomery  : 0.032697400 s
+
+--- Full Cycle (with conversion) ---
+Classic full    : 0.061492500 s
+Montgomery full : 0.177421700 s
+Overhead vs classic: 188.525755173 %
+
+========================================
+Modulus = 1000000007
+========================================
+
+--- Modular Addition ---
+Classic     : 0.032101000 s
+REIST       : 0.015346000 s
+Montgomery  : 0.017750500 s
+
+--- Modular Multiplication ---
+Classic     : 0.076952900 s
+REIST       : 0.138595000 s
+Montgomery  : 0.033035900 s
+
+--- Full Cycle (with conversion) ---
+Classic full    : 0.059449300 s
+Montgomery full : 0.179521300 s
+Overhead vs classic: 201.973782702 %
+
+========================================
+Modulus = 1000000000039
+========================================
+
+--- Modular Addition ---
+Classic     : 0.031801000 s
+REIST       : 0.012708100 s
+Montgomery  : 0.015359000 s
+
+--- Modular Multiplication ---
+Classic     : 0.079959400 s
+REIST       : 0.136650000 s
+Montgomery  : 0.033409500 s
+
+--- Full Cycle (with conversion) ---
+Classic full    : 0.061567200 s
+Montgomery full : 0.179595600 s
+Overhead vs classic: 191.706623007 %
+

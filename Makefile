@@ -270,6 +270,9 @@ else
 	@mkdir -p $(RESULT_DIR)
 endif
 	@echo "Running bench_modadd_suite (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_modadd_suite_simd$(EXE_EXT) $(BUILD_DIR)\bench_modadd_suite_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_modadd_suite_SIMD.txt 2>nul || echo.
+else
 ifeq ($(ARCH),aarch64)
 	@if [ -x $(BUILD_DIR)/bench_modadd_suite_neon_simd ]; then \
 		$(BUILD_DIR)/bench_modadd_suite_neon_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_modadd_suite_SIMD.txt || true; \
@@ -287,69 +290,98 @@ else
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_modadd_suite_SIMD.txt; \
 	fi
 endif
+endif
 	@echo
 
 	@echo "Running bench_poly_mod (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_poly_mod_simd$(EXE_EXT) $(BUILD_DIR)\bench_poly_mod_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_poly_mod_SIMD.txt 2>nul || echo.
+else
 	@if [ -x $(BUILD_DIR)/bench_poly_mod_simd ]; then \
 		$(BUILD_DIR)/bench_poly_mod_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_poly_mod_SIMD.txt || true; \
 	else \
 		echo "SKIP: bench_poly_mod_simd not built"; \
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_poly_mod_SIMD.txt; \
 	fi
+endif
 	@echo
 
 	@echo "Running bench_modular (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_modular_simd$(EXE_EXT) $(BUILD_DIR)\bench_modular_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_modular_SIMD.txt 2>nul || echo.
+else
 	@if [ -x $(BUILD_DIR)/bench_modular_simd ]; then \
 		$(BUILD_DIR)/bench_modular_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_modular_SIMD.txt || true; \
 	else \
 		echo "SKIP: bench_modular_simd not built"; \
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_modular_SIMD.txt; \
 	fi
+endif
 	@echo
 
 	@echo "Running bench_chacha_reist (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_chacha_reist_simd$(EXE_EXT) $(BUILD_DIR)\bench_chacha_reist_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_chacha_reist_SIMD.txt 2>nul || echo.
+else
 	@if [ -x $(BUILD_DIR)/bench_chacha_reist_simd ]; then \
 		$(BUILD_DIR)/bench_chacha_reist_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_reist_SIMD.txt || true; \
 	else \
 		echo "SKIP: bench_chacha_reist_simd not built"; \
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_reist_SIMD.txt; \
 	fi
+endif
 	@echo
 
 	@echo "Running bench_chacha_stream (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_chacha_stream_simd$(EXE_EXT) $(BUILD_DIR)\bench_chacha_stream_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_chacha_stream_SIMD.txt 2>nul || echo.
+else
 	@if [ -x $(BUILD_DIR)/bench_chacha_stream_simd ]; then \
 		$(BUILD_DIR)/bench_chacha_stream_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_stream_SIMD.txt || true; \
 	else \
 		echo "SKIP: bench_chacha_stream_simd not built"; \
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_chacha_stream_SIMD.txt; \
 	fi
+endif
 	@echo
 
 	@echo "Running bench_hashmix (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_hashmix_simd$(EXE_EXT) $(BUILD_DIR)\bench_hashmix_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_hashmix_SIMD.txt 2>nul || echo.
+else
 	@if [ -x $(BUILD_DIR)/bench_hashmix_simd ]; then \
 		$(BUILD_DIR)/bench_hashmix_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_SIMD.txt || true; \
 	else \
 		echo "SKIP: bench_hashmix_simd not built"; \
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_hashmix_SIMD.txt; \
 	fi
+endif
 	@echo
 
 	@echo "Running bench_montgomery (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_montgomery_simd$(EXE_EXT) $(BUILD_DIR)\bench_montgomery_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_montgomery_SIMD.txt 2>nul || echo.
+else
 	@if [ -x $(BUILD_DIR)/bench_montgomery_simd ]; then \
 		$(BUILD_DIR)/bench_montgomery_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_montgomery_SIMD.txt || true; \
 	else \
 		echo "SKIP: bench_montgomery_simd not built"; \
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_montgomery_SIMD.txt; \
 	fi
+endif
 	@echo
 
 	@echo "Running bench_barret_reist (SIMD)..."
+ifeq ($(IS_WINDOWS),1)
+	@if exist $(BUILD_DIR)\bench_barret_reist_simd$(EXE_EXT) $(BUILD_DIR)\bench_barret_reist_simd$(EXE_EXT) > $(RESULT_DIR)\$(TIMESTAMP)_bench_barret_reist_SIMD.txt 2>nul || echo.
+else
 	@if [ -x $(BUILD_DIR)/bench_barret_reist_simd ]; then \
 		$(BUILD_DIR)/bench_barret_reist_simd > $(RESULT_DIR)/$(TIMESTAMP)_bench_barret_reist_SIMD.txt || true; \
 	else \
 		echo "SKIP: bench_barret_reist_simd not built"; \
 		: > $(RESULT_DIR)/$(TIMESTAMP)_bench_barret_reist_SIMD.txt; \
 	fi
+endif
 	@echo
 
 

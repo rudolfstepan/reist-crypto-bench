@@ -30,8 +30,7 @@ def is_arm_platform():
 
 def get_arch_result_dir():
     """Determine result directory based on architecture."""
-    arch = platform.machine()
-    if arch == "aarch64":
+    if is_arm_platform():
         return "tests/results/arm"
     else:
         return "tests/results/x86"
@@ -86,6 +85,38 @@ def find_latest_results(result_dir, opt_level, prefix=None):
 
     # Default behaviour: newest timestamp
     files = glob.glob(os.path.join(result_dir, f"*_bench_*_O{opt_level}.txt"))
+    if not files:
+        return []
+
+    timestamps = defaultdict(list)
+    for f in files:
+        basename = os.path.basename(f)
+        match = re.match(r"(\d{8}_\d{6})_", basename)
+        if match:
+            timestamps[match.group(1)].append(f)
+
+    if not timestamps:
+        return []
+
+    latest_timestamp = max(timestamps.keys())
+    return timestamps[latest_timestamp]
+
+
+def find_latest_simd_results(result_dir, prefix=None):
+    """
+    Find SIMD/NEON benchmark result files.
+    If prefix is provided, return only files matching that prefix.
+    Otherwise return the newest timestamp group.
+    """
+    
+    # If explicit prefix was passed → try to match that prefix exactly
+    if prefix:
+        specific_pattern = os.path.join(result_dir, f"{prefix}_bench_*_SIMD.txt")
+        matches = glob.glob(specific_pattern)
+        return matches  # may be empty; caller handles it
+
+    # Default behaviour: newest timestamp
+    files = glob.glob(os.path.join(result_dir, "*_bench_*_SIMD.txt"))
     if not files:
         return []
 
@@ -182,18 +213,35 @@ def parse_benchmark_results(txt_file):
 
 def parse_modadd_suite(content):
     results = {'moduli': []}
-    pattern = (
-        r'Modulus B = (\d+)\s+classic_mod:\s+([\d.]+)\s+s\s+'
-        r'reist_sym\s*:\s+([\d.]+)\s+s\s+speedup\s*:\s+([\d.]+)x'
+    # Try to parse NEON version first (with "reist_sym (NEON)" format)
+    pattern_neon = (
+        r'Modulus B = (\d+)\s+classic_mod\s*:\s+([\d.]+)\s+s\s+'
+        r'reist_sym \(scalar\)\s*:\s+([\d.]+)\s+s\s+'
+        r'reist_sym \(NEON\)\s*:\s+([\d.]+)\s+s'
     )
-    matches = re.findall(pattern, content)
-    for modulus, classic_time, reist_time, speedup in matches:
-        results['moduli'].append({
-            'modulus': int(modulus),
-            'classic_time': float(classic_time),
-            'reist_time': float(reist_time),
-            'speedup': float(speedup)
-        })
+    matches_neon = re.findall(pattern_neon, content)
+    if matches_neon:
+        for modulus, classic_time, scalar_time, neon_time in matches_neon:
+            results['moduli'].append({
+                'modulus': int(modulus),
+                'classic_time': float(classic_time),
+                'reist_time': float(neon_time),  # Use NEON time as the primary REIST time
+                'speedup': float(classic_time) / float(neon_time) if float(neon_time) > 0 else 0.0
+            })
+    else:
+        # Fall back to original format (scalar version)
+        pattern = (
+            r'Modulus B = (\d+)\s+classic_mod:\s+([\d.]+)\s+s\s+'
+            r'reist_sym\s*:\s+([\d.]+)\s+s\s+speedup\s*:\s+([\d.]+)x'
+        )
+        matches = re.findall(pattern, content)
+        for modulus, classic_time, reist_time, speedup in matches:
+            results['moduli'].append({
+                'modulus': int(modulus),
+                'classic_time': float(classic_time),
+                'reist_time': float(reist_time),
+                'speedup': float(speedup)
+            })
     return results
 
 
@@ -548,6 +596,10 @@ def find_bench_sources(src_dir="src"):
             print(f"Skipping x86-specific benchmark on ARM platform: {src.name}")
             continue
 
+        if "avx2" in name and is_arm_platform():
+            print(f"Skipping AVX2 benchmark on ARM platform: {src.name}")
+            continue
+
         filtered.append(src)
 
     return filtered
@@ -636,9 +688,9 @@ def collect_asm_analysis(asm_dir: Path, bench_sources):
 # Markdown report generation
 # ---------------------------------------------------------------------------
 
-def generate_markdown_report(system_info, o0_data, o3_data, charts,
+def generate_markdown_report(system_info, o0_data, o3_data, simd_data, charts,
                              asm_results, output_file):
-    """Generate comprehensive markdown report including ASM analysis."""
+    """Generate comprehensive markdown report including ASM analysis and SIMD results."""
 
     with open(output_file, 'w', encoding="utf-8") as f:
         # Header
@@ -667,7 +719,10 @@ def generate_markdown_report(system_info, o0_data, o3_data, charts,
         f.write("symmetric remainder arithmetic compared to classical modular ")
         f.write("operations. Benchmarks were run with:\n\n")
         f.write("- **O0**: No optimization (baseline)\n")
-        f.write("- **O3**: Full optimization with architecture-specific tuning\n\n")
+        f.write("- **O3**: Full optimization with architecture-specific tuning\n")
+        if simd_data and any(simd_data.values()):
+            f.write("- **SIMD**: O3 optimization with SIMD/NEON extensions\n")
+        f.write("\n")
 
         # Overall comparison charts
         f.write("## Performance Overview\n\n")
@@ -679,11 +734,11 @@ def generate_markdown_report(system_info, o0_data, o3_data, charts,
         f.write("---\n\n")
 
         # Detailed benchmark sections
-        write_modadd_section(f, o0_data, o3_data, charts, output_file)
-        write_poly_mod_section(f, o0_data, o3_data, charts, output_file)
-        write_modular_section(f, o0_data, o3_data)
-        write_chacha_sections(f, o0_data, o3_data)
-        write_hashmix_section(f, o0_data, o3_data)
+        write_modadd_section(f, o0_data, o3_data, simd_data, charts, output_file)
+        write_poly_mod_section(f, o0_data, o3_data, simd_data, charts, output_file)
+        write_modular_section(f, o0_data, o3_data, simd_data)
+        write_chacha_sections(f, o0_data, o3_data, simd_data)
+        write_hashmix_section(f, o0_data, o3_data, simd_data)
 
         # ASM / Compiler artifact analysis
         write_asm_analysis_section(f, asm_results, output_file)
@@ -716,7 +771,7 @@ def generate_markdown_report(system_info, o0_data, o3_data, charts,
     print(f"\n✓ Generated comprehensive benchmark report: {output_file}")
 
 
-def write_modadd_section(f, o0_data, o3_data, charts, output_file):
+def write_modadd_section(f, o0_data, o3_data, simd_data, charts, output_file):
     f.write("## Modular Addition Suite\n\n")
     f.write("This benchmark compares classical modulo `(a + b) % m` with ")
     f.write("REIST symmetric remainder using simple comparisons.\n\n")
@@ -726,12 +781,28 @@ def write_modadd_section(f, o0_data, o3_data, charts, output_file):
             rel_path = os.path.relpath(chart_path, os.path.dirname(output_file))
             f.write(f"![Modadd Comparison]({rel_path})\n\n")
 
-    if 'bench_modadd_suite' in o0_data and 'bench_modadd_suite' in o3_data:
+    if 'bench_modadd_suite' in o0_data or 'bench_modadd_suite' in o3_data or 'bench_modadd_suite' in simd_data:
         f.write("### Results: O0 (No Optimization)\n\n")
-        write_modadd_table(f, o0_data['bench_modadd_suite'])
+        o0 = o0_data.get('bench_modadd_suite')
+        if o0:
+            write_modadd_table(f, o0)
+        else:
+            f.write("*No data available*\n\n")
 
         f.write("\n### Results: O3 (Optimized)\n\n")
-        write_modadd_table(f, o3_data['bench_modadd_suite'])
+        o3 = o3_data.get('bench_modadd_suite')
+        if o3:
+            write_modadd_table(f, o3)
+        else:
+            f.write("*No data available*\n\n")
+
+        if simd_data and 'bench_modadd_suite' in simd_data:
+            f.write("\n### Results: SIMD (O3 + SIMD/NEON)\n\n")
+            simd = simd_data.get('bench_modadd_suite')
+            if simd:
+                write_modadd_table(f, simd)
+            else:
+                f.write("*No data available*\n\n")
 
     f.write("\n---\n\n")
 
@@ -749,7 +820,7 @@ def write_modadd_table(f, results):
     f.write("\n")
 
 
-def write_poly_mod_section(f, o0_data, o3_data, charts, output_file):
+def write_poly_mod_section(f, o0_data, o3_data, simd_data, charts, output_file):
     f.write("## Polynomial Modular Addition\n\n")
     f.write("Benchmark for NTRU-style lattice operations with large prime moduli, ")
     f.write("testing coefficient-wise modular addition.\n\n")
@@ -759,12 +830,28 @@ def write_poly_mod_section(f, o0_data, o3_data, charts, output_file):
             rel_path = os.path.relpath(chart_path, os.path.dirname(output_file))
             f.write(f"![Poly Mod Comparison]({rel_path})\n\n")
 
-    if 'bench_poly_mod' in o0_data and 'bench_poly_mod' in o3_data:
+    if 'bench_poly_mod' in o0_data or 'bench_poly_mod' in o3_data or 'bench_poly_mod' in simd_data:
         f.write("### Results: O0 (No Optimization)\n\n")
-        write_poly_table(f, o0_data['bench_poly_mod'])
+        o0 = o0_data.get('bench_poly_mod')
+        if o0:
+            write_poly_table(f, o0)
+        else:
+            f.write("*No data available*\n\n")
 
         f.write("\n### Results: O3 (Optimized)\n\n")
-        write_poly_table(f, o3_data['bench_poly_mod'])
+        o3 = o3_data.get('bench_poly_mod')
+        if o3:
+            write_poly_table(f, o3)
+        else:
+            f.write("*No data available*\n\n")
+
+        if simd_data and 'bench_poly_mod' in simd_data:
+            f.write("\n### Results: SIMD (O3 + SIMD/NEON)\n\n")
+            simd = simd_data.get('bench_poly_mod')
+            if simd:
+                write_poly_table(f, simd)
+            else:
+                f.write("*No data available*\n\n")
 
     f.write("\n---\n\n")
 
@@ -782,16 +869,17 @@ def write_poly_table(f, results):
     f.write("\n")
 
 
-def write_modular_section(f, o0_data, o3_data):
+def write_modular_section(f, o0_data, o3_data, simd_data):
     f.write("## Modular Remainder Operations\n\n")
     f.write("Direct comparison of modular remainder computation methods.\n\n")
 
-    if 'bench_modular' in o0_data and 'bench_modular' in o3_data:
+    if 'bench_modular' in o0_data or 'bench_modular' in o3_data or 'bench_modular' in simd_data:
         f.write("| Optimization | Classic Time (s) | REIST Time (s) | Speedup |\n")
         f.write("|--------------|------------------|----------------|----------|\n")
 
-        o0 = o0_data['bench_modular']
-        o3 = o3_data['bench_modular']
+        o0 = o0_data.get('bench_modular', {})
+        o3 = o3_data.get('bench_modular', {})
+        simd = simd_data.get('bench_modular', {})
 
         if o0:
             f.write(f"| **O0** | {o0.get('classic_time', 0):.6f} | "
@@ -799,23 +887,27 @@ def write_modular_section(f, o0_data, o3_data):
         if o3:
             f.write(f"| **O3** | {o3.get('classic_time', 0):.6f} | "
                     f"{o3.get('reist_time', 0):.6f} | {o3.get('speedup', 0):.3f}x |\n")
+        if simd:
+            f.write(f"| **SIMD** | {simd.get('classic_time', 0):.6f} | "
+                    f"{simd.get('reist_time', 0):.6f} | {simd.get('speedup', 0):.3f}x |\n")
 
         f.write("\n")
 
     f.write("---\n\n")
 
 
-def write_chacha_sections(f, o0_data, o3_data):
+def write_chacha_sections(f, o0_data, o3_data, simd_data):
     f.write("## ChaCha20 Cipher Benchmarks\n\n")
     f.write("Performance analysis of ChaCha20-style operations with REIST arithmetic.\n\n")
 
-    if 'bench_chacha_stream' in o0_data and 'bench_chacha_stream' in o3_data:
+    if 'bench_chacha_stream' in o0_data or 'bench_chacha_stream' in o3_data or 'bench_chacha_stream' in simd_data:
         f.write("### ChaCha20 Stream Generation\n\n")
         f.write("| Optimization | Classic (MB/s) | REIST (MB/s) | Speedup |\n")
         f.write("|--------------|----------------|--------------|----------|\n")
 
-        o0 = o0_data['bench_chacha_stream']
-        o3 = o3_data['bench_chacha_stream']
+        o0 = o0_data.get('bench_chacha_stream', {})
+        o3 = o3_data.get('bench_chacha_stream', {})
+        simd = simd_data.get('bench_chacha_stream', {})
 
         if o0:
             f.write(f"| **O0** | {o0.get('classic_mbps', 0):.2f} | "
@@ -823,33 +915,46 @@ def write_chacha_sections(f, o0_data, o3_data):
         if o3:
             f.write(f"| **O3** | {o3.get('classic_mbps', 0):.2f} | "
                     f"{o3.get('reist_mbps', 0):.2f} | {o3.get('speedup', 0):.3f}x |\n")
+        if simd:
+            f.write(f"| **SIMD** | {simd.get('classic_mbps', 0):.2f} | "
+                    f"{simd.get('reist_mbps', 0):.2f} | {simd.get('speedup', 0):.3f}x |\n")
 
         f.write("\n")
 
     f.write("---\n\n")
 
 
-def write_hashmix_section(f, o0_data, o3_data):
+def write_hashmix_section(f, o0_data, o3_data, simd_data):
     f.write("## Hash-Mix Operations\n\n")
     f.write("Performance comparison for hash function mixing operations using modular arithmetic.\n\n")
 
-    if 'bench_hashmix' in o0_data and 'bench_hashmix' in o3_data:
-        f.write("### Results: O0 vs O3 Comparison\n\n")
+    if 'bench_hashmix' in o0_data or 'bench_hashmix' in o3_data or 'bench_hashmix' in simd_data:
+        f.write("### Results: O0 vs O3 vs SIMD Comparison\n\n")
 
-        o0_moduli = o0_data['bench_hashmix'].get('moduli', [])
-        o3_moduli = o3_data['bench_hashmix'].get('moduli', [])
+        o0_moduli = o0_data.get('bench_hashmix', {}).get('moduli', [])
+        o3_moduli = o3_data.get('bench_hashmix', {}).get('moduli', [])
+        simd_moduli = simd_data.get('bench_hashmix', {}).get('moduli', [])
 
-        if o0_moduli or o3_moduli:
-            f.write("| Modulus | O0 Speedup | O3 Speedup |\n")
-            f.write("|---------|------------|------------|\n")
+        if o0_moduli or o3_moduli or simd_moduli:
+            f.write("| Modulus | O0 Speedup | O3 Speedup | SIMD Speedup |\n")
+            f.write("|---------|------------|------------|---------------|\n")
 
-            for i in range(max(len(o0_moduli), len(o3_moduli))):
+            max_len = max(len(o0_moduli), len(o3_moduli), len(simd_moduli))
+            for i in range(max_len):
                 o0_speedup = o0_moduli[i]['speedup'] if i < len(o0_moduli) else 0
                 o3_speedup = o3_moduli[i]['speedup'] if i < len(o3_moduli) else 0
-                modulus = (o0_moduli[i]['modulus']
-                           if i < len(o0_moduli)
-                           else o3_moduli[i]['modulus'])
-                f.write(f"| {modulus:,} | {o0_speedup:.3f}x | {o3_speedup:.3f}x |\n")
+                simd_speedup = simd_moduli[i]['speedup'] if i < len(simd_moduli) else 0
+                
+                # Get modulus from whichever has data
+                if i < len(o0_moduli):
+                    modulus = o0_moduli[i]['modulus']
+                elif i < len(o3_moduli):
+                    modulus = o3_moduli[i]['modulus']
+                else:
+                    modulus = simd_moduli[i]['modulus']
+                
+                simd_col = f"| {simd_speedup:.3f}x " if simd_speedup else "| - "
+                f.write(f"| {modulus:,} | {o0_speedup:.3f}x | {o3_speedup:.3f}x {simd_col}|\n")
 
             f.write("\n")
 
@@ -921,6 +1026,7 @@ def main():
     # Load benchmark results, now prefix-aware
     o0_files = find_latest_results(result_dir, 0, prefix)
     o3_files = find_latest_results(result_dir, 3, prefix)
+    simd_files = find_latest_simd_results(result_dir, prefix)
 
     if not o0_files or not o3_files:
         print("ERROR: Could not find complete benchmark results for both O0 and O3")
@@ -930,14 +1036,16 @@ def main():
 
     print(f"Found {len(o0_files)} O0 benchmark files")
     print(f"Found {len(o3_files)} O3 benchmark files")
+    if simd_files:
+        print(f"Found {len(simd_files)} SIMD benchmark files")
 
-    system_info = extract_system_info(o0_files + o3_files)
+    system_info = extract_system_info(o0_files + o3_files + simd_files)
     print(f"\nSystem: {system_info.get('cpu_model', 'Unknown')}")
 
     print("\nParsing benchmark results...")
     o0_data = {}
     o3_data = {}
-    simd_data = {}  # Initialize empty SIMD data for compatibility
+    simd_data = {}
     for fpath in o0_files:
         bench_name = os.path.basename(fpath).split('_O0.txt')[0].split('_', 2)[2]
         o0_data[bench_name] = parse_benchmark_results(fpath)
@@ -947,6 +1055,11 @@ def main():
         bench_name = os.path.basename(fpath).split('_O3.txt')[0].split('_', 2)[2]
         o3_data[bench_name] = parse_benchmark_results(fpath)
         print(f"  Parsed O3: {bench_name}")
+
+    for fpath in simd_files:
+        bench_name = os.path.basename(fpath).split('_SIMD.txt')[0].split('_', 2)[2]
+        simd_data[bench_name] = parse_benchmark_results(fpath)
+        print(f"  Parsed SIMD: {bench_name}")
 
     print("\nGenerating comparison charts...")
     timestamp = prefix or datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -966,7 +1079,7 @@ def main():
 
     print("\nGenerating markdown report...")
     output_file = os.path.join(result_dir, f"{timestamp}_BENCHMARK_REPORT.md")
-    generate_markdown_report(system_info, o0_data, o3_data, charts, asm_results, output_file)
+    generate_markdown_report(system_info, o0_data, o3_data, simd_data, charts, asm_results, output_file)
 
     print("\n" + "=" * 60)
     print("Documentation generation complete!")

@@ -1,0 +1,71 @@
+========================================
+REIST modular-add benchmark suite (NEON)
+========================================
+System Information:
+  Hostname: Mac-mini-von-Rudolf.local
+  OS: Darwin
+  CPU Model: 
+  CPU MHz: 
+  Memory: 
+========================================
+
+Total iterations per modulus N = 50000000
+step = 3
+
+Running benchmarks (with NEON vectorization)...
+
+Modulus B = 257
+  classic_mod        : 0.160770 s
+  reist_sym (scalar) : 0.074292 s
+  reist_sym (NEON)   : 0.038183 s
+  speedup (classic / scalar) : 2.164020x
+  speedup (classic / NEON)   : 4.210547x
+  NEON speedup (scalar / NEON): 1.945706x
+  sinks: 151 / -106 / 102
+
+Modulus B = 997
+  classic_mod        : 0.159408 s
+  reist_sym (scalar) : 0.073573 s
+  reist_sym (NEON)   : 0.038424 s
+  speedup (classic / scalar) : 2.166675x
+  speedup (classic / NEON)   : 4.148682x
+  NEON speedup (scalar / NEON): 1.914768x
+  sinks: 353 / 353 / -161
+
+Modulus B = 10007
+  classic_mod        : 0.160629 s
+  reist_sym (scalar) : 0.073690 s
+  reist_sym (NEON)   : 0.038483 s
+  speedup (classic / scalar) : 2.179790x
+  speedup (classic / NEON)   : 4.174053x
+  NEON speedup (scalar / NEON): 1.914887x
+  sinks: 5077 / -4930 / 3771
+
+Modulus B = 1000003
+  classic_mod        : 0.167579 s
+  reist_sym (scalar) : 0.074528 s
+  reist_sym (NEON)   : 0.038170 s
+  speedup (classic / scalar) : 2.248552x
+  speedup (classic / NEON)   : 4.390348x
+  NEON speedup (scalar / NEON): 1.952523x
+  sinks: 999553 / -450 / 499889
+
+Modulus B = 10000019
+  classic_mod        : 0.162649 s
+  reist_sym (scalar) : 0.074190 s
+  reist_sym (NEON)   : 0.038401 s
+  speedup (classic / scalar) : 2.192326x
+  speedup (classic / NEON)   : 4.235509x
+  NEON speedup (scalar / NEON): 1.931971x
+  sinks: 9999734 / -285 / -2500076
+
+Modulus B = 1000000007
+  classic_mod        : 0.160926 s
+  reist_sym (scalar) : 0.072667 s
+  reist_sym (NEON)   : 0.037559 s
+  speedup (classic / scalar) : 2.214569x
+  speedup (classic / NEON)   : 4.284607x
+  NEON speedup (scalar / NEON): 1.934736x
+  sinks: 150000000 / 150000000 / 37500000
+
+CSV written to results_modadd_suite_neon.csv

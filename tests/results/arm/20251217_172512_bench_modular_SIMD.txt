@@ -1,0 +1,17 @@
+========================================
+Modular Benchmark
+========================================
+System Information:
+  Hostname: Mac-mini-von-Rudolf.local
+  OS: Darwin
+  CPU Model: 
+  CPU MHz: 
+  Memory: 
+========================================
+
+Benchmark with B = 257, N = 5000000
+
+--- Modular remainder ---
+classic  : 0.103609 s
+REIST    : 0.102445 s
+Speedup  : 1.011354x (classic / REIST)

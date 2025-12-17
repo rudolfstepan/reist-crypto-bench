@@ -1,0 +1,18 @@
+========================================
+ChaCha20 Stream Benchmark
+========================================
+System Information:
+  Hostname: Mac-mini-von-Rudolf.local
+  OS: Darwin
+  CPU Model: 
+  CPU MHz: 
+  Memory: 
+========================================
+
+ChaCha20-like keystream benchmark (61.035156 MB total)
+
+Classic : 0.550146 s (116.332746 MB/s)
+REIST   : 0.605426 s (105.710719 MB/s)
+Speed ratio (classic / REIST): 0.908693x
+
+Sink XOR: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 

@@ -1,0 +1,13 @@
+========================================
+Hashmix benchmark (classic % vs REIST reduction)
+========================================
+System Information:
+  Hostname: Mac-mini-von-Rudolf.local
+  OS: Darwin
+  CPU Model: 
+  CPU MHz: 
+  Memory: 
+========================================
+
+Iterations N = 100000000
+M = 1000003  classic : 0.436168  REIST   : 0.554800  speedup : 0.786171x (classic / REIST)  sink values: 7ce05 / 26f47M = 10000019  classic : 0.439730  REIST   : 0.550639  speedup : 0.798581x (classic / REIST)  sink values: 2e7c0e / 22daeaM = 100000007  classic : 0.431264  REIST   : 0.548664  speedup : 0.786026x (classic / REIST)  sink values: c81895 / 158db5dM = 1000000007  classic : 0.432321  REIST   : 0.550539  speedup : 0.785268x (classic / REIST)  sink values: b640eeb / 85136e5

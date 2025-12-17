@@ -1,0 +1,53 @@
+========================================
+REIST modular-add benchmark suite
+========================================
+System Information:
+  Hostname: Mac-mini-von-Rudolf.local
+  OS: Darwin
+  CPU Model: 
+  CPU MHz: 
+  Memory: 
+========================================
+
+Total iterations per modulus N = 50000000
+step = 3
+
+Running benchmarks...
+
+Modulus B = 257
+  classic_mod: 0.160154 s
+  reist_sym  : 0.075038 s
+  speedup    : 2.134302x (classic / REIST)
+  sinks: 151 / -106
+
+Modulus B = 997
+  classic_mod: 0.160344 s
+  reist_sym  : 0.073468 s
+  speedup    : 2.182503x (classic / REIST)
+  sinks: 353 / 353
+
+Modulus B = 10007
+  classic_mod: 0.160895 s
+  reist_sym  : 0.074014 s
+  speedup    : 2.173856x (classic / REIST)
+  sinks: 5077 / -4930
+
+Modulus B = 1000003
+  classic_mod: 0.167651 s
+  reist_sym  : 0.073593 s
+  speedup    : 2.278069x (classic / REIST)
+  sinks: 999553 / -450
+
+Modulus B = 10000019
+  classic_mod: 0.162715 s
+  reist_sym  : 0.073559 s
+  speedup    : 2.212028x (classic / REIST)
+  sinks: 9999734 / -285
+
+Modulus B = 1000000007
+  classic_mod: 0.158419 s
+  reist_sym  : 0.073901 s
+  speedup    : 2.143659x (classic / REIST)
+  sinks: 150000000 / 150000000
+
+CSV written to results_modadd_suite.csv

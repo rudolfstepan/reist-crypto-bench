@@ -1,0 +1,45 @@
+========================================
+ARM REIST Benchmark: scalar vs NEON
+========================================
+System Information:
+  Hostname: Mac-mini-von-Rudolf.local
+  OS: Darwin
+  CPU Model: 
+  CPU MHz: 
+  Memory: 
+========================================
+
+N = 1024 coefficients
+
+q = 1000003
+  classic scalar : 0.028211 s  (reps=2560)
+  REIST  scalar  : 0.023663 s  (reps=5120)
+  REIST  NEON    : 0.024186 s  (reps=5120)
+  speedup REIST scalar vs classic : 1.192191x
+  speedup REIST NEON   vs classic : 1.166413x
+  speedup NEON vs REIST scalar    : 0.978378x
+
+q = 10000019
+  classic scalar : 0.028516 s  (reps=2560)
+  REIST  scalar  : 0.023775 s  (reps=5120)
+  REIST  NEON    : 0.024311 s  (reps=5120)
+  speedup REIST scalar vs classic : 1.199429x
+  speedup REIST NEON   vs classic : 1.172968x
+  speedup NEON vs REIST scalar    : 0.977939x
+
+q = 100000007
+  classic scalar : 0.028455 s  (reps=2560)
+  REIST  scalar  : 0.023455 s  (reps=5120)
+  REIST  NEON    : 0.023894 s  (reps=5120)
+  speedup REIST scalar vs classic : 1.213201x
+  speedup REIST NEON   vs classic : 1.190911x
+  speedup NEON vs REIST scalar    : 0.981627x
+
+q = 1000000007
+  classic scalar : 0.028356 s  (reps=2560)
+  REIST  scalar  : 0.023483 s  (reps=5120)
+  REIST  NEON    : 0.023855 s  (reps=5120)
+  speedup REIST scalar vs classic : 1.207540x
+  speedup REIST NEON   vs classic : 1.188684x
+  speedup NEON vs REIST scalar    : 0.984385x
+

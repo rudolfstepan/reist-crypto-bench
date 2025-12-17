@@ -164,7 +164,9 @@ def plot_optimization_comparison_modadd(data, out_path, title_suffix=""):
     plt.figure(figsize=(12, 8))
     
     colors = {'noopt': '#1f77b4', 'opt': '#ff7f0e', 'simd': '#2ca02c'}
-    labels = {'noopt': 'No Optimization (O0)', 'opt': 'Standard Optimization (O3)', 'simd': 'SIMD Optimization (O3+AVX2)'}
+    # Use platform-appropriate SIMD label
+    simd_label = 'SIMD Optimization (O3+NEON)' if platform.machine() in ('aarch64', 'arm64') else 'SIMD Optimization (O3+AVX2)'
+    labels = {'noopt': 'No Optimization (O0)', 'opt': 'Standard Optimization (O3)', 'simd': simd_label}
     markers = {'noopt': 'o', 'opt': 's', 'simd': '^'}
     
     for opt_level, level_data in data.items():
@@ -282,12 +284,18 @@ def main():
     parser = argparse.ArgumentParser(description="Generate REIST benchmark plots comparing O0, O3, and SIMD optimizations.")
     parser.add_argument("--prefix", type=str, help="Timestamp prefix of result files", default=None)
     parser.add_argument("--legacy", action="store_true", help="Generate legacy single-optimization plots")
+    parser.add_argument("--result-dir", type=str, default=None, help="Directory where results live and where images will be written")
     args = parser.parse_args()
 
     arch = platform.machine()
-    result_dir = os.path.join("tests", "results", "arm" if arch == "aarch64" else "x86")
+    # Check for both aarch64 (Linux) and arm64 (macOS)
+    is_arm = arch in ("aarch64", "arm64")
+    default_result_dir = os.path.join("tests", "results", "arm" if is_arm else "x86")
 
-    # Allow override via environment OR CLI
+    # Allow override via CLI or environment
+    result_dir = args.result_dir or os.environ.get("RESULT_DIR") or default_result_dir
+
+    # Allow override for timestamp prefix via env/CLI
     prefix = args.prefix or os.environ.get("RESULT_TIMESTAMP")
 
     # Output timestamp

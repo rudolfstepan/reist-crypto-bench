@@ -1,0 +1,20 @@
+========================================
+ChaCha20 REIST Benchmark
+========================================
+System Information:
+  Hostname: Mac-mini-von-Rudolf.local
+  OS: Darwin
+  CPU Model: 
+  CPU MHz: 
+  Memory: 
+========================================
+
+--- Modular Addition (32-bit) ---
+std_add    : 0.002892 s
+reist_add32: 0.002926 s
+Speed ratio: 0.988297x (std / REIST)
+
+--- ChaCha20-like Cipher-Speed ---
+Classic : 0.518077 s (123.533880 MB/s)
+REIST   : 0.577499 s (110.822623 MB/s)
+Speed ratio: 0.897103x (classic / REIST)

@@ -1,0 +1,3032 @@
+	.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 26, 0	sdk_version 26, 2
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+Lfunc_begin0:
+	.cfi_startproc
+	.cfi_personality 155, ___gxx_personality_v0
+	.cfi_lsda 16, Lexception0
+; %bb.0:
+	stp	d11, d10, [sp, #-128]!          ; 16-byte Folded Spill
+	stp	d9, d8, [sp, #16]               ; 16-byte Folded Spill
+	stp	x28, x27, [sp, #32]             ; 16-byte Folded Spill
+	stp	x26, x25, [sp, #48]             ; 16-byte Folded Spill
+	stp	x24, x23, [sp, #64]             ; 16-byte Folded Spill
+	stp	x22, x21, [sp, #80]             ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #96]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #112]            ; 16-byte Folded Spill
+	add	x29, sp, #112
+	sub	sp, sp, #928
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	.cfi_offset w21, -40
+	.cfi_offset w22, -48
+	.cfi_offset w23, -56
+	.cfi_offset w24, -64
+	.cfi_offset w25, -72
+	.cfi_offset w26, -80
+	.cfi_offset w27, -88
+	.cfi_offset w28, -96
+	.cfi_offset b8, -104
+	.cfi_offset b9, -112
+	.cfi_offset b10, -120
+	.cfi_offset b11, -128
+Lloh0:
+	adrp	x8, ___stack_chk_guard@GOTPAGE
+Lloh1:
+	ldr	x8, [x8, ___stack_chk_guard@GOTPAGEOFF]
+Lloh2:
+	ldr	x8, [x8]
+	stur	x8, [x29, #-128]
+	mov	x26, #-9                        ; =0xfffffffffffffff7
+	movk	x26, #32767, lsl #48
+	mov	x20, #33103                     ; =0x814f
+	movk	x20, #63335, lsl #16
+	movk	x20, #31614, lsl #32
+	movk	x20, #5125, lsl #48
+	cmp	w0, #2
+	b.lt	LBB0_4
+; %bb.1:
+	mov	x19, x1
+	mov	x22, x0
+	ldr	x23, [x1, #8]
+	mov	x0, x23
+	bl	_strlen
+	cmp	x0, x26
+	b.hi	LBB0_217
+; %bb.2:
+	mov	x21, x0
+	cmp	x0, #23
+	b.hs	LBB0_5
+; %bb.3:
+	strb	w21, [sp, #359]
+	add	x24, sp, #336
+	cbnz	x21, LBB0_7
+	b	LBB0_8
+LBB0_4:
+	mov	w21, #57600                     ; =0xe100
+	movk	w21, #1525, lsl #16
+	b	LBB0_26
+LBB0_5:
+	orr	x8, x21, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x25, x9, x8, eq
+Ltmp0:
+	mov	x0, x25
+	bl	__Znwm
+Ltmp1:
+; %bb.6:
+	mov	x24, x0
+	orr	x8, x25, #0x8000000000000000
+	stp	x21, x8, [sp, #344]
+	str	x0, [sp, #336]
+LBB0_7:
+	mov	x0, x24
+	mov	x1, x23
+	mov	x2, x21
+	bl	_memmove
+LBB0_8:
+	strb	wzr, [x24, x21]
+Ltmp2:
+	add	x0, sp, #336
+	mov	x1, #0                          ; =0x0
+	mov	w2, #10                         ; =0xa
+	bl	__ZNSt3__16stoullERKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPmi
+Ltmp3:
+; %bb.9:
+	mov	x21, x0
+	ldrsb	w8, [sp, #359]
+	tbnz	w8, #31, LBB0_11
+; %bb.10:
+	cmp	w22, #2
+	b.ne	LBB0_12
+	b	LBB0_26
+LBB0_11:
+	ldr	x0, [sp, #336]
+	bl	__ZdlPv
+	cmp	w22, #2
+	b.eq	LBB0_26
+LBB0_12:
+	mov	x25, x21
+	ldr	x21, [x19, #16]
+	mov	x0, x21
+	bl	_strlen
+	cmp	x0, x26
+	b.hi	LBB0_219
+; %bb.13:
+	mov	x20, x0
+	cmp	x0, #23
+	b.hs	LBB0_15
+; %bb.14:
+	strb	w20, [sp, #359]
+	add	x23, sp, #336
+	cbnz	x20, LBB0_17
+	b	LBB0_18
+LBB0_15:
+	orr	x8, x20, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x24, x9, x8, eq
+Ltmp5:
+	mov	x0, x24
+	bl	__Znwm
+Ltmp6:
+; %bb.16:
+	mov	x23, x0
+	orr	x8, x24, #0x8000000000000000
+	stp	x20, x8, [sp, #344]
+	str	x0, [sp, #336]
+LBB0_17:
+	mov	x0, x23
+	mov	x1, x21
+	mov	x2, x20
+	bl	_memmove
+LBB0_18:
+	strb	wzr, [x23, x20]
+Ltmp7:
+	add	x0, sp, #336
+	mov	x1, #0                          ; =0x0
+	mov	w2, #10                         ; =0xa
+	bl	__ZNSt3__16stoullERKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPmi
+Ltmp8:
+; %bb.19:
+	mov	x20, x0
+	ldrsb	w8, [sp, #359]
+	tbnz	w8, #31, LBB0_24
+; %bb.20:
+	cmp	w22, #4
+	b.lo	LBB0_25
+LBB0_21:
+	ldr	x21, [x19, #24]
+	mov	x0, x21
+	bl	_strlen
+	cmp	x0, x26
+	b.hi	LBB0_220
+; %bb.22:
+	mov	x19, x0
+	cmp	x0, #23
+	b.hs	LBB0_98
+; %bb.23:
+	strb	w19, [sp, #359]
+	add	x22, sp, #336
+	cbnz	x19, LBB0_100
+	b	LBB0_101
+LBB0_24:
+	ldr	x0, [sp, #336]
+	bl	__ZdlPv
+	cmp	w22, #4
+	b.hs	LBB0_21
+LBB0_25:
+	mov	x21, x25
+LBB0_26:
+Ltmp23:
+	mov	w0, #32                         ; =0x20
+	bl	__Znwm
+Ltmp24:
+; %bb.27:
+Lloh3:
+	adrp	x8, l_constinit@PAGE
+Lloh4:
+	add	x8, x8, l_constinit@PAGEOFF
+	ldp	q0, q1, [x8]
+	stp	q0, q1, [x0]
+	add	x8, x0, #32
+	stp	x0, x8, [sp, #16]               ; 16-byte Folded Spill
+LBB0_28:
+	str	x21, [sp, #32]                  ; 8-byte Folded Spill
+	stp	xzr, xzr, [sp, #176]
+	str	xzr, [sp, #192]
+	stp	xzr, xzr, [sp, #144]
+	str	xzr, [sp, #160]
+	stp	xzr, xzr, [sp, #112]
+	str	xzr, [sp, #128]
+	stp	xzr, xzr, [sp, #88]
+	str	xzr, [sp, #104]
+	stp	xzr, xzr, [sp, #64]
+	str	xzr, [sp, #80]
+Ltmp26:
+Lloh5:
+	adrp	x1, l_.str@PAGE
+Lloh6:
+	add	x1, x1, l_.str@PAGEOFF
+	add	x0, sp, #336
+	mov	w2, #8                          ; =0x8
+	bl	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj
+Ltmp27:
+; %bb.29:
+	stp	xzr, xzr, [sp, #208]
+	str	xzr, [sp, #224]
+	mov	x24, #28525                     ; =0x6f6d
+	movk	x24, #25956, lsl #16
+	movk	x24, #8300, lsl #32
+	movk	x24, #24942, lsl #48
+	mov	w27, #25965                     ; =0x656d
+	b	LBB0_32
+LBB0_30:                                ;   in Loop: Header=BB0_32 Depth=1
+	strb	wzr, [x21, x19]
+	ldrsb	w8, [sp, #167]
+	tbnz	w8, #31, LBB0_84
+LBB0_31:                                ;   in Loop: Header=BB0_32 Depth=1
+	ldur	q0, [sp, #40]
+	str	q0, [sp, #144]
+	ldr	x8, [sp, #56]
+	str	x8, [sp, #160]
+LBB0_32:                                ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_39 Depth 2
+                                        ;     Child Loop BB0_45 Depth 2
+                                        ;     Child Loop BB0_60 Depth 2
+                                        ;     Child Loop BB0_66 Depth 2
+	ldr	x8, [sp, #336]
+	ldur	x9, [x8, #-24]
+Ltmp29:
+	add	x8, sp, #40
+	add	x10, sp, #336
+	add	x0, x10, x9
+	bl	__ZNKSt3__18ios_base6getlocEv
+Ltmp30:
+; %bb.33:                               ;   in Loop: Header=BB0_32 Depth=1
+Ltmp31:
+	add	x0, sp, #40
+Lloh7:
+	adrp	x1, __ZNSt3__15ctypeIcE2idE@GOTPAGE
+Lloh8:
+	ldr	x1, [x1, __ZNSt3__15ctypeIcE2idE@GOTPAGEOFF]
+	bl	__ZNKSt3__16locale9use_facetERNS0_2idE
+Ltmp32:
+; %bb.34:                               ;   in Loop: Header=BB0_32 Depth=1
+	ldr	x8, [x0]
+	ldr	x8, [x8, #56]
+Ltmp33:
+	mov	w1, #10                         ; =0xa
+	blr	x8
+Ltmp34:
+; %bb.35:                               ;   in Loop: Header=BB0_32 Depth=1
+	mov	x19, x0
+	add	x0, sp, #40
+	bl	__ZNSt3__16localeD1Ev
+Ltmp36:
+	add	x0, sp, #336
+	add	x1, sp, #208
+	mov	x2, x19
+	bl	__ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_
+Ltmp37:
+; %bb.36:                               ;   in Loop: Header=BB0_32 Depth=1
+	ldr	x8, [x0]
+	ldur	x8, [x8, #-24]
+	add	x8, x0, x8
+	ldrb	w21, [sp, #231]
+	sxtb	w25, w21
+	ldrb	w8, [x8, #32]
+	mov	w9, #5                          ; =0x5
+	tst	w8, w9
+	b.ne	LBB0_85
+; %bb.37:                               ;   in Loop: Header=BB0_32 Depth=1
+	cmp	w25, #0
+	ldp	x22, x23, [sp, #208]
+	add	x8, sp, #208
+	csel	x19, x22, x8, lt
+	csel	x8, x23, x21, lt
+	cmp	x8, #10
+	b.lt	LBB0_58
+; %bb.38:                               ;   in Loop: Header=BB0_32 Depth=1
+	add	x26, x19, x8
+	mov	x28, x8
+	mov	x0, x19
+LBB0_39:                                ;   Parent Loop BB0_32 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	sub	x2, x8, #9
+	mov	w1, #109                        ; =0x6d
+	bl	_memchr
+	cbz	x0, LBB0_58
+; %bb.40:                               ;   in Loop: Header=BB0_39 Depth=2
+	ldr	x8, [x0]
+	ldrh	w9, [x0, #8]
+	cmp	x8, x24
+	ccmp	w9, w27, #0, eq
+	b.eq	LBB0_42
+; %bb.41:                               ;   in Loop: Header=BB0_39 Depth=2
+	add	x0, x0, #1
+	sub	x8, x26, x0
+	cmp	x8, #10
+	b.ge	LBB0_39
+	b	LBB0_58
+LBB0_42:                                ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x0, x26
+	b.eq	LBB0_58
+; %bb.43:                               ;   in Loop: Header=BB0_32 Depth=1
+	sub	x8, x0, x19
+	cmn	x8, #1
+	b.eq	LBB0_58
+; %bb.44:                               ;   in Loop: Header=BB0_32 Depth=1
+	mov	x2, x28
+	mov	x0, x19
+	mov	x28, #-9                        ; =0xfffffffffffffff7
+	movk	x28, #32767, lsl #48
+LBB0_45:                                ;   Parent Loop BB0_32 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	mov	w1, #58                         ; =0x3a
+	bl	_memchr
+	cbz	x0, LBB0_48
+; %bb.46:                               ;   in Loop: Header=BB0_45 Depth=2
+	ldrb	w8, [x0]
+	cmp	w8, #58
+	b.eq	LBB0_49
+; %bb.47:                               ;   in Loop: Header=BB0_45 Depth=2
+	add	x0, x0, #1
+	sub	x2, x26, x0
+	cmp	x2, #0
+	b.gt	LBB0_45
+LBB0_48:                                ;   in Loop: Header=BB0_32 Depth=1
+	mov	x0, x26
+LBB0_49:                                ;   in Loop: Header=BB0_32 Depth=1
+	sub	x8, x0, x19
+	add	x8, x8, #2
+	cmp	x0, x26
+	csinc	x26, x8, xzr, ne
+	tbnz	w25, #31, LBB0_52
+; %bb.50:                               ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x26, x21
+	b.hi	LBB0_212
+; %bb.51:                               ;   in Loop: Header=BB0_32 Depth=1
+	add	x22, sp, #208
+	mov	x23, x21
+	b	LBB0_53
+LBB0_52:                                ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x23, x26
+	b.lo	LBB0_212
+LBB0_53:                                ;   in Loop: Header=BB0_32 Depth=1
+	sub	x19, x23, x26
+	cmp	x19, x28
+	b.hi	LBB0_213
+; %bb.54:                               ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x19, #23
+	b.hs	LBB0_73
+; %bb.55:                               ;   in Loop: Header=BB0_32 Depth=1
+	strb	w19, [sp, #63]
+	add	x21, sp, #40
+	cmp	x23, x26
+	b.ne	LBB0_75
+; %bb.56:                               ;   in Loop: Header=BB0_32 Depth=1
+	strb	wzr, [x21, x19]
+	ldrsb	w8, [sp, #199]
+	tbnz	w8, #31, LBB0_76
+LBB0_57:                                ;   in Loop: Header=BB0_32 Depth=1
+	ldur	q0, [sp, #40]
+	str	q0, [sp, #176]
+	ldr	x8, [sp, #56]
+	str	x8, [sp, #192]
+	ldrb	w21, [sp, #231]
+	ldp	x22, x23, [sp, #208]
+	mov	x25, x21
+LBB0_58:                                ;   in Loop: Header=BB0_32 Depth=1
+	sxtb	w8, w25
+	cmp	w8, #0
+	add	x8, sp, #208
+	csel	x28, x22, x8, lt
+	csel	x19, x23, x21, lt
+	cmp	x19, #7
+	b.lt	LBB0_32
+; %bb.59:                               ;   in Loop: Header=BB0_32 Depth=1
+	add	x26, x28, x19
+	mov	x8, x19
+	mov	x0, x28
+LBB0_60:                                ;   Parent Loop BB0_32 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	sub	x2, x8, #6
+	mov	w1, #99                         ; =0x63
+	bl	_memchr
+	cbz	x0, LBB0_32
+; %bb.61:                               ;   in Loop: Header=BB0_60 Depth=2
+	ldr	w8, [x0]
+	ldur	w9, [x0, #3]
+	mov	w10, #28771                     ; =0x7063
+	movk	w10, #8309, lsl #16
+	cmp	w8, w10
+	mov	w8, #19744                      ; =0x4d20
+	movk	w8, #31304, lsl #16
+	ccmp	w9, w8, #0, eq
+	b.eq	LBB0_63
+; %bb.62:                               ;   in Loop: Header=BB0_60 Depth=2
+	add	x0, x0, #1
+	sub	x8, x26, x0
+	cmp	x8, #7
+	b.ge	LBB0_60
+	b	LBB0_32
+LBB0_63:                                ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x0, x26
+	b.eq	LBB0_32
+; %bb.64:                               ;   in Loop: Header=BB0_32 Depth=1
+	sub	x8, x0, x28
+	cmn	x8, #1
+	b.eq	LBB0_32
+; %bb.65:                               ;   in Loop: Header=BB0_32 Depth=1
+	mov	x0, x28
+LBB0_66:                                ;   Parent Loop BB0_32 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	mov	w1, #58                         ; =0x3a
+	mov	x2, x19
+	bl	_memchr
+	cbz	x0, LBB0_69
+; %bb.67:                               ;   in Loop: Header=BB0_66 Depth=2
+	ldrb	w8, [x0]
+	cmp	w8, #58
+	b.eq	LBB0_70
+; %bb.68:                               ;   in Loop: Header=BB0_66 Depth=2
+	add	x0, x0, #1
+	sub	x19, x26, x0
+	cmp	x19, #0
+	b.gt	LBB0_66
+LBB0_69:                                ;   in Loop: Header=BB0_32 Depth=1
+	mov	x0, x26
+LBB0_70:                                ;   in Loop: Header=BB0_32 Depth=1
+	sub	x8, x0, x28
+	add	x8, x8, #2
+	cmp	x0, x26
+	csinc	x26, x8, xzr, ne
+	tbnz	w25, #7, LBB0_77
+; %bb.71:                               ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x26, x21
+	mov	x8, #-9                         ; =0xfffffffffffffff7
+	movk	x8, #32767, lsl #48
+	b.hi	LBB0_214
+; %bb.72:                               ;   in Loop: Header=BB0_32 Depth=1
+	add	x22, sp, #208
+	mov	x23, x21
+	b	LBB0_78
+LBB0_73:                                ;   in Loop: Header=BB0_32 Depth=1
+	orr	x8, x19, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x23, x9, x8, eq
+Ltmp153:
+	mov	x0, x23
+	bl	__Znwm
+Ltmp154:
+; %bb.74:                               ;   in Loop: Header=BB0_32 Depth=1
+	mov	x21, x0
+	orr	x8, x23, #0x8000000000000000
+	stp	x19, x8, [sp, #48]
+	str	x0, [sp, #40]
+LBB0_75:                                ;   in Loop: Header=BB0_32 Depth=1
+	add	x1, x22, x26
+	mov	x0, x21
+	mov	x2, x19
+	bl	_memmove
+	strb	wzr, [x21, x19]
+	ldrsb	w8, [sp, #199]
+	tbz	w8, #31, LBB0_57
+LBB0_76:                                ;   in Loop: Header=BB0_32 Depth=1
+	ldr	x0, [sp, #176]
+	bl	__ZdlPv
+	b	LBB0_57
+LBB0_77:                                ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x23, x26
+	mov	x8, #-9                         ; =0xfffffffffffffff7
+	movk	x8, #32767, lsl #48
+	b.lo	LBB0_214
+LBB0_78:                                ;   in Loop: Header=BB0_32 Depth=1
+	sub	x19, x23, x26
+	cmp	x19, x8
+	b.hi	LBB0_215
+; %bb.79:                               ;   in Loop: Header=BB0_32 Depth=1
+	cmp	x19, #23
+	b.hs	LBB0_81
+; %bb.80:                               ;   in Loop: Header=BB0_32 Depth=1
+	strb	w19, [sp, #63]
+	add	x21, sp, #40
+	cmp	x23, x26
+	b.ne	LBB0_83
+	b	LBB0_30
+LBB0_81:                                ;   in Loop: Header=BB0_32 Depth=1
+	orr	x8, x19, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x23, x9, x8, eq
+Ltmp161:
+	mov	x0, x23
+	bl	__Znwm
+Ltmp162:
+; %bb.82:                               ;   in Loop: Header=BB0_32 Depth=1
+	mov	x21, x0
+	orr	x8, x23, #0x8000000000000000
+	stp	x19, x8, [sp, #48]
+	str	x0, [sp, #40]
+LBB0_83:                                ;   in Loop: Header=BB0_32 Depth=1
+	add	x1, x22, x26
+	mov	x0, x21
+	mov	x2, x19
+	bl	_memmove
+	strb	wzr, [x21, x19]
+	ldrsb	w8, [sp, #167]
+	tbz	w8, #31, LBB0_31
+LBB0_84:                                ;   in Loop: Header=BB0_32 Depth=1
+	ldr	x0, [sp, #144]
+	bl	__ZdlPv
+	b	LBB0_31
+LBB0_85:
+	tbz	w25, #31, LBB0_87
+; %bb.86:
+	ldr	x0, [sp, #208]
+	bl	__ZdlPv
+LBB0_87:
+Lloh9:
+	adrp	x23, __ZTTNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGE
+Lloh10:
+	ldr	x23, [x23, __ZTTNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGEOFF]
+	ldr	x24, [x23]
+	str	x24, [sp, #336]
+	ldr	x25, [x23, #24]
+	ldur	x8, [x24, #-24]
+	add	x19, sp, #336
+	str	x25, [x19, x8]
+	add	x0, x19, #16
+	bl	__ZNSt3__113basic_filebufIcNS_11char_traitsIcEEED1Ev
+	add	x0, sp, #336
+	add	x1, x23, #8
+	bl	__ZNSt3__113basic_istreamIcNS_11char_traitsIcEEED2Ev
+	add	x0, x19, #424
+	bl	__ZNSt3__19basic_iosIcNS_11char_traitsIcEEED2Ev
+Ltmp39:
+Lloh11:
+	adrp	x1, l_.str.4@PAGE
+Lloh12:
+	add	x1, x1, l_.str.4@PAGEOFF
+	add	x19, sp, #336
+	add	x0, sp, #336
+	mov	w2, #8                          ; =0x8
+	bl	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj
+Ltmp40:
+; %bb.88:
+	stp	xzr, xzr, [sp, #208]
+	str	xzr, [sp, #224]
+	ldr	x8, [sp, #336]
+	ldur	x9, [x8, #-24]
+Ltmp42:
+	add	x8, sp, #40
+	add	x0, x19, x9
+	bl	__ZNKSt3__18ios_base6getlocEv
+Ltmp43:
+; %bb.89:
+Ltmp44:
+Lloh13:
+	adrp	x1, __ZNSt3__15ctypeIcE2idE@GOTPAGE
+Lloh14:
+	ldr	x1, [x1, __ZNSt3__15ctypeIcE2idE@GOTPAGEOFF]
+	add	x0, sp, #40
+	bl	__ZNKSt3__16locale9use_facetERNS0_2idE
+Ltmp45:
+; %bb.90:
+	ldr	x8, [x0]
+	ldr	x8, [x8, #56]
+Ltmp46:
+	mov	w1, #10                         ; =0xa
+	blr	x8
+Ltmp47:
+; %bb.91:
+	mov	x19, x0
+	add	x0, sp, #40
+	bl	__ZNSt3__16localeD1Ev
+Ltmp49:
+	add	x0, sp, #336
+	add	x1, sp, #208
+	mov	x2, x19
+	bl	__ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_
+Ltmp50:
+; %bb.92:
+	ldr	x8, [x0]
+	ldur	x8, [x8, #-24]
+	add	x8, x0, x8
+	ldrb	w8, [x8, #32]
+	mov	w9, #5                          ; =0x5
+	tst	w8, w9
+	b.ne	LBB0_125
+; %bb.93:
+	ldrsb	x21, [sp, #231]
+	add	x8, sp, #208
+	ldp	x9, x22, [sp, #208]
+	cmp	x21, #0
+	str	x9, [sp, #8]                    ; 8-byte Folded Spill
+	csel	x27, x9, x8, lt
+	cmp	w21, #0
+	csel	x19, x22, x21, lt
+	cmp	x19, #8
+	b.lt	LBB0_125
+; %bb.94:
+	add	x28, x27, x19
+	mov	x26, #25933                     ; =0x654d
+	movk	x26, #21613, lsl #16
+	movk	x26, #29807, lsl #32
+	movk	x26, #27745, lsl #48
+	mov	x8, x19
+	mov	x0, x27
+LBB0_95:                                ; =>This Inner Loop Header: Depth=1
+	sub	x2, x8, #7
+	mov	w1, #77                         ; =0x4d
+	bl	_memchr
+	cbz	x0, LBB0_125
+; %bb.96:                               ;   in Loop: Header=BB0_95 Depth=1
+	ldr	x8, [x0]
+	cmp	x8, x26
+	b.eq	LBB0_105
+; %bb.97:                               ;   in Loop: Header=BB0_95 Depth=1
+	add	x0, x0, #1
+	sub	x8, x28, x0
+	cmp	x8, #8
+	b.ge	LBB0_95
+	b	LBB0_125
+LBB0_98:
+	orr	x8, x19, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x23, x9, x8, eq
+Ltmp10:
+	mov	x0, x23
+	bl	__Znwm
+Ltmp11:
+; %bb.99:
+	mov	x22, x0
+	orr	x8, x23, #0x8000000000000000
+	stp	x19, x8, [sp, #344]
+	str	x0, [sp, #336]
+LBB0_100:
+	mov	x0, x22
+	mov	x1, x21
+	mov	x2, x19
+	bl	_memmove
+LBB0_101:
+	mov	x21, x25
+	strb	wzr, [x22, x19]
+Ltmp12:
+	add	x0, sp, #336
+	mov	x1, #0                          ; =0x0
+	mov	w2, #10                         ; =0xa
+	bl	__ZNSt3__16stoullERKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPmi
+Ltmp13:
+; %bb.102:
+Ltmp14:
+	mov	x19, x0
+	mov	w0, #8                          ; =0x8
+	bl	__Znwm
+Ltmp15:
+; %bb.103:
+	str	x0, [sp, #16]                   ; 8-byte Folded Spill
+	str	x19, [x0], #8
+	str	x0, [sp, #24]                   ; 8-byte Folded Spill
+	ldrsb	w8, [sp, #359]
+	tbz	w8, #31, LBB0_28
+; %bb.104:
+	ldr	x0, [sp, #336]
+	bl	__ZdlPv
+	b	LBB0_28
+LBB0_105:
+	cmp	x0, x28
+	b.eq	LBB0_125
+; %bb.106:
+	sub	x8, x0, x27
+	cmn	x8, #1
+	b.eq	LBB0_125
+; %bb.107:
+	mov	x0, x27
+LBB0_108:                               ; =>This Inner Loop Header: Depth=1
+	mov	w1, #58                         ; =0x3a
+	mov	x2, x19
+	bl	_memchr
+	cbz	x0, LBB0_111
+; %bb.109:                              ;   in Loop: Header=BB0_108 Depth=1
+	ldrb	w8, [x0]
+	cmp	w8, #58
+	b.eq	LBB0_112
+; %bb.110:                              ;   in Loop: Header=BB0_108 Depth=1
+	add	x0, x0, #1
+	sub	x19, x28, x0
+	cmp	x19, #0
+	b.gt	LBB0_108
+LBB0_111:
+	mov	x0, x28
+LBB0_112:
+	sub	x8, x0, x27
+	add	x8, x8, #2
+	cmp	x0, x28
+	csinc	x27, x8, xzr, ne
+	tbnz	w21, #31, LBB0_115
+; %bb.113:
+	cmp	x27, x21
+	mov	x8, #-9                         ; =0xfffffffffffffff7
+	movk	x8, #32767, lsl #48
+	b.hi	LBB0_221
+; %bb.114:
+	add	x26, sp, #208
+	mov	x22, x21
+	b	LBB0_116
+LBB0_115:
+	cmp	x22, x27
+	mov	x8, #-9                         ; =0xfffffffffffffff7
+	movk	x8, #32767, lsl #48
+	ldr	x26, [sp, #8]                   ; 8-byte Folded Reload
+	b.lo	LBB0_221
+LBB0_116:
+	sub	x19, x22, x27
+	cmp	x19, x8
+	b.hi	LBB0_222
+; %bb.117:
+	cmp	x19, #23
+	b.hs	LBB0_119
+; %bb.118:
+	strb	w19, [sp, #63]
+	add	x21, sp, #40
+	cmp	x22, x27
+	b.ne	LBB0_121
+	b	LBB0_122
+LBB0_119:
+	orr	x8, x19, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x22, x9, x8, eq
+Ltmp52:
+	mov	x0, x22
+	bl	__Znwm
+Ltmp53:
+; %bb.120:
+	mov	x21, x0
+	orr	x8, x22, #0x8000000000000000
+	stp	x19, x8, [sp, #48]
+	str	x0, [sp, #40]
+LBB0_121:
+	add	x1, x26, x27
+	mov	x0, x21
+	mov	x2, x19
+	bl	_memmove
+LBB0_122:
+	strb	wzr, [x21, x19]
+	ldrsb	w8, [sp, #135]
+	tbz	w8, #31, LBB0_124
+; %bb.123:
+	ldr	x0, [sp, #112]
+	bl	__ZdlPv
+LBB0_124:
+	ldur	q0, [sp, #40]
+	str	q0, [sp, #112]
+	ldr	x8, [sp, #56]
+	str	x8, [sp, #128]
+LBB0_125:
+	ldrsb	w8, [sp, #231]
+	tbz	w8, #31, LBB0_127
+; %bb.126:
+	ldr	x0, [sp, #208]
+	bl	__ZdlPv
+LBB0_127:
+	str	x24, [sp, #336]
+	ldur	x8, [x24, #-24]
+	add	x19, sp, #336
+	str	x25, [x19, x8]
+	add	x0, x19, #16
+	bl	__ZNSt3__113basic_filebufIcNS_11char_traitsIcEEED1Ev
+	add	x0, sp, #336
+	add	x1, x23, #8
+	bl	__ZNSt3__113basic_istreamIcNS_11char_traitsIcEEED2Ev
+	add	x0, x19, #424
+	bl	__ZNSt3__19basic_iosIcNS_11char_traitsIcEEED2Ev
+Ltmp59:
+	add	x0, sp, #336
+	mov	w1, #256                        ; =0x100
+	bl	_gethostname
+Ltmp60:
+	ldr	x21, [sp, #32]                  ; 8-byte Folded Reload
+	mov	x22, #-9                        ; =0xfffffffffffffff7
+	movk	x22, #32767, lsl #48
+; %bb.128:
+	cbnz	w0, LBB0_130
+; %bb.129:
+Ltmp61:
+	add	x0, sp, #88
+	add	x1, sp, #336
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE6assignEPKc
+Ltmp62:
+LBB0_130:
+Ltmp63:
+Lloh15:
+	adrp	x0, l_.str.6@PAGE
+Lloh16:
+	add	x0, x0, l_.str.6@PAGEOFF
+Lloh17:
+	adrp	x1, l_.str.7@PAGE
+Lloh18:
+	add	x1, x1, l_.str.7@PAGEOFF
+	bl	_popen
+Ltmp64:
+; %bb.131:
+	mov	x19, x0
+	cbz	x0, LBB0_150
+; %bb.132:
+	add	x0, sp, #208
+	mov	w1, #128                        ; =0x80
+	mov	x2, x19
+	bl	_fgets
+	cbz	x0, LBB0_149
+; %bb.133:
+	add	x0, sp, #208
+	bl	_strlen
+	cmp	x0, x22
+	b.hi	LBB0_218
+; %bb.134:
+	mov	x21, x0
+	cmp	x0, #23
+	b.hs	LBB0_141
+; %bb.135:
+	strb	w21, [sp, #63]
+	add	x22, sp, #40
+	cbnz	x21, LBB0_143
+; %bb.136:
+	strb	wzr, [x22, x21]
+	ldrsb	w8, [sp, #87]
+	tbnz	w8, #31, LBB0_144
+LBB0_137:
+	ldr	x8, [sp, #56]
+	str	x8, [sp, #80]
+	ldur	q0, [sp, #40]
+	str	q0, [sp, #64]
+	ldrsb	x8, [sp, #87]
+	ldr	x21, [sp, #32]                  ; 8-byte Folded Reload
+	tbnz	x8, #63, LBB0_145
+; %bb.138:
+	cbz	w8, LBB0_149
+; %bb.139:
+	add	x9, sp, #64
+	add	x9, x9, x8
+	ldurb	w9, [x9, #-1]
+	cmp	w9, #10
+	b.ne	LBB0_149
+; %bb.140:
+	sub	x9, x8, #1
+	strb	w9, [sp, #87]
+	add	x8, sp, #64
+	b	LBB0_148
+LBB0_141:
+	orr	x8, x21, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x23, x9, x8, eq
+Ltmp66:
+	mov	x0, x23
+	bl	__Znwm
+Ltmp67:
+; %bb.142:
+	mov	x22, x0
+	orr	x8, x23, #0x8000000000000000
+	stp	x21, x8, [sp, #48]
+	str	x0, [sp, #40]
+LBB0_143:
+	add	x1, sp, #208
+	mov	x0, x22
+	mov	x2, x21
+	bl	_memcpy
+	strb	wzr, [x22, x21]
+	ldrsb	w8, [sp, #87]
+	tbz	w8, #31, LBB0_137
+LBB0_144:
+	ldr	x0, [sp, #64]
+	bl	__ZdlPv
+	b	LBB0_137
+LBB0_145:
+	ldr	x9, [sp, #72]
+	cbz	x9, LBB0_149
+; %bb.146:
+	ldr	x8, [sp, #64]
+	add	x10, x8, x9
+	ldurb	w10, [x10, #-1]
+	cmp	w10, #10
+	b.ne	LBB0_149
+; %bb.147:
+	sub	x9, x9, #1
+	str	x9, [sp, #72]
+LBB0_148:
+	strb	wzr, [x8, x9]
+LBB0_149:
+	mov	x0, x19
+	bl	_pclose
+LBB0_150:
+Lloh19:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh20:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+	ldr	x8, [x0]
+	ldur	x9, [x8, #-24]
+	add	x9, x0, x9
+	ldr	w10, [x9, #8]
+	and	w10, w10, #0xfffffeff
+	orr	w10, w10, #0x4
+	str	w10, [x9, #8]
+	ldur	x8, [x8, #-24]
+	add	x8, x0, x8
+	mov	w9, #6                          ; =0x6
+	str	x9, [x8, #16]
+Ltmp71:
+Lloh21:
+	adrp	x1, l_.str.8@PAGE
+Lloh22:
+	add	x1, x1, l_.str.8@PAGEOFF
+	mov	w2, #41                         ; =0x29
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp72:
+; %bb.151:
+Ltmp73:
+Lloh23:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh24:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh25:
+	adrp	x1, l_.str.9@PAGE
+Lloh26:
+	add	x1, x1, l_.str.9@PAGEOFF
+	mov	w2, #49                         ; =0x31
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp74:
+; %bb.152:
+Ltmp75:
+Lloh27:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh28:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh29:
+	adrp	x1, l_.str.8@PAGE
+Lloh30:
+	add	x1, x1, l_.str.8@PAGEOFF
+	mov	w2, #41                         ; =0x29
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp76:
+; %bb.153:
+Ltmp77:
+Lloh31:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh32:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh33:
+	adrp	x1, l_.str.10@PAGE
+Lloh34:
+	add	x1, x1, l_.str.10@PAGEOFF
+	mov	w2, #20                         ; =0x14
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp78:
+; %bb.154:
+Ltmp79:
+Lloh35:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh36:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh37:
+	adrp	x1, l_.str.11@PAGE
+Lloh38:
+	add	x1, x1, l_.str.11@PAGEOFF
+	mov	w2, #12                         ; =0xc
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp80:
+; %bb.155:
+	ldrb	w8, [sp, #111]
+	sxtb	w9, w8
+	ldp	x10, x11, [sp, #88]
+	cmp	w9, #0
+	add	x9, sp, #88
+	csel	x1, x10, x9, lt
+	csel	x2, x11, x8, lt
+Ltmp81:
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp82:
+; %bb.156:
+Ltmp83:
+Lloh39:
+	adrp	x1, l_.str.12@PAGE
+Lloh40:
+	add	x1, x1, l_.str.12@PAGEOFF
+	mov	w2, #1                          ; =0x1
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp84:
+; %bb.157:
+Ltmp85:
+Lloh41:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh42:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh43:
+	adrp	x1, l_.str.13@PAGE
+Lloh44:
+	add	x1, x1, l_.str.13@PAGEOFF
+	mov	w2, #6                          ; =0x6
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp86:
+; %bb.158:
+	ldrb	w8, [sp, #87]
+	sxtb	w9, w8
+	ldp	x10, x11, [sp, #64]
+	cmp	w9, #0
+	add	x9, sp, #64
+	csel	x1, x10, x9, lt
+	csel	x2, x11, x8, lt
+Ltmp87:
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp88:
+; %bb.159:
+Ltmp89:
+Lloh45:
+	adrp	x1, l_.str.12@PAGE
+Lloh46:
+	add	x1, x1, l_.str.12@PAGEOFF
+	mov	w2, #1                          ; =0x1
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp90:
+; %bb.160:
+Ltmp91:
+Lloh47:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh48:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh49:
+	adrp	x1, l_.str.14@PAGE
+Lloh50:
+	add	x1, x1, l_.str.14@PAGEOFF
+	mov	w2, #13                         ; =0xd
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp92:
+; %bb.161:
+	ldrb	w8, [sp, #199]
+	sxtb	w9, w8
+	ldp	x10, x11, [sp, #176]
+	cmp	w9, #0
+	add	x9, sp, #176
+	csel	x1, x10, x9, lt
+	csel	x2, x11, x8, lt
+Ltmp93:
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp94:
+; %bb.162:
+Ltmp95:
+Lloh51:
+	adrp	x1, l_.str.12@PAGE
+Lloh52:
+	add	x1, x1, l_.str.12@PAGEOFF
+	mov	w2, #1                          ; =0x1
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp96:
+; %bb.163:
+Ltmp97:
+Lloh53:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh54:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh55:
+	adrp	x1, l_.str.15@PAGE
+Lloh56:
+	add	x1, x1, l_.str.15@PAGEOFF
+	mov	w2, #11                         ; =0xb
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp98:
+; %bb.164:
+	ldrb	w8, [sp, #167]
+	sxtb	w9, w8
+	ldp	x10, x11, [sp, #144]
+	cmp	w9, #0
+	add	x9, sp, #144
+	csel	x1, x10, x9, lt
+	csel	x2, x11, x8, lt
+Ltmp99:
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp100:
+; %bb.165:
+Ltmp101:
+Lloh57:
+	adrp	x1, l_.str.12@PAGE
+Lloh58:
+	add	x1, x1, l_.str.12@PAGEOFF
+	mov	w2, #1                          ; =0x1
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp102:
+; %bb.166:
+Ltmp103:
+Lloh59:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh60:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh61:
+	adrp	x1, l_.str.16@PAGE
+Lloh62:
+	add	x1, x1, l_.str.16@PAGEOFF
+	mov	w2, #10                         ; =0xa
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp104:
+; %bb.167:
+	ldrb	w8, [sp, #135]
+	sxtb	w9, w8
+	ldp	x10, x11, [sp, #112]
+	cmp	w9, #0
+	add	x9, sp, #112
+	csel	x1, x10, x9, lt
+	csel	x2, x11, x8, lt
+Ltmp105:
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp106:
+; %bb.168:
+Ltmp107:
+Lloh63:
+	adrp	x1, l_.str.12@PAGE
+Lloh64:
+	add	x1, x1, l_.str.12@PAGEOFF
+	mov	w2, #1                          ; =0x1
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp108:
+; %bb.169:
+Ltmp109:
+Lloh65:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh66:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh67:
+	adrp	x1, l_.str.17@PAGE
+Lloh68:
+	add	x1, x1, l_.str.17@PAGEOFF
+	mov	w2, #42                         ; =0x2a
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp110:
+; %bb.170:
+Ltmp111:
+Lloh69:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh70:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh71:
+	adrp	x1, l_.str.18@PAGE
+Lloh72:
+	add	x1, x1, l_.str.18@PAGEOFF
+	mov	w2, #15                         ; =0xf
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp112:
+; %bb.171:
+Ltmp113:
+	mov	x1, x21
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEy
+Ltmp114:
+; %bb.172:
+Ltmp115:
+Lloh73:
+	adrp	x1, l_.str.12@PAGE
+Lloh74:
+	add	x1, x1, l_.str.12@PAGEOFF
+	mov	w2, #1                          ; =0x1
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp116:
+; %bb.173:
+	ldp	x8, x9, [sp, #16]               ; 16-byte Folded Reload
+	cmp	x8, x9
+	b.eq	LBB0_200
+; %bb.174:
+	mov	x24, #32557                     ; =0x7f2d
+	movk	x24, #19605, lsl #16
+	movk	x24, #62509, lsl #32
+	movk	x24, #22609, lsl #48
+	mov	x8, #225833675390976            ; =0xcd6500000000
+	movk	x8, #16845, lsl #48
+	fmov	d10, x8
+	ldr	x22, [sp, #16]                  ; 8-byte Folded Reload
+LBB0_175:                               ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_177 Depth 2
+                                        ;     Child Loop BB0_180 Depth 2
+	ldr	x27, [x22]
+	bl	__ZNSt3__16chrono12steady_clock3nowEv
+	mov	x26, x0
+	mov	x28, #52719                     ; =0xcdef
+	movk	x28, #37035, lsl #16
+	movk	x28, #22136, lsl #32
+	movk	x28, #4660, lsl #48
+	cbz	x21, LBB0_178
+; %bb.176:                              ;   in Loop: Header=BB0_175 Depth=1
+	mov	x8, x21
+LBB0_177:                               ;   Parent Loop BB0_175 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	madd	x9, x28, x24, x20
+	udiv	x10, x9, x27
+	msub	x28, x10, x27, x9
+	subs	x8, x8, #1
+	b.ne	LBB0_177
+LBB0_178:                               ;   in Loop: Header=BB0_175 Depth=1
+	bl	__ZNSt3__16chrono12steady_clock3nowEv
+	mov	x19, x0
+	bl	__ZNSt3__16chrono12steady_clock3nowEv
+	mov	x25, x0
+	mov	x23, #52719                     ; =0xcdef
+	movk	x23, #37035, lsl #16
+	movk	x23, #22136, lsl #32
+	movk	x23, #4660, lsl #48
+	cbz	x21, LBB0_181
+; %bb.179:                              ;   in Loop: Header=BB0_175 Depth=1
+	add	x8, x27, x27, lsr #63
+	asr	x8, x8, #1
+	neg	x9, x8
+LBB0_180:                               ;   Parent Loop BB0_175 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	madd	x11, x23, x24, x20
+	sdiv	x12, x11, x27
+	msub	x11, x12, x27, x11
+	cmp	x11, x8
+	csel	x12, x27, xzr, gt
+	cmp	x11, x9
+	csel	x13, xzr, x27, gt
+	sub	x11, x11, x12
+	add	x23, x11, x13
+	subs	x21, x21, #1
+	b.ne	LBB0_180
+LBB0_181:                               ;   in Loop: Header=BB0_175 Depth=1
+	bl	__ZNSt3__16chrono12steady_clock3nowEv
+	mov	x21, x0
+Ltmp118:
+Lloh75:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh76:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh77:
+	adrp	x1, l_.str.19@PAGE
+Lloh78:
+	add	x1, x1, l_.str.19@PAGEOFF
+	mov	w2, #4                          ; =0x4
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp119:
+; %bb.182:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp120:
+	mov	x1, x27
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEy
+Ltmp121:
+; %bb.183:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp122:
+Lloh79:
+	adrp	x1, l_.str.20@PAGE
+Lloh80:
+	add	x1, x1, l_.str.20@PAGEOFF
+	mov	x2, #0                          ; =0x0
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp123:
+; %bb.184:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp124:
+Lloh81:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh82:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh83:
+	adrp	x1, l_.str.21@PAGE
+Lloh84:
+	add	x1, x1, l_.str.21@PAGEOFF
+	mov	w2, #12                         ; =0xc
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp125:
+; %bb.185:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp126:
+	sub	x8, x19, x26
+	scvtf	d0, x8
+	fdiv	d8, d0, d10
+	fmov	d0, d8
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEd
+Ltmp127:
+; %bb.186:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp128:
+Lloh85:
+	adrp	x1, l_.str.20@PAGE
+Lloh86:
+	add	x1, x1, l_.str.20@PAGEOFF
+	mov	x2, #0                          ; =0x0
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp129:
+; %bb.187:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp130:
+Lloh87:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh88:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh89:
+	adrp	x1, l_.str.22@PAGE
+Lloh90:
+	add	x1, x1, l_.str.22@PAGEOFF
+	mov	w2, #12                         ; =0xc
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp131:
+; %bb.188:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp132:
+	sub	x8, x21, x25
+	scvtf	d0, x8
+	fdiv	d9, d0, d10
+	fmov	d0, d9
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEd
+Ltmp133:
+; %bb.189:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp134:
+Lloh91:
+	adrp	x1, l_.str.20@PAGE
+Lloh92:
+	add	x1, x1, l_.str.20@PAGEOFF
+	mov	x2, #0                          ; =0x0
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp135:
+; %bb.190:                              ;   in Loop: Header=BB0_175 Depth=1
+	fcmp	d9, #0.0
+	b.le	LBB0_194
+; %bb.191:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp136:
+Lloh93:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh94:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh95:
+	adrp	x1, l_.str.23@PAGE
+Lloh96:
+	add	x1, x1, l_.str.23@PAGEOFF
+	mov	w2, #12                         ; =0xc
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp137:
+; %bb.192:                              ;   in Loop: Header=BB0_175 Depth=1
+	fdiv	d0, d8, d9
+Ltmp138:
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEd
+Ltmp139:
+; %bb.193:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp140:
+Lloh97:
+	adrp	x1, l_.str.24@PAGE
+Lloh98:
+	add	x1, x1, l_.str.24@PAGEOFF
+	mov	w2, #19                         ; =0x13
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp141:
+LBB0_194:                               ;   in Loop: Header=BB0_175 Depth=1
+Ltmp142:
+Lloh99:
+	adrp	x0, __ZNSt3__14coutE@GOTPAGE
+Lloh100:
+	ldr	x0, [x0, __ZNSt3__14coutE@GOTPAGEOFF]
+Lloh101:
+	adrp	x1, l_.str.25@PAGE
+Lloh102:
+	add	x1, x1, l_.str.25@PAGEOFF
+	mov	w2, #15                         ; =0xf
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp143:
+; %bb.195:                              ;   in Loop: Header=BB0_175 Depth=1
+	ldr	x8, [x0]
+	ldur	x8, [x8, #-24]
+	add	x8, x0, x8
+	ldr	w9, [x8, #8]
+	mov	w10, #-75                       ; =0xffffffb5
+	and	w9, w9, w10
+	orr	w9, w9, #0x8
+	str	w9, [x8, #8]
+Ltmp144:
+	mov	x1, x28
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEy
+Ltmp145:
+; %bb.196:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp146:
+Lloh103:
+	adrp	x1, l_.str.26@PAGE
+Lloh104:
+	add	x1, x1, l_.str.26@PAGEOFF
+	mov	w2, #3                          ; =0x3
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp147:
+; %bb.197:                              ;   in Loop: Header=BB0_175 Depth=1
+Ltmp148:
+	mov	x1, x23
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEx
+Ltmp149:
+; %bb.198:                              ;   in Loop: Header=BB0_175 Depth=1
+	ldr	x8, [x0]
+	ldur	x8, [x8, #-24]
+	add	x8, x0, x8
+	ldr	w9, [x8, #8]
+	mov	w10, #-75                       ; =0xffffffb5
+	and	w9, w9, w10
+	orr	w9, w9, #0x2
+	str	w9, [x8, #8]
+Ltmp150:
+Lloh105:
+	adrp	x1, l_.str.20@PAGE
+Lloh106:
+	add	x1, x1, l_.str.20@PAGEOFF
+	mov	x2, #0                          ; =0x0
+	bl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Ltmp151:
+; %bb.199:                              ;   in Loop: Header=BB0_175 Depth=1
+	add	x22, x22, #8
+	ldp	x8, x21, [sp, #24]              ; 16-byte Folded Reload
+	cmp	x22, x8
+	b.ne	LBB0_175
+LBB0_200:
+	ldrsb	w8, [sp, #87]
+	tbnz	w8, #31, LBB0_207
+; %bb.201:
+	ldrsb	w8, [sp, #111]
+	tbnz	w8, #31, LBB0_208
+LBB0_202:
+	ldrsb	w8, [sp, #135]
+	tbnz	w8, #31, LBB0_209
+LBB0_203:
+	ldrsb	w8, [sp, #167]
+	tbnz	w8, #31, LBB0_210
+LBB0_204:
+	ldrsb	w8, [sp, #199]
+	tbnz	w8, #31, LBB0_211
+LBB0_205:
+	ldr	x0, [sp, #16]                   ; 8-byte Folded Reload
+	bl	__ZdlPv
+	ldur	x8, [x29, #-128]
+Lloh107:
+	adrp	x9, ___stack_chk_guard@GOTPAGE
+Lloh108:
+	ldr	x9, [x9, ___stack_chk_guard@GOTPAGEOFF]
+Lloh109:
+	ldr	x9, [x9]
+	cmp	x9, x8
+	b.ne	LBB0_216
+; %bb.206:
+	mov	w0, #0                          ; =0x0
+	add	sp, sp, #928
+	ldp	x29, x30, [sp, #112]            ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #96]             ; 16-byte Folded Reload
+	ldp	x22, x21, [sp, #80]             ; 16-byte Folded Reload
+	ldp	x24, x23, [sp, #64]             ; 16-byte Folded Reload
+	ldp	x26, x25, [sp, #48]             ; 16-byte Folded Reload
+	ldp	x28, x27, [sp, #32]             ; 16-byte Folded Reload
+	ldp	d9, d8, [sp, #16]               ; 16-byte Folded Reload
+	ldp	d11, d10, [sp], #128            ; 16-byte Folded Reload
+	ret
+LBB0_207:
+	ldr	x0, [sp, #64]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #111]
+	tbz	w8, #31, LBB0_202
+LBB0_208:
+	ldr	x0, [sp, #88]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #135]
+	tbz	w8, #31, LBB0_203
+LBB0_209:
+	ldr	x0, [sp, #112]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #167]
+	tbz	w8, #31, LBB0_204
+LBB0_210:
+	ldr	x0, [sp, #144]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #199]
+	tbz	w8, #31, LBB0_205
+LBB0_211:
+	ldr	x0, [sp, #176]
+	bl	__ZdlPv
+	b	LBB0_205
+LBB0_212:
+Ltmp158:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev
+Ltmp159:
+	b	LBB0_223
+LBB0_213:
+Ltmp156:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+Ltmp157:
+	b	LBB0_223
+LBB0_214:
+Ltmp166:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev
+Ltmp167:
+	b	LBB0_223
+LBB0_215:
+Ltmp164:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+Ltmp165:
+	b	LBB0_223
+LBB0_216:
+	bl	___stack_chk_fail
+LBB0_217:
+Ltmp169:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+Ltmp170:
+	b	LBB0_223
+LBB0_218:
+Ltmp68:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+Ltmp69:
+	b	LBB0_223
+LBB0_219:
+Ltmp20:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+Ltmp21:
+	b	LBB0_223
+LBB0_220:
+Ltmp17:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+Ltmp18:
+	b	LBB0_223
+LBB0_221:
+Ltmp56:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev
+Ltmp57:
+	b	LBB0_223
+LBB0_222:
+Ltmp54:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+Ltmp55:
+LBB0_223:
+	brk	#0x1
+LBB0_224:
+Ltmp58:
+	b	LBB0_250
+LBB0_225:
+Ltmp19:
+	b	LBB0_235
+LBB0_226:
+Ltmp16:
+	b	LBB0_230
+LBB0_227:
+Ltmp9:
+	b	LBB0_230
+LBB0_228:
+Ltmp22:
+	b	LBB0_235
+LBB0_229:
+Ltmp4:
+LBB0_230:
+	mov	x19, x0
+	ldrsb	w8, [sp, #359]
+	tbz	w8, #31, LBB0_236
+; %bb.231:
+	ldr	x0, [sp, #336]
+	bl	__ZdlPv
+	mov	x0, x19
+	bl	__Unwind_Resume
+LBB0_232:
+Ltmp70:
+	b	LBB0_255
+LBB0_233:
+Ltmp171:
+	b	LBB0_235
+LBB0_234:
+Ltmp25:
+LBB0_235:
+	mov	x19, x0
+LBB0_236:
+	mov	x0, x19
+	bl	__Unwind_Resume
+LBB0_237:
+Ltmp65:
+	b	LBB0_255
+LBB0_238:
+Ltmp41:
+	b	LBB0_255
+LBB0_239:
+Ltmp28:
+	b	LBB0_255
+LBB0_240:
+Ltmp163:
+	b	LBB0_250
+LBB0_241:
+Ltmp155:
+	b	LBB0_250
+LBB0_242:
+Ltmp51:
+	b	LBB0_250
+LBB0_243:
+Ltmp48:
+	b	LBB0_248
+LBB0_244:
+Ltmp168:
+	b	LBB0_250
+LBB0_245:
+Ltmp160:
+	b	LBB0_250
+LBB0_246:
+Ltmp117:
+	b	LBB0_255
+LBB0_247:
+Ltmp35:
+LBB0_248:
+	mov	x19, x0
+	add	x0, sp, #40
+	bl	__ZNSt3__16localeD1Ev
+	b	LBB0_251
+LBB0_249:
+Ltmp38:
+LBB0_250:
+	mov	x19, x0
+LBB0_251:
+	ldrsb	w8, [sp, #231]
+	tbz	w8, #31, LBB0_253
+; %bb.252:
+	ldr	x0, [sp, #208]
+	bl	__ZdlPv
+LBB0_253:
+	add	x0, sp, #336
+	bl	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEED1Ev
+	b	LBB0_256
+LBB0_254:
+Ltmp152:
+LBB0_255:
+	mov	x19, x0
+LBB0_256:
+	ldrsb	w8, [sp, #87]
+	tbz	w8, #31, LBB0_262
+; %bb.257:
+	ldr	x0, [sp, #64]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #111]
+	tbnz	w8, #31, LBB0_263
+LBB0_258:
+	ldrsb	w8, [sp, #135]
+	tbz	w8, #31, LBB0_264
+LBB0_259:
+	ldr	x0, [sp, #112]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #167]
+	tbnz	w8, #31, LBB0_265
+LBB0_260:
+	ldrsb	w8, [sp, #199]
+	tbz	w8, #31, LBB0_266
+LBB0_261:
+	ldr	x0, [sp, #176]
+	bl	__ZdlPv
+	ldr	x0, [sp, #16]                   ; 8-byte Folded Reload
+	bl	__ZdlPv
+	mov	x0, x19
+	bl	__Unwind_Resume
+LBB0_262:
+	ldrsb	w8, [sp, #111]
+	tbz	w8, #31, LBB0_258
+LBB0_263:
+	ldr	x0, [sp, #88]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #135]
+	tbnz	w8, #31, LBB0_259
+LBB0_264:
+	ldrsb	w8, [sp, #167]
+	tbz	w8, #31, LBB0_260
+LBB0_265:
+	ldr	x0, [sp, #144]
+	bl	__ZdlPv
+	ldrsb	w8, [sp, #199]
+	tbnz	w8, #31, LBB0_261
+LBB0_266:
+	ldr	x0, [sp, #16]                   ; 8-byte Folded Reload
+	bl	__ZdlPv
+	mov	x0, x19
+	bl	__Unwind_Resume
+	.loh AdrpLdrGotLdr	Lloh0, Lloh1, Lloh2
+	.loh AdrpAdd	Lloh3, Lloh4
+	.loh AdrpAdd	Lloh5, Lloh6
+	.loh AdrpLdrGot	Lloh7, Lloh8
+	.loh AdrpAdd	Lloh11, Lloh12
+	.loh AdrpLdrGot	Lloh9, Lloh10
+	.loh AdrpLdrGot	Lloh13, Lloh14
+	.loh AdrpAdd	Lloh17, Lloh18
+	.loh AdrpAdd	Lloh15, Lloh16
+	.loh AdrpAdd	Lloh21, Lloh22
+	.loh AdrpLdrGot	Lloh19, Lloh20
+	.loh AdrpAdd	Lloh25, Lloh26
+	.loh AdrpLdrGot	Lloh23, Lloh24
+	.loh AdrpAdd	Lloh29, Lloh30
+	.loh AdrpLdrGot	Lloh27, Lloh28
+	.loh AdrpAdd	Lloh33, Lloh34
+	.loh AdrpLdrGot	Lloh31, Lloh32
+	.loh AdrpAdd	Lloh37, Lloh38
+	.loh AdrpLdrGot	Lloh35, Lloh36
+	.loh AdrpAdd	Lloh39, Lloh40
+	.loh AdrpAdd	Lloh43, Lloh44
+	.loh AdrpLdrGot	Lloh41, Lloh42
+	.loh AdrpAdd	Lloh45, Lloh46
+	.loh AdrpAdd	Lloh49, Lloh50
+	.loh AdrpLdrGot	Lloh47, Lloh48
+	.loh AdrpAdd	Lloh51, Lloh52
+	.loh AdrpAdd	Lloh55, Lloh56
+	.loh AdrpLdrGot	Lloh53, Lloh54
+	.loh AdrpAdd	Lloh57, Lloh58
+	.loh AdrpAdd	Lloh61, Lloh62
+	.loh AdrpLdrGot	Lloh59, Lloh60
+	.loh AdrpAdd	Lloh63, Lloh64
+	.loh AdrpAdd	Lloh67, Lloh68
+	.loh AdrpLdrGot	Lloh65, Lloh66
+	.loh AdrpAdd	Lloh71, Lloh72
+	.loh AdrpLdrGot	Lloh69, Lloh70
+	.loh AdrpAdd	Lloh73, Lloh74
+	.loh AdrpAdd	Lloh77, Lloh78
+	.loh AdrpLdrGot	Lloh75, Lloh76
+	.loh AdrpAdd	Lloh79, Lloh80
+	.loh AdrpAdd	Lloh83, Lloh84
+	.loh AdrpLdrGot	Lloh81, Lloh82
+	.loh AdrpAdd	Lloh85, Lloh86
+	.loh AdrpAdd	Lloh89, Lloh90
+	.loh AdrpLdrGot	Lloh87, Lloh88
+	.loh AdrpAdd	Lloh91, Lloh92
+	.loh AdrpAdd	Lloh95, Lloh96
+	.loh AdrpLdrGot	Lloh93, Lloh94
+	.loh AdrpAdd	Lloh97, Lloh98
+	.loh AdrpAdd	Lloh101, Lloh102
+	.loh AdrpLdrGot	Lloh99, Lloh100
+	.loh AdrpAdd	Lloh103, Lloh104
+	.loh AdrpAdd	Lloh105, Lloh106
+	.loh AdrpLdrGotLdr	Lloh107, Lloh108, Lloh109
+Lfunc_end0:
+	.cfi_endproc
+	.section	__TEXT,__gcc_except_tab
+	.p2align	2, 0x0
+GCC_except_table0:
+Lexception0:
+	.byte	255                             ; @LPStart Encoding = omit
+	.byte	255                             ; @TType Encoding = omit
+	.byte	1                               ; Call site Encoding = uleb128
+	.uleb128 Lcst_end0-Lcst_begin0
+Lcst_begin0:
+	.uleb128 Ltmp0-Lfunc_begin0             ; >> Call Site 1 <<
+	.uleb128 Ltmp1-Ltmp0                    ;   Call between Ltmp0 and Ltmp1
+	.uleb128 Ltmp171-Lfunc_begin0           ;     jumps to Ltmp171
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp1-Lfunc_begin0             ; >> Call Site 2 <<
+	.uleb128 Ltmp2-Ltmp1                    ;   Call between Ltmp1 and Ltmp2
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp2-Lfunc_begin0             ; >> Call Site 3 <<
+	.uleb128 Ltmp3-Ltmp2                    ;   Call between Ltmp2 and Ltmp3
+	.uleb128 Ltmp4-Lfunc_begin0             ;     jumps to Ltmp4
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp5-Lfunc_begin0             ; >> Call Site 4 <<
+	.uleb128 Ltmp6-Ltmp5                    ;   Call between Ltmp5 and Ltmp6
+	.uleb128 Ltmp22-Lfunc_begin0            ;     jumps to Ltmp22
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp6-Lfunc_begin0             ; >> Call Site 5 <<
+	.uleb128 Ltmp7-Ltmp6                    ;   Call between Ltmp6 and Ltmp7
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp7-Lfunc_begin0             ; >> Call Site 6 <<
+	.uleb128 Ltmp8-Ltmp7                    ;   Call between Ltmp7 and Ltmp8
+	.uleb128 Ltmp9-Lfunc_begin0             ;     jumps to Ltmp9
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp23-Lfunc_begin0            ; >> Call Site 7 <<
+	.uleb128 Ltmp24-Ltmp23                  ;   Call between Ltmp23 and Ltmp24
+	.uleb128 Ltmp25-Lfunc_begin0            ;     jumps to Ltmp25
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp26-Lfunc_begin0            ; >> Call Site 8 <<
+	.uleb128 Ltmp27-Ltmp26                  ;   Call between Ltmp26 and Ltmp27
+	.uleb128 Ltmp28-Lfunc_begin0            ;     jumps to Ltmp28
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp29-Lfunc_begin0            ; >> Call Site 9 <<
+	.uleb128 Ltmp30-Ltmp29                  ;   Call between Ltmp29 and Ltmp30
+	.uleb128 Ltmp38-Lfunc_begin0            ;     jumps to Ltmp38
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp31-Lfunc_begin0            ; >> Call Site 10 <<
+	.uleb128 Ltmp34-Ltmp31                  ;   Call between Ltmp31 and Ltmp34
+	.uleb128 Ltmp35-Lfunc_begin0            ;     jumps to Ltmp35
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp36-Lfunc_begin0            ; >> Call Site 11 <<
+	.uleb128 Ltmp37-Ltmp36                  ;   Call between Ltmp36 and Ltmp37
+	.uleb128 Ltmp38-Lfunc_begin0            ;     jumps to Ltmp38
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp153-Lfunc_begin0           ; >> Call Site 12 <<
+	.uleb128 Ltmp154-Ltmp153                ;   Call between Ltmp153 and Ltmp154
+	.uleb128 Ltmp155-Lfunc_begin0           ;     jumps to Ltmp155
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp154-Lfunc_begin0           ; >> Call Site 13 <<
+	.uleb128 Ltmp161-Ltmp154                ;   Call between Ltmp154 and Ltmp161
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp161-Lfunc_begin0           ; >> Call Site 14 <<
+	.uleb128 Ltmp162-Ltmp161                ;   Call between Ltmp161 and Ltmp162
+	.uleb128 Ltmp163-Lfunc_begin0           ;     jumps to Ltmp163
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp162-Lfunc_begin0           ; >> Call Site 15 <<
+	.uleb128 Ltmp39-Ltmp162                 ;   Call between Ltmp162 and Ltmp39
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp39-Lfunc_begin0            ; >> Call Site 16 <<
+	.uleb128 Ltmp40-Ltmp39                  ;   Call between Ltmp39 and Ltmp40
+	.uleb128 Ltmp41-Lfunc_begin0            ;     jumps to Ltmp41
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp42-Lfunc_begin0            ; >> Call Site 17 <<
+	.uleb128 Ltmp43-Ltmp42                  ;   Call between Ltmp42 and Ltmp43
+	.uleb128 Ltmp51-Lfunc_begin0            ;     jumps to Ltmp51
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp44-Lfunc_begin0            ; >> Call Site 18 <<
+	.uleb128 Ltmp47-Ltmp44                  ;   Call between Ltmp44 and Ltmp47
+	.uleb128 Ltmp48-Lfunc_begin0            ;     jumps to Ltmp48
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp49-Lfunc_begin0            ; >> Call Site 19 <<
+	.uleb128 Ltmp50-Ltmp49                  ;   Call between Ltmp49 and Ltmp50
+	.uleb128 Ltmp51-Lfunc_begin0            ;     jumps to Ltmp51
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp10-Lfunc_begin0            ; >> Call Site 20 <<
+	.uleb128 Ltmp11-Ltmp10                  ;   Call between Ltmp10 and Ltmp11
+	.uleb128 Ltmp19-Lfunc_begin0            ;     jumps to Ltmp19
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp11-Lfunc_begin0            ; >> Call Site 21 <<
+	.uleb128 Ltmp12-Ltmp11                  ;   Call between Ltmp11 and Ltmp12
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp12-Lfunc_begin0            ; >> Call Site 22 <<
+	.uleb128 Ltmp15-Ltmp12                  ;   Call between Ltmp12 and Ltmp15
+	.uleb128 Ltmp16-Lfunc_begin0            ;     jumps to Ltmp16
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp52-Lfunc_begin0            ; >> Call Site 23 <<
+	.uleb128 Ltmp53-Ltmp52                  ;   Call between Ltmp52 and Ltmp53
+	.uleb128 Ltmp58-Lfunc_begin0            ;     jumps to Ltmp58
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp53-Lfunc_begin0            ; >> Call Site 24 <<
+	.uleb128 Ltmp59-Ltmp53                  ;   Call between Ltmp53 and Ltmp59
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp59-Lfunc_begin0            ; >> Call Site 25 <<
+	.uleb128 Ltmp62-Ltmp59                  ;   Call between Ltmp59 and Ltmp62
+	.uleb128 Ltmp117-Lfunc_begin0           ;     jumps to Ltmp117
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp63-Lfunc_begin0            ; >> Call Site 26 <<
+	.uleb128 Ltmp64-Ltmp63                  ;   Call between Ltmp63 and Ltmp64
+	.uleb128 Ltmp65-Lfunc_begin0            ;     jumps to Ltmp65
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp66-Lfunc_begin0            ; >> Call Site 27 <<
+	.uleb128 Ltmp67-Ltmp66                  ;   Call between Ltmp66 and Ltmp67
+	.uleb128 Ltmp70-Lfunc_begin0            ;     jumps to Ltmp70
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp67-Lfunc_begin0            ; >> Call Site 28 <<
+	.uleb128 Ltmp71-Ltmp67                  ;   Call between Ltmp67 and Ltmp71
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp71-Lfunc_begin0            ; >> Call Site 29 <<
+	.uleb128 Ltmp116-Ltmp71                 ;   Call between Ltmp71 and Ltmp116
+	.uleb128 Ltmp117-Lfunc_begin0           ;     jumps to Ltmp117
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp118-Lfunc_begin0           ; >> Call Site 30 <<
+	.uleb128 Ltmp151-Ltmp118                ;   Call between Ltmp118 and Ltmp151
+	.uleb128 Ltmp152-Lfunc_begin0           ;     jumps to Ltmp152
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp158-Lfunc_begin0           ; >> Call Site 31 <<
+	.uleb128 Ltmp157-Ltmp158                ;   Call between Ltmp158 and Ltmp157
+	.uleb128 Ltmp160-Lfunc_begin0           ;     jumps to Ltmp160
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp166-Lfunc_begin0           ; >> Call Site 32 <<
+	.uleb128 Ltmp165-Ltmp166                ;   Call between Ltmp166 and Ltmp165
+	.uleb128 Ltmp168-Lfunc_begin0           ;     jumps to Ltmp168
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp165-Lfunc_begin0           ; >> Call Site 33 <<
+	.uleb128 Ltmp169-Ltmp165                ;   Call between Ltmp165 and Ltmp169
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp169-Lfunc_begin0           ; >> Call Site 34 <<
+	.uleb128 Ltmp170-Ltmp169                ;   Call between Ltmp169 and Ltmp170
+	.uleb128 Ltmp171-Lfunc_begin0           ;     jumps to Ltmp171
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp68-Lfunc_begin0            ; >> Call Site 35 <<
+	.uleb128 Ltmp69-Ltmp68                  ;   Call between Ltmp68 and Ltmp69
+	.uleb128 Ltmp70-Lfunc_begin0            ;     jumps to Ltmp70
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp20-Lfunc_begin0            ; >> Call Site 36 <<
+	.uleb128 Ltmp21-Ltmp20                  ;   Call between Ltmp20 and Ltmp21
+	.uleb128 Ltmp22-Lfunc_begin0            ;     jumps to Ltmp22
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp17-Lfunc_begin0            ; >> Call Site 37 <<
+	.uleb128 Ltmp18-Ltmp17                  ;   Call between Ltmp17 and Ltmp18
+	.uleb128 Ltmp19-Lfunc_begin0            ;     jumps to Ltmp19
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp56-Lfunc_begin0            ; >> Call Site 38 <<
+	.uleb128 Ltmp55-Ltmp56                  ;   Call between Ltmp56 and Ltmp55
+	.uleb128 Ltmp58-Lfunc_begin0            ;     jumps to Ltmp58
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp55-Lfunc_begin0            ; >> Call Site 39 <<
+	.uleb128 Lfunc_end0-Ltmp55              ;   Call between Ltmp55 and Lfunc_end0
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+Lcst_end0:
+	.p2align	2, 0x0
+                                        ; -- End function
+	.section	__TEXT,__text,regular,pure_instructions
+	.private_extern	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj ; -- Begin function _ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj
+	.globl	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj
+	.weak_def_can_be_hidden	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj
+	.p2align	2
+__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj: ; @_ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEC1EPKcj
+Lfunc_begin1:
+	.cfi_startproc
+	.cfi_personality 155, ___gxx_personality_v0
+	.cfi_lsda 16, Lexception1
+; %bb.0:
+	stp	x26, x25, [sp, #-80]!           ; 16-byte Folded Spill
+	stp	x24, x23, [sp, #16]             ; 16-byte Folded Spill
+	stp	x22, x21, [sp, #32]             ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #48]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #64]             ; 16-byte Folded Spill
+	add	x29, sp, #64
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	.cfi_offset w21, -40
+	.cfi_offset w22, -48
+	.cfi_offset w23, -56
+	.cfi_offset w24, -64
+	.cfi_offset w25, -72
+	.cfi_offset w26, -80
+	mov	x21, x2
+	mov	x20, x1
+	mov	x19, x0
+	str	xzr, [x0, #472]
+Lloh110:
+	adrp	x25, __ZTVNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGE
+Lloh111:
+	ldr	x25, [x25, __ZTVNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGEOFF]
+	add	x24, x25, #64
+	str	x24, [x0, #424]
+Lloh112:
+	adrp	x23, __ZTTNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGE
+Lloh113:
+	ldr	x23, [x23, __ZTTNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGEOFF]
+	ldp	x8, x9, [x23, #8]
+	str	x8, [x0]
+	ldur	x8, [x8, #-24]
+	str	x9, [x0, x8]
+	str	xzr, [x0, #8]
+	ldr	x8, [x0]
+	ldur	x8, [x8, #-24]
+	add	x22, x0, x8
+Ltmp172:
+	add	x1, x0, #16
+	mov	x0, x22
+	bl	__ZNSt3__18ios_base4initEPv
+Ltmp173:
+; %bb.1:
+	str	xzr, [x22, #136]
+	mov	w8, #-1                         ; =0xffffffff
+	str	w8, [x22, #144]
+	add	x8, x25, #24
+	str	x8, [x19]
+	str	x24, [x19, #424]
+Ltmp175:
+	add	x0, x19, #16
+	bl	__ZNSt3__113basic_filebufIcNS_11char_traitsIcEEEC1Ev
+Ltmp176:
+; %bb.2:
+Ltmp178:
+	add	x0, x19, #16
+	orr	w2, w21, #0x8
+	mov	x1, x20
+	bl	__ZNSt3__113basic_filebufIcNS_11char_traitsIcEEE4openEPKcj
+Ltmp179:
+; %bb.3:
+	cbnz	x0, LBB1_5
+; %bb.4:
+	ldr	x8, [x19]
+	ldur	x8, [x8, #-24]
+	add	x0, x19, x8
+	ldr	w8, [x0, #32]
+Ltmp180:
+	orr	w1, w8, #0x4
+	bl	__ZNSt3__18ios_base5clearEj
+Ltmp181:
+LBB1_5:
+	mov	x0, x19
+	ldp	x29, x30, [sp, #64]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #48]             ; 16-byte Folded Reload
+	ldp	x22, x21, [sp, #32]             ; 16-byte Folded Reload
+	ldp	x24, x23, [sp, #16]             ; 16-byte Folded Reload
+	ldp	x26, x25, [sp], #80             ; 16-byte Folded Reload
+	ret
+LBB1_6:
+Ltmp177:
+	mov	x20, x0
+	b	LBB1_9
+LBB1_7:
+Ltmp174:
+	mov	x20, x0
+	add	x0, x19, #424
+	bl	__ZNSt3__19basic_iosIcNS_11char_traitsIcEEED2Ev
+	mov	x0, x20
+	bl	__Unwind_Resume
+LBB1_8:
+Ltmp182:
+	mov	x20, x0
+	add	x0, x19, #16
+	bl	__ZNSt3__113basic_filebufIcNS_11char_traitsIcEEED1Ev
+LBB1_9:
+	add	x1, x23, #8
+	mov	x0, x19
+	bl	__ZNSt3__113basic_istreamIcNS_11char_traitsIcEEED2Ev
+	add	x0, x19, #424
+	bl	__ZNSt3__19basic_iosIcNS_11char_traitsIcEEED2Ev
+	mov	x0, x20
+	bl	__Unwind_Resume
+	.loh AdrpLdrGot	Lloh112, Lloh113
+	.loh AdrpLdrGot	Lloh110, Lloh111
+Lfunc_end1:
+	.cfi_endproc
+	.section	__TEXT,__gcc_except_tab
+	.p2align	2, 0x0
+GCC_except_table1:
+Lexception1:
+	.byte	255                             ; @LPStart Encoding = omit
+	.byte	255                             ; @TType Encoding = omit
+	.byte	1                               ; Call site Encoding = uleb128
+	.uleb128 Lcst_end1-Lcst_begin1
+Lcst_begin1:
+	.uleb128 Ltmp172-Lfunc_begin1           ; >> Call Site 1 <<
+	.uleb128 Ltmp173-Ltmp172                ;   Call between Ltmp172 and Ltmp173
+	.uleb128 Ltmp174-Lfunc_begin1           ;     jumps to Ltmp174
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp175-Lfunc_begin1           ; >> Call Site 2 <<
+	.uleb128 Ltmp176-Ltmp175                ;   Call between Ltmp175 and Ltmp176
+	.uleb128 Ltmp177-Lfunc_begin1           ;     jumps to Ltmp177
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp178-Lfunc_begin1           ; >> Call Site 3 <<
+	.uleb128 Ltmp181-Ltmp178                ;   Call between Ltmp178 and Ltmp181
+	.uleb128 Ltmp182-Lfunc_begin1           ;     jumps to Ltmp182
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp181-Lfunc_begin1           ; >> Call Site 4 <<
+	.uleb128 Lfunc_end1-Ltmp181             ;   Call between Ltmp181 and Lfunc_end1
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+Lcst_end1:
+	.p2align	2, 0x0
+                                        ; -- End function
+	.section	__TEXT,__text,regular,pure_instructions
+	.globl	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEED1Ev ; -- Begin function _ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEED1Ev
+	.weak_def_can_be_hidden	__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEED1Ev
+	.p2align	2
+__ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEED1Ev: ; @_ZNSt3__114basic_ifstreamIcNS_11char_traitsIcEEED1Ev
+	.cfi_startproc
+; %bb.0:
+	stp	x20, x19, [sp, #-32]!           ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	mov	x19, x0
+Lloh114:
+	adrp	x20, __ZTTNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGE
+Lloh115:
+	ldr	x20, [x20, __ZTTNSt3__114basic_ifstreamIcNS_11char_traitsIcEEEE@GOTPAGEOFF]
+	ldr	x8, [x20]
+	str	x8, [x0]
+	ldr	x9, [x20, #24]
+	ldur	x8, [x8, #-24]
+	str	x9, [x0, x8]
+	add	x0, x0, #16
+	bl	__ZNSt3__113basic_filebufIcNS_11char_traitsIcEEED1Ev
+	add	x1, x20, #8
+	mov	x0, x19
+	bl	__ZNSt3__113basic_istreamIcNS_11char_traitsIcEEED2Ev
+	add	x0, x19, #424
+	bl	__ZNSt3__19basic_iosIcNS_11char_traitsIcEEED2Ev
+	mov	x0, x19
+	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp], #32             ; 16-byte Folded Reload
+	ret
+	.loh AdrpLdrGot	Lloh114, Lloh115
+	.cfi_endproc
+                                        ; -- End function
+	.private_extern	___clang_call_terminate ; -- Begin function __clang_call_terminate
+	.globl	___clang_call_terminate
+	.weak_def_can_be_hidden	___clang_call_terminate
+	.p2align	2
+___clang_call_terminate:                ; @__clang_call_terminate
+	.cfi_startproc
+; %bb.0:
+	stp	x29, x30, [sp, #-16]!           ; 16-byte Folded Spill
+	mov	x29, sp
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	bl	___cxa_begin_catch
+	bl	__ZSt9terminatev
+	.cfi_endproc
+                                        ; -- End function
+	.private_extern	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev ; -- Begin function _ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+	.globl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+	.weak_def_can_be_hidden	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+	.p2align	2
+__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev: ; @_ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+	.cfi_startproc
+; %bb.0:
+	stp	x29, x30, [sp, #-16]!           ; 16-byte Folded Spill
+	mov	x29, sp
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+Lloh116:
+	adrp	x0, l_.str.27@PAGE
+Lloh117:
+	add	x0, x0, l_.str.27@PAGEOFF
+	bl	__ZNSt3__120__throw_length_errorB8ne200100EPKc
+	.loh AdrpAdd	Lloh116, Lloh117
+	.cfi_endproc
+                                        ; -- End function
+	.private_extern	__ZNSt3__120__throw_length_errorB8ne200100EPKc ; -- Begin function _ZNSt3__120__throw_length_errorB8ne200100EPKc
+	.globl	__ZNSt3__120__throw_length_errorB8ne200100EPKc
+	.weak_def_can_be_hidden	__ZNSt3__120__throw_length_errorB8ne200100EPKc
+	.p2align	2
+__ZNSt3__120__throw_length_errorB8ne200100EPKc: ; @_ZNSt3__120__throw_length_errorB8ne200100EPKc
+Lfunc_begin2:
+	.cfi_startproc
+	.cfi_personality 155, ___gxx_personality_v0
+	.cfi_lsda 16, Lexception2
+; %bb.0:
+	stp	x20, x19, [sp, #-32]!           ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	mov	x20, x0
+	mov	w0, #16                         ; =0x10
+	bl	___cxa_allocate_exception
+	mov	x19, x0
+Ltmp183:
+	mov	x1, x20
+	bl	__ZNSt12length_errorC1B8ne200100EPKc
+Ltmp184:
+; %bb.1:
+Lloh118:
+	adrp	x1, __ZTISt12length_error@GOTPAGE
+Lloh119:
+	ldr	x1, [x1, __ZTISt12length_error@GOTPAGEOFF]
+Lloh120:
+	adrp	x2, __ZNSt12length_errorD1Ev@GOTPAGE
+Lloh121:
+	ldr	x2, [x2, __ZNSt12length_errorD1Ev@GOTPAGEOFF]
+	mov	x0, x19
+	bl	___cxa_throw
+LBB5_2:
+Ltmp185:
+	mov	x20, x0
+	mov	x0, x19
+	bl	___cxa_free_exception
+	mov	x0, x20
+	bl	__Unwind_Resume
+	.loh AdrpLdrGot	Lloh120, Lloh121
+	.loh AdrpLdrGot	Lloh118, Lloh119
+Lfunc_end2:
+	.cfi_endproc
+	.section	__TEXT,__gcc_except_tab
+	.p2align	2, 0x0
+GCC_except_table5:
+Lexception2:
+	.byte	255                             ; @LPStart Encoding = omit
+	.byte	255                             ; @TType Encoding = omit
+	.byte	1                               ; Call site Encoding = uleb128
+	.uleb128 Lcst_end2-Lcst_begin2
+Lcst_begin2:
+	.uleb128 Lfunc_begin2-Lfunc_begin2      ; >> Call Site 1 <<
+	.uleb128 Ltmp183-Lfunc_begin2           ;   Call between Lfunc_begin2 and Ltmp183
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp183-Lfunc_begin2           ; >> Call Site 2 <<
+	.uleb128 Ltmp184-Ltmp183                ;   Call between Ltmp183 and Ltmp184
+	.uleb128 Ltmp185-Lfunc_begin2           ;     jumps to Ltmp185
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp184-Lfunc_begin2           ; >> Call Site 3 <<
+	.uleb128 Lfunc_end2-Ltmp184             ;   Call between Ltmp184 and Lfunc_end2
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+Lcst_end2:
+	.p2align	2, 0x0
+                                        ; -- End function
+	.section	__TEXT,__text,regular,pure_instructions
+	.private_extern	__ZNSt12length_errorC1B8ne200100EPKc ; -- Begin function _ZNSt12length_errorC1B8ne200100EPKc
+	.globl	__ZNSt12length_errorC1B8ne200100EPKc
+	.weak_def_can_be_hidden	__ZNSt12length_errorC1B8ne200100EPKc
+	.p2align	2
+__ZNSt12length_errorC1B8ne200100EPKc:   ; @_ZNSt12length_errorC1B8ne200100EPKc
+	.cfi_startproc
+; %bb.0:
+	stp	x29, x30, [sp, #-16]!           ; 16-byte Folded Spill
+	mov	x29, sp
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	bl	__ZNSt11logic_errorC2EPKc
+Lloh122:
+	adrp	x8, __ZTVSt12length_error@GOTPAGE
+Lloh123:
+	ldr	x8, [x8, __ZTVSt12length_error@GOTPAGEOFF]
+	add	x8, x8, #16
+	str	x8, [x0]
+	ldp	x29, x30, [sp], #16             ; 16-byte Folded Reload
+	ret
+	.loh AdrpLdrGot	Lloh122, Lloh123
+	.cfi_endproc
+                                        ; -- End function
+	.private_extern	__ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_ ; -- Begin function _ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_
+	.globl	__ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_
+	.weak_def_can_be_hidden	__ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_
+	.p2align	2
+__ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_: ; @_ZNSt3__17getlineB8ne200100IcNS_11char_traitsIcEENS_9allocatorIcEEEERNS_13basic_istreamIT_T0_EES9_RNS_12basic_stringIS6_S7_T1_EES6_
+Lfunc_begin3:
+	.cfi_startproc
+	.cfi_personality 155, ___gxx_personality_v0
+	.cfi_lsda 16, Lexception3
+; %bb.0:
+	sub	sp, sp, #80
+	stp	x24, x23, [sp, #16]             ; 16-byte Folded Spill
+	stp	x22, x21, [sp, #32]             ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #48]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #64]             ; 16-byte Folded Spill
+	add	x29, sp, #64
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	.cfi_offset w21, -40
+	.cfi_offset w22, -48
+	.cfi_offset w23, -56
+	.cfi_offset w24, -64
+	mov	x20, x2
+	mov	x21, x1
+	mov	x19, x0
+	add	x0, sp, #15
+	mov	x1, x19
+	mov	w2, #1                          ; =0x1
+	bl	__ZNSt3__113basic_istreamIcNS_11char_traitsIcEEE6sentryC1ERS3_b
+	ldrb	w8, [sp, #15]
+	cmp	w8, #1
+	b.ne	LBB7_17
+; %bb.1:
+	ldrsb	w8, [x21, #23]
+	tbnz	w8, #31, LBB7_3
+; %bb.2:
+	strb	wzr, [x21]
+	strb	wzr, [x21, #23]
+	b	LBB7_4
+LBB7_3:
+	ldr	x8, [x21]
+	strb	wzr, [x8]
+	str	xzr, [x21, #8]
+LBB7_4:
+	mov	x22, #0                         ; =0x0
+	add	x23, x19, #40
+	mov	x24, #-9                        ; =0xfffffffffffffff7
+	movk	x24, #32767, lsl #48
+LBB7_5:                                 ; =>This Inner Loop Header: Depth=1
+	ldr	x8, [x19]
+	ldur	x8, [x8, #-24]
+	ldr	x0, [x23, x8]
+	ldp	x8, x9, [x0, #24]
+	cmp	x8, x9
+	b.eq	LBB7_7
+; %bb.6:                                ;   in Loop: Header=BB7_5 Depth=1
+	add	x9, x8, #1
+	str	x9, [x0, #24]
+	ldrb	w0, [x8]
+	b	LBB7_9
+LBB7_7:                                 ;   in Loop: Header=BB7_5 Depth=1
+	ldr	x8, [x0]
+	ldr	x8, [x8, #80]
+Ltmp186:
+	blr	x8
+Ltmp187:
+; %bb.8:                                ;   in Loop: Header=BB7_5 Depth=1
+	cmn	w0, #1
+	b.eq	LBB7_15
+LBB7_9:                                 ;   in Loop: Header=BB7_5 Depth=1
+	and	w8, w0, #0xff
+	cmp	w8, w20, uxtb
+	b.eq	LBB7_14
+; %bb.10:                               ;   in Loop: Header=BB7_5 Depth=1
+Ltmp189:
+	sxtb	w1, w0
+	mov	x0, x21
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE9push_backEc
+Ltmp190:
+; %bb.11:                               ;   in Loop: Header=BB7_5 Depth=1
+	ldrsb	w8, [x21, #23]
+	sub	x22, x22, #1
+	tbz	w8, #31, LBB7_5
+; %bb.12:                               ;   in Loop: Header=BB7_5 Depth=1
+	ldr	x8, [x21, #8]
+	cmp	x8, x24
+	b.ne	LBB7_5
+; %bb.13:
+	mov	w8, #4                          ; =0x4
+	b	LBB7_16
+LBB7_14:
+	mov	w8, #0                          ; =0x0
+	b	LBB7_16
+LBB7_15:
+	cmp	x22, #0
+	mov	w8, #2                          ; =0x2
+	mov	w9, #6                          ; =0x6
+	csel	w8, w9, w8, eq
+LBB7_16:
+	ldr	x9, [x19]
+	ldur	x9, [x9, #-24]
+	add	x0, x19, x9
+	ldr	w9, [x0, #32]
+	orr	w1, w9, w8
+	bl	__ZNSt3__18ios_base5clearEj
+LBB7_17:
+	mov	x0, x19
+	ldp	x29, x30, [sp, #64]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #48]             ; 16-byte Folded Reload
+	ldp	x22, x21, [sp, #32]             ; 16-byte Folded Reload
+	ldp	x24, x23, [sp, #16]             ; 16-byte Folded Reload
+	add	sp, sp, #80
+	ret
+LBB7_18:
+Ltmp188:
+	b	LBB7_20
+LBB7_19:
+Ltmp191:
+LBB7_20:
+	bl	___cxa_begin_catch
+	ldr	x8, [x19]
+	ldur	x9, [x8, #-24]
+	add	x9, x19, x9
+	ldr	w10, [x9, #32]
+	orr	w10, w10, #0x1
+	str	w10, [x9, #32]
+	ldur	x8, [x8, #-24]
+	add	x8, x19, x8
+	ldrb	w8, [x8, #36]
+	tbnz	w8, #0, LBB7_22
+; %bb.21:
+	bl	___cxa_end_catch
+	mov	w8, #1                          ; =0x1
+	b	LBB7_16
+LBB7_22:
+Ltmp192:
+	bl	___cxa_rethrow
+Ltmp193:
+; %bb.23:
+	brk	#0x1
+LBB7_24:
+Ltmp194:
+	mov	x19, x0
+Ltmp195:
+	bl	___cxa_end_catch
+Ltmp196:
+; %bb.25:
+	mov	x0, x19
+	bl	__Unwind_Resume
+LBB7_26:
+Ltmp197:
+	bl	___clang_call_terminate
+Lfunc_end3:
+	.cfi_endproc
+	.section	__TEXT,__gcc_except_tab
+	.p2align	2, 0x0
+GCC_except_table7:
+Lexception3:
+	.byte	255                             ; @LPStart Encoding = omit
+	.byte	155                             ; @TType Encoding = indirect pcrel sdata4
+	.uleb128 Lttbase0-Lttbaseref0
+Lttbaseref0:
+	.byte	1                               ; Call site Encoding = uleb128
+	.uleb128 Lcst_end3-Lcst_begin3
+Lcst_begin3:
+	.uleb128 Lfunc_begin3-Lfunc_begin3      ; >> Call Site 1 <<
+	.uleb128 Ltmp186-Lfunc_begin3           ;   Call between Lfunc_begin3 and Ltmp186
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp186-Lfunc_begin3           ; >> Call Site 2 <<
+	.uleb128 Ltmp187-Ltmp186                ;   Call between Ltmp186 and Ltmp187
+	.uleb128 Ltmp188-Lfunc_begin3           ;     jumps to Ltmp188
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp189-Lfunc_begin3           ; >> Call Site 3 <<
+	.uleb128 Ltmp190-Ltmp189                ;   Call between Ltmp189 and Ltmp190
+	.uleb128 Ltmp191-Lfunc_begin3           ;     jumps to Ltmp191
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp190-Lfunc_begin3           ; >> Call Site 4 <<
+	.uleb128 Ltmp192-Ltmp190                ;   Call between Ltmp190 and Ltmp192
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp192-Lfunc_begin3           ; >> Call Site 5 <<
+	.uleb128 Ltmp193-Ltmp192                ;   Call between Ltmp192 and Ltmp193
+	.uleb128 Ltmp194-Lfunc_begin3           ;     jumps to Ltmp194
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp195-Lfunc_begin3           ; >> Call Site 6 <<
+	.uleb128 Ltmp196-Ltmp195                ;   Call between Ltmp195 and Ltmp196
+	.uleb128 Ltmp197-Lfunc_begin3           ;     jumps to Ltmp197
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp196-Lfunc_begin3           ; >> Call Site 7 <<
+	.uleb128 Lfunc_end3-Ltmp196             ;   Call between Ltmp196 and Lfunc_end3
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+Lcst_end3:
+	.byte	1                               ; >> Action Record 1 <<
+                                        ;   Catch TypeInfo 1
+	.byte	0                               ;   No further actions
+	.p2align	2, 0x0
+                                        ; >> Catch TypeInfos <<
+	.long	0                               ; TypeInfo 1
+Lttbase0:
+	.p2align	2, 0x0
+                                        ; -- End function
+	.section	__TEXT,__text,regular,pure_instructions
+	.private_extern	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev ; -- Begin function _ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev
+	.globl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev
+	.weak_def_can_be_hidden	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev
+	.p2align	2
+__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev: ; @_ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_out_of_rangeB8ne200100Ev
+	.cfi_startproc
+; %bb.0:
+	stp	x29, x30, [sp, #-16]!           ; 16-byte Folded Spill
+	mov	x29, sp
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+Lloh124:
+	adrp	x0, l_.str.27@PAGE
+Lloh125:
+	add	x0, x0, l_.str.27@PAGEOFF
+	bl	__ZNSt3__120__throw_out_of_rangeB8ne200100EPKc
+	.loh AdrpAdd	Lloh124, Lloh125
+	.cfi_endproc
+                                        ; -- End function
+	.private_extern	__ZNSt3__120__throw_out_of_rangeB8ne200100EPKc ; -- Begin function _ZNSt3__120__throw_out_of_rangeB8ne200100EPKc
+	.globl	__ZNSt3__120__throw_out_of_rangeB8ne200100EPKc
+	.weak_def_can_be_hidden	__ZNSt3__120__throw_out_of_rangeB8ne200100EPKc
+	.p2align	2
+__ZNSt3__120__throw_out_of_rangeB8ne200100EPKc: ; @_ZNSt3__120__throw_out_of_rangeB8ne200100EPKc
+Lfunc_begin4:
+	.cfi_startproc
+	.cfi_personality 155, ___gxx_personality_v0
+	.cfi_lsda 16, Lexception4
+; %bb.0:
+	stp	x20, x19, [sp, #-32]!           ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	mov	x20, x0
+	mov	w0, #16                         ; =0x10
+	bl	___cxa_allocate_exception
+	mov	x19, x0
+Ltmp198:
+	mov	x1, x20
+	bl	__ZNSt12out_of_rangeC1B8ne200100EPKc
+Ltmp199:
+; %bb.1:
+Lloh126:
+	adrp	x1, __ZTISt12out_of_range@GOTPAGE
+Lloh127:
+	ldr	x1, [x1, __ZTISt12out_of_range@GOTPAGEOFF]
+Lloh128:
+	adrp	x2, __ZNSt12out_of_rangeD1Ev@GOTPAGE
+Lloh129:
+	ldr	x2, [x2, __ZNSt12out_of_rangeD1Ev@GOTPAGEOFF]
+	mov	x0, x19
+	bl	___cxa_throw
+LBB9_2:
+Ltmp200:
+	mov	x20, x0
+	mov	x0, x19
+	bl	___cxa_free_exception
+	mov	x0, x20
+	bl	__Unwind_Resume
+	.loh AdrpLdrGot	Lloh128, Lloh129
+	.loh AdrpLdrGot	Lloh126, Lloh127
+Lfunc_end4:
+	.cfi_endproc
+	.section	__TEXT,__gcc_except_tab
+	.p2align	2, 0x0
+GCC_except_table9:
+Lexception4:
+	.byte	255                             ; @LPStart Encoding = omit
+	.byte	255                             ; @TType Encoding = omit
+	.byte	1                               ; Call site Encoding = uleb128
+	.uleb128 Lcst_end4-Lcst_begin4
+Lcst_begin4:
+	.uleb128 Lfunc_begin4-Lfunc_begin4      ; >> Call Site 1 <<
+	.uleb128 Ltmp198-Lfunc_begin4           ;   Call between Lfunc_begin4 and Ltmp198
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp198-Lfunc_begin4           ; >> Call Site 2 <<
+	.uleb128 Ltmp199-Ltmp198                ;   Call between Ltmp198 and Ltmp199
+	.uleb128 Ltmp200-Lfunc_begin4           ;     jumps to Ltmp200
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp199-Lfunc_begin4           ; >> Call Site 3 <<
+	.uleb128 Lfunc_end4-Ltmp199             ;   Call between Ltmp199 and Lfunc_end4
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+Lcst_end4:
+	.p2align	2, 0x0
+                                        ; -- End function
+	.section	__TEXT,__text,regular,pure_instructions
+	.private_extern	__ZNSt12out_of_rangeC1B8ne200100EPKc ; -- Begin function _ZNSt12out_of_rangeC1B8ne200100EPKc
+	.globl	__ZNSt12out_of_rangeC1B8ne200100EPKc
+	.weak_def_can_be_hidden	__ZNSt12out_of_rangeC1B8ne200100EPKc
+	.p2align	2
+__ZNSt12out_of_rangeC1B8ne200100EPKc:   ; @_ZNSt12out_of_rangeC1B8ne200100EPKc
+	.cfi_startproc
+; %bb.0:
+	stp	x29, x30, [sp, #-16]!           ; 16-byte Folded Spill
+	mov	x29, sp
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	bl	__ZNSt11logic_errorC2EPKc
+Lloh130:
+	adrp	x8, __ZTVSt12out_of_range@GOTPAGE
+Lloh131:
+	ldr	x8, [x8, __ZTVSt12out_of_range@GOTPAGEOFF]
+	add	x8, x8, #16
+	str	x8, [x0]
+	ldp	x29, x30, [sp], #16             ; 16-byte Folded Reload
+	ret
+	.loh AdrpLdrGot	Lloh130, Lloh131
+	.cfi_endproc
+                                        ; -- End function
+	.private_extern	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m ; -- Begin function _ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+	.globl	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+	.weak_def_can_be_hidden	__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+	.p2align	2
+__ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m: ; @_ZNSt3__124__put_character_sequenceB8ne200100IcNS_11char_traitsIcEEEERNS_13basic_ostreamIT_T0_EES7_PKS4_m
+Lfunc_begin5:
+	.cfi_startproc
+	.cfi_personality 155, ___gxx_personality_v0
+	.cfi_lsda 16, Lexception5
+; %bb.0:
+	sub	sp, sp, #112
+	stp	x26, x25, [sp, #32]             ; 16-byte Folded Spill
+	stp	x24, x23, [sp, #48]             ; 16-byte Folded Spill
+	stp	x22, x21, [sp, #64]             ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #80]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #96]             ; 16-byte Folded Spill
+	add	x29, sp, #96
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	.cfi_offset w21, -40
+	.cfi_offset w22, -48
+	.cfi_offset w23, -56
+	.cfi_offset w24, -64
+	.cfi_offset w25, -72
+	.cfi_offset w26, -80
+	mov	x21, x2
+	mov	x20, x1
+	mov	x19, x0
+Ltmp201:
+	add	x0, sp, #8
+	mov	x1, x19
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEE6sentryC1ERS3_
+Ltmp202:
+; %bb.1:
+	ldrb	w8, [sp, #8]
+	cmp	w8, #1
+	b.ne	LBB11_10
+; %bb.2:
+	ldr	x8, [x19]
+	ldur	x8, [x8, #-24]
+	add	x4, x19, x8
+	ldr	x22, [x4, #40]
+	ldr	w24, [x4, #8]
+	ldr	w23, [x4, #144]
+	cmn	w23, #1
+	b.ne	LBB11_7
+; %bb.3:
+Ltmp204:
+	add	x8, sp, #24
+	mov	x25, x4
+	mov	x0, x4
+	bl	__ZNKSt3__18ios_base6getlocEv
+Ltmp205:
+; %bb.4:
+Ltmp206:
+Lloh132:
+	adrp	x1, __ZNSt3__15ctypeIcE2idE@GOTPAGE
+Lloh133:
+	ldr	x1, [x1, __ZNSt3__15ctypeIcE2idE@GOTPAGEOFF]
+	add	x0, sp, #24
+	bl	__ZNKSt3__16locale9use_facetERNS0_2idE
+Ltmp207:
+; %bb.5:
+	ldr	x8, [x0]
+	ldr	x8, [x8, #56]
+Ltmp208:
+	mov	w1, #32                         ; =0x20
+	blr	x8
+Ltmp209:
+; %bb.6:
+	mov	x23, x0
+	add	x0, sp, #24
+	bl	__ZNSt3__16localeD1Ev
+	mov	x4, x25
+	str	w23, [x25, #144]
+LBB11_7:
+	mov	w8, #176                        ; =0xb0
+	and	w8, w24, w8
+	add	x3, x20, x21
+	cmp	w8, #32
+	csel	x2, x3, x20, eq
+Ltmp211:
+	sxtb	w5, w23
+	mov	x0, x22
+	mov	x1, x20
+	bl	__ZNSt3__116__pad_and_outputB8ne200100IcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+Ltmp212:
+; %bb.8:
+	cbnz	x0, LBB11_10
+; %bb.9:
+	ldr	x8, [x19]
+	ldur	x8, [x8, #-24]
+	add	x0, x19, x8
+	ldr	w8, [x0, #32]
+	mov	w9, #5                          ; =0x5
+Ltmp214:
+	orr	w1, w8, w9
+	bl	__ZNSt3__18ios_base5clearEj
+Ltmp215:
+LBB11_10:
+	add	x0, sp, #8
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEE6sentryD1Ev
+LBB11_11:
+	mov	x0, x19
+	ldp	x29, x30, [sp, #96]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #80]             ; 16-byte Folded Reload
+	ldp	x22, x21, [sp, #64]             ; 16-byte Folded Reload
+	ldp	x24, x23, [sp, #48]             ; 16-byte Folded Reload
+	ldp	x26, x25, [sp, #32]             ; 16-byte Folded Reload
+	add	sp, sp, #112
+	ret
+LBB11_12:
+Ltmp216:
+	b	LBB11_15
+LBB11_13:
+Ltmp210:
+	mov	x20, x0
+	add	x0, sp, #24
+	bl	__ZNSt3__16localeD1Ev
+	b	LBB11_16
+LBB11_14:
+Ltmp213:
+LBB11_15:
+	mov	x20, x0
+LBB11_16:
+	add	x0, sp, #8
+	bl	__ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEE6sentryD1Ev
+	b	LBB11_18
+LBB11_17:
+Ltmp203:
+	mov	x20, x0
+LBB11_18:
+	mov	x0, x20
+	bl	___cxa_begin_catch
+	ldr	x8, [x19]
+	ldur	x8, [x8, #-24]
+Ltmp217:
+	add	x0, x19, x8
+	bl	__ZNSt3__18ios_base33__set_badbit_and_consider_rethrowEv
+Ltmp218:
+; %bb.19:
+	bl	___cxa_end_catch
+	b	LBB11_11
+LBB11_20:
+Ltmp219:
+	mov	x19, x0
+Ltmp220:
+	bl	___cxa_end_catch
+Ltmp221:
+; %bb.21:
+	mov	x0, x19
+	bl	__Unwind_Resume
+LBB11_22:
+Ltmp222:
+	bl	___clang_call_terminate
+	.loh AdrpLdrGot	Lloh132, Lloh133
+Lfunc_end5:
+	.cfi_endproc
+	.section	__TEXT,__gcc_except_tab
+	.p2align	2, 0x0
+GCC_except_table11:
+Lexception5:
+	.byte	255                             ; @LPStart Encoding = omit
+	.byte	155                             ; @TType Encoding = indirect pcrel sdata4
+	.uleb128 Lttbase1-Lttbaseref1
+Lttbaseref1:
+	.byte	1                               ; Call site Encoding = uleb128
+	.uleb128 Lcst_end5-Lcst_begin5
+Lcst_begin5:
+	.uleb128 Ltmp201-Lfunc_begin5           ; >> Call Site 1 <<
+	.uleb128 Ltmp202-Ltmp201                ;   Call between Ltmp201 and Ltmp202
+	.uleb128 Ltmp203-Lfunc_begin5           ;     jumps to Ltmp203
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp204-Lfunc_begin5           ; >> Call Site 2 <<
+	.uleb128 Ltmp205-Ltmp204                ;   Call between Ltmp204 and Ltmp205
+	.uleb128 Ltmp213-Lfunc_begin5           ;     jumps to Ltmp213
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp206-Lfunc_begin5           ; >> Call Site 3 <<
+	.uleb128 Ltmp209-Ltmp206                ;   Call between Ltmp206 and Ltmp209
+	.uleb128 Ltmp210-Lfunc_begin5           ;     jumps to Ltmp210
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp211-Lfunc_begin5           ; >> Call Site 4 <<
+	.uleb128 Ltmp212-Ltmp211                ;   Call between Ltmp211 and Ltmp212
+	.uleb128 Ltmp213-Lfunc_begin5           ;     jumps to Ltmp213
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp214-Lfunc_begin5           ; >> Call Site 5 <<
+	.uleb128 Ltmp215-Ltmp214                ;   Call between Ltmp214 and Ltmp215
+	.uleb128 Ltmp216-Lfunc_begin5           ;     jumps to Ltmp216
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp215-Lfunc_begin5           ; >> Call Site 6 <<
+	.uleb128 Ltmp217-Ltmp215                ;   Call between Ltmp215 and Ltmp217
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp217-Lfunc_begin5           ; >> Call Site 7 <<
+	.uleb128 Ltmp218-Ltmp217                ;   Call between Ltmp217 and Ltmp218
+	.uleb128 Ltmp219-Lfunc_begin5           ;     jumps to Ltmp219
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp218-Lfunc_begin5           ; >> Call Site 8 <<
+	.uleb128 Ltmp220-Ltmp218                ;   Call between Ltmp218 and Ltmp220
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp220-Lfunc_begin5           ; >> Call Site 9 <<
+	.uleb128 Ltmp221-Ltmp220                ;   Call between Ltmp220 and Ltmp221
+	.uleb128 Ltmp222-Lfunc_begin5           ;     jumps to Ltmp222
+	.byte	1                               ;   On action: 1
+	.uleb128 Ltmp221-Lfunc_begin5           ; >> Call Site 10 <<
+	.uleb128 Lfunc_end5-Ltmp221             ;   Call between Ltmp221 and Lfunc_end5
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+Lcst_end5:
+	.byte	1                               ; >> Action Record 1 <<
+                                        ;   Catch TypeInfo 1
+	.byte	0                               ;   No further actions
+	.p2align	2, 0x0
+                                        ; >> Catch TypeInfos <<
+	.long	0                               ; TypeInfo 1
+Lttbase1:
+	.p2align	2, 0x0
+                                        ; -- End function
+	.section	__TEXT,__text,regular,pure_instructions
+	.private_extern	__ZNSt3__116__pad_and_outputB8ne200100IcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_ ; -- Begin function _ZNSt3__116__pad_and_outputB8ne200100IcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+	.globl	__ZNSt3__116__pad_and_outputB8ne200100IcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+	.weak_def_can_be_hidden	__ZNSt3__116__pad_and_outputB8ne200100IcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+	.p2align	2
+__ZNSt3__116__pad_and_outputB8ne200100IcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_: ; @_ZNSt3__116__pad_and_outputB8ne200100IcNS_11char_traitsIcEEEENS_19ostreambuf_iteratorIT_T0_EES6_PKS4_S8_S8_RNS_8ios_baseES4_
+Lfunc_begin6:
+	.cfi_startproc
+	.cfi_personality 155, ___gxx_personality_v0
+	.cfi_lsda 16, Lexception6
+; %bb.0:
+	sub	sp, sp, #112
+	stp	x26, x25, [sp, #32]             ; 16-byte Folded Spill
+	stp	x24, x23, [sp, #48]             ; 16-byte Folded Spill
+	stp	x22, x21, [sp, #64]             ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #80]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #96]             ; 16-byte Folded Spill
+	add	x29, sp, #96
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	.cfi_offset w19, -24
+	.cfi_offset w20, -32
+	.cfi_offset w21, -40
+	.cfi_offset w22, -48
+	.cfi_offset w23, -56
+	.cfi_offset w24, -64
+	.cfi_offset w25, -72
+	.cfi_offset w26, -80
+	mov	x19, x0
+	cbz	x0, LBB12_16
+; %bb.1:
+	mov	x24, x5
+	mov	x20, x4
+	mov	x22, x3
+	mov	x21, x2
+	ldr	x8, [x4, #24]
+	sub	x9, x3, x1
+	subs	x8, x8, x9
+	csel	x23, x8, xzr, gt
+	sub	x25, x2, x1
+	cmp	x25, #1
+	b.lt	LBB12_3
+; %bb.2:
+	ldr	x8, [x19]
+	ldr	x8, [x8, #96]
+	mov	x0, x19
+	mov	x2, x25
+	blr	x8
+	cmp	x0, x25
+	b.ne	LBB12_15
+LBB12_3:
+	cmp	x23, #1
+	b.lt	LBB12_12
+; %bb.4:
+	mov	x8, #9223372036854775800        ; =0x7ffffffffffffff8
+	cmp	x23, x8
+	b.hs	LBB12_17
+; %bb.5:
+	cmp	x23, #23
+	b.hs	LBB12_7
+; %bb.6:
+	strb	w23, [sp, #31]
+	add	x25, sp, #8
+	b	LBB12_8
+LBB12_7:
+	orr	x8, x23, #0x7
+	cmp	x8, #23
+	mov	w9, #25                         ; =0x19
+	csinc	x26, x9, x8, eq
+	mov	x0, x26
+	bl	__Znwm
+	mov	x25, x0
+	orr	x8, x26, #0x8000000000000000
+	stp	x23, x8, [sp, #16]
+	str	x0, [sp, #8]
+LBB12_8:
+	mov	x0, x25
+	mov	x1, x24
+	mov	x2, x23
+	bl	_memset
+	strb	wzr, [x25, x23]
+	ldrsb	w8, [sp, #31]
+	ldr	x9, [sp, #8]
+	cmp	w8, #0
+	add	x8, sp, #8
+	csel	x1, x9, x8, lt
+	ldr	x8, [x19]
+	ldr	x8, [x8, #96]
+Ltmp223:
+	mov	x0, x19
+	mov	x2, x23
+	blr	x8
+Ltmp224:
+; %bb.9:
+	ldrsb	w8, [sp, #31]
+	tbnz	w8, #31, LBB12_11
+; %bb.10:
+	cmp	x0, x23
+	b.ne	LBB12_15
+	b	LBB12_12
+LBB12_11:
+	ldr	x8, [sp, #8]
+	mov	x24, x0
+	mov	x0, x8
+	bl	__ZdlPv
+	cmp	x24, x23
+	b.ne	LBB12_15
+LBB12_12:
+	sub	x22, x22, x21
+	cmp	x22, #1
+	b.lt	LBB12_14
+; %bb.13:
+	ldr	x8, [x19]
+	ldr	x8, [x8, #96]
+	mov	x0, x19
+	mov	x1, x21
+	mov	x2, x22
+	blr	x8
+	cmp	x0, x22
+	b.ne	LBB12_15
+LBB12_14:
+	str	xzr, [x20, #24]
+	b	LBB12_16
+LBB12_15:
+	mov	x19, #0                         ; =0x0
+LBB12_16:
+	mov	x0, x19
+	ldp	x29, x30, [sp, #96]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #80]             ; 16-byte Folded Reload
+	ldp	x22, x21, [sp, #64]             ; 16-byte Folded Reload
+	ldp	x24, x23, [sp, #48]             ; 16-byte Folded Reload
+	ldp	x26, x25, [sp, #32]             ; 16-byte Folded Reload
+	add	sp, sp, #112
+	ret
+LBB12_17:
+	bl	__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE20__throw_length_errorB8ne200100Ev
+LBB12_18:
+Ltmp225:
+	mov	x19, x0
+	ldrsb	w8, [sp, #31]
+	tbz	w8, #31, LBB12_20
+; %bb.19:
+	ldr	x0, [sp, #8]
+	bl	__ZdlPv
+LBB12_20:
+	mov	x0, x19
+	bl	__Unwind_Resume
+Lfunc_end6:
+	.cfi_endproc
+	.section	__TEXT,__gcc_except_tab
+	.p2align	2, 0x0
+GCC_except_table12:
+Lexception6:
+	.byte	255                             ; @LPStart Encoding = omit
+	.byte	255                             ; @TType Encoding = omit
+	.byte	1                               ; Call site Encoding = uleb128
+	.uleb128 Lcst_end6-Lcst_begin6
+Lcst_begin6:
+	.uleb128 Lfunc_begin6-Lfunc_begin6      ; >> Call Site 1 <<
+	.uleb128 Ltmp223-Lfunc_begin6           ;   Call between Lfunc_begin6 and Ltmp223
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp223-Lfunc_begin6           ; >> Call Site 2 <<
+	.uleb128 Ltmp224-Ltmp223                ;   Call between Ltmp223 and Ltmp224
+	.uleb128 Ltmp225-Lfunc_begin6           ;     jumps to Ltmp225
+	.byte	0                               ;   On action: cleanup
+	.uleb128 Ltmp224-Lfunc_begin6           ; >> Call Site 3 <<
+	.uleb128 Lfunc_end6-Ltmp224             ;   Call between Ltmp224 and Lfunc_end6
+	.byte	0                               ;     has no landing pad
+	.byte	0                               ;   On action: cleanup
+Lcst_end6:
+	.p2align	2, 0x0
+                                        ; -- End function
+	.section	__TEXT,__const
+	.p2align	3, 0x0                          ; @constinit
+l_constinit:
+	.quad	1000003                         ; 0xf4243
+	.quad	10000019                        ; 0x989693
+	.quad	100000007                       ; 0x5f5e107
+	.quad	1000000007                      ; 0x3b9aca07
+
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"/proc/cpuinfo"
+
+l_.str.1:                               ; @.str.1
+	.asciz	"model name"
+
+l_.str.3:                               ; @.str.3
+	.asciz	"cpu MHz"
+
+l_.str.4:                               ; @.str.4
+	.asciz	"/proc/meminfo"
+
+l_.str.5:                               ; @.str.5
+	.asciz	"MemTotal"
+
+l_.str.6:                               ; @.str.6
+	.asciz	"uname -o"
+
+l_.str.7:                               ; @.str.7
+	.asciz	"r"
+
+l_.str.8:                               ; @.str.8
+	.asciz	"========================================\n"
+
+l_.str.9:                               ; @.str.9
+	.asciz	"Hashmix benchmark (classic % vs REIST reduction)\n"
+
+l_.str.10:                              ; @.str.10
+	.asciz	"System Information:\n"
+
+l_.str.11:                              ; @.str.11
+	.asciz	"  Hostname: "
+
+l_.str.12:                              ; @.str.12
+	.asciz	"\n"
+
+l_.str.13:                              ; @.str.13
+	.asciz	"  OS: "
+
+l_.str.14:                              ; @.str.14
+	.asciz	"  CPU Model: "
+
+l_.str.15:                              ; @.str.15
+	.asciz	"  CPU MHz: "
+
+l_.str.16:                              ; @.str.16
+	.asciz	"  Memory: "
+
+l_.str.17:                              ; @.str.17
+	.asciz	"========================================\n\n"
+
+l_.str.18:                              ; @.str.18
+	.asciz	"Iterations N = "
+
+l_.str.19:                              ; @.str.19
+	.asciz	"M = "
+
+l_.str.20:                              ; @.str.20
+	.space	1
+
+l_.str.21:                              ; @.str.21
+	.asciz	"  classic : "
+
+l_.str.22:                              ; @.str.22
+	.asciz	"  REIST   : "
+
+l_.str.23:                              ; @.str.23
+	.asciz	"  speedup : "
+
+l_.str.24:                              ; @.str.24
+	.asciz	"x (classic / REIST)"
+
+l_.str.25:                              ; @.str.25
+	.asciz	"  sink values: "
+
+l_.str.26:                              ; @.str.26
+	.asciz	" / "
+
+l_.str.27:                              ; @.str.27
+	.asciz	"basic_string"
+
+.subsections_via_symbols

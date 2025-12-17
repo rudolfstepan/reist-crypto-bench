@@ -1,0 +1,75 @@
+=============================================
+Barret-REIST v2 Benchmark (Division-Free)
+=============================================
+Iterations per modulus: 10000000
+
+---------------------------------------------
+Modulus = 257
+---------------------------------------------
+Classic modulo           : 0.032359 s
+REIST v1 scalar          : 0.012378 s
+Barret-REIST v2 scalar     : 0.043809 s
+Barret-REIST v2 int32      : 0.036881 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.614314x
+  Barret-REIST scalar vs Classic      : 0.738642x
+  Barret-REIST int32 vs scalar        : 1.187848x
+
+Sink: -73
+
+---------------------------------------------
+Modulus = 65537
+---------------------------------------------
+Classic modulo           : 0.033407 s
+REIST v1 scalar          : 0.012355 s
+Barret-REIST v2 scalar     : 0.043309 s
+Barret-REIST v2 int32      : 0.036314 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.703929x
+  Barret-REIST scalar vs Classic      : 0.771365x
+  Barret-REIST int32 vs scalar        : 1.192606x
+
+Sink: 22046
+
+---------------------------------------------
+Modulus = 1000003
+---------------------------------------------
+Classic modulo           : 0.034492 s
+REIST v1 scalar          : 0.012325 s
+Barret-REIST v2 scalar     : 0.043593 s
+Barret-REIST v2 int32      : 0.036636 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.798488x
+  Barret-REIST scalar vs Classic      : 0.791234x
+  Barret-REIST int32 vs scalar        : 1.189905x
+
+Sink: -495688
+
+---------------------------------------------
+Modulus = 10000019
+---------------------------------------------
+Classic modulo           : 0.032371 s
+REIST v1 scalar          : 0.012321 s
+Barret-REIST v2 scalar     : 0.043301 s
+Barret-REIST v2 int32      : 0.036269 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.627282x
+  Barret-REIST scalar vs Classic      : 0.747585x
+  Barret-REIST int32 vs scalar        : 1.193887x
+
+Sink: 4305396
+
+---------------------------------------------
+Modulus = 1000000007
+---------------------------------------------
+Classic modulo           : 0.033477 s
+REIST v1 scalar          : 0.012463 s
+Barret-REIST v2 scalar     : 0.044082 s
+Barret-REIST v2 int32      : 0.037138 s
+Speedups:
+  REIST v1 scalar vs Classic        : 2.686051x
+  Barret-REIST scalar vs Classic      : 0.759417x
+  Barret-REIST int32 vs scalar        : 1.186967x
+
+Sink: 111172197
+

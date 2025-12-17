@@ -1,7 +1,9 @@
 #include <iostream>
 #include <chrono>
 #include <cstdint>
-#include <immintrin.h>
+#if defined(__x86_64__) || defined(_M_X64)
+  #include <immintrin.h>
+#endif
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -21,7 +23,7 @@ struct Context {
 // Test 1: Pure computation without modulo
 // ============================================================
 
-NO_VECTORIZE
+// NO_VECTORIZE
 void test_scalar_add(int64_t N) {
     volatile int32_t a = 1, b = 2;
     for (int64_t i = 0; i < N; i++) {
@@ -59,7 +61,7 @@ inline __m256i approx_q_avx2(__m256i T, uint32_t invB) {
     return _mm256_unpacklo_epi32(q_even_32, q_odd_32);
 }
 
-NO_VECTORIZE
+// NO_VECTORIZE
 void test_scalar_barrett(int64_t N, const Context& ctx) {
     volatile int32_t T = 12345;
     for (int64_t i = 0; i < N; i++) {

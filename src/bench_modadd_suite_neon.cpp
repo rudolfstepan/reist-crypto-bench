@@ -19,18 +19,6 @@
   #include <arm_neon.h>
 #endif
 
-
-// This benchmark compares two ways to maintain a periodic counter modulo B:
-//
-//  (1) Classic: r = (r + step) % B
-//  (2) REIST-style: keep r in a signed symmetric interval and correct only
-//      with simple comparisons and +/- B.
-//
-// On typical CPUs, '%' for non-power-of-two moduli is relatively expensive,
-// so (2) can be noticeably faster. This is exactly the scenario where a REIST-ALU
-// in hardware shines even stärker: no division, only signed additions and
-// trivial comparisons.
-
 using Clock = std::chrono::high_resolution_clock;
 
 struct Result {
@@ -58,9 +46,9 @@ static std::uint64_t bench_classic_mod(std::int64_t B, std::int64_t N, std::int6
     return static_cast<std::uint64_t>(r);
 }
 
-// REIST-style symmetric remainder counter.
+// REIST-style symmetric remainder counter (scalar).
 // Keep r in (-B/2, +B/2] by simple correction.
-static std::int64_t bench_reist_sym(std::int64_t B, std::int64_t N, std::int64_t step) {
+static std::int64_t bench_reist_sym_scalar(std::int64_t B, std::int64_t N, std::int64_t step) {
     std::int64_t halfB = B / 2;
     std::int64_t r = 0;
     for (std::int64_t i = 0; i < N; ++i) {
@@ -74,40 +62,43 @@ static std::int64_t bench_reist_sym(std::int64_t B, std::int64_t N, std::int64_t
     return r;
 }
 
-// NEON-vectorized REIST symmetric remainder counter (ARM)
+// NEON-vectorized REIST symmetric remainder counter.
+// Process 4 values in parallel using NEON int32x4_t
 #if defined(__aarch64__) || defined(__arm__)
 static std::int64_t bench_reist_sym_neon(std::int64_t B, std::int64_t N, std::int64_t step) {
     std::int64_t halfB = B / 2;
     
-    // Use 4x int32 parallel operations
-    int32x4_t r_vec = vdupq_n_s32(0);  // r values for 4 iterations in parallel
+    // Create NEON vectors
+    int32x4_t r_vec = vdupq_n_s32(0);
     int32x4_t step_vec = vdupq_n_s32(static_cast<int32_t>(step));
     int32x4_t halfB_vec = vdupq_n_s32(static_cast<int32_t>(halfB));
     int32x4_t negHalfB_vec = vdupq_n_s32(static_cast<int32_t>(-halfB));
     int32x4_t B_vec = vdupq_n_s32(static_cast<int32_t>(B));
     
-    // Process 4 iterations at a time
-    for (std::int64_t i = 0; i < N / 4; ++i) {
+    // Process 4 iterations at a time in parallel
+    std::int64_t simd_iters = N / 4;
+    for (std::int64_t i = 0; i < simd_iters; ++i) {
         // r += step
         r_vec = vaddq_s32(r_vec, step_vec);
         
-        // Correction: if (r > halfB) r -= B; else if (r <= -halfB) r += B;
-        uint32x4_t gt_half = vcgtq_s32(r_vec, halfB_vec);      // r > halfB
-        uint32x4_t le_neghalf = vcleq_s32(r_vec, negHalfB_vec); // r <= -halfB
+        // Predicates for corrections
+        uint32x4_t gt_half = vcgtq_s32(r_vec, halfB_vec);        // r > halfB
+        uint32x4_t le_neghalf = vcleq_s32(r_vec, negHalfB_vec);  // r <= -halfB
         
-        // Apply correction using conditional select
+        // Compute correction results
         int32x4_t r_minus_B = vsubq_s32(r_vec, B_vec);
         int32x4_t r_plus_B = vaddq_s32(r_vec, B_vec);
         
-        r_vec = vbslq_s32(gt_half, r_minus_B, r_vec);           // if gt_half: r -= B
-        r_vec = vbslq_s32(le_neghalf, r_plus_B, r_vec);         // if le_neghalf: r += B
+        // Apply corrections using bit-select (vbslq)
+        // vbslq selects from first argument where mask is 1, second argument where mask is 0
+        r_vec = vbslq_s32(gt_half, r_minus_B, r_vec);           // if r > halfB: r -= B
+        r_vec = vbslq_s32(le_neghalf, r_plus_B, r_vec);         // if r <= -halfB: r += B
     }
     
-    // Reduce: sum all 4 elements (they should all be close to the same value for correctness check)
-    int32x2_t pairsum = vpadd_s32(vget_low_s32(r_vec), vget_high_s32(r_vec));
-    int32_t result = vget_lane_s32(pairsum, 0) / 2;  // Average (both should be same)
+    // Extract result (all 4 lanes should have the same value for correct algorithm)
+    std::int64_t result = static_cast<std::int64_t>(vgetq_lane_s32(r_vec, 0));
     
-    // Handle remaining elements if N is not divisible by 4
+    // Handle remaining iterations if N is not divisible by 4
     std::int64_t remainder = N % 4;
     for (std::int64_t i = 0; i < remainder; ++i) {
         result += step;
@@ -121,17 +112,13 @@ static std::int64_t bench_reist_sym_neon(std::int64_t B, std::int64_t N, std::in
     return result;
 }
 #else
+// Fallback for non-ARM platforms
 static std::int64_t bench_reist_sym_neon(std::int64_t B, std::int64_t N, std::int64_t step) {
-    return bench_reist_sym(B, N, step);  // Fallback to scalar on non-ARM
+    return bench_reist_sym_scalar(B, N, step);
 }
 #endif
 
 int main(int argc, char** argv) {
-    // Usage:
-    //   bench_modadd_suite [N] [B]
-    // If B is provided, only that modulus is benchmarked (runtime parameter).
-    // Otherwise, all default moduli are used (constant scenario).
-
     std::int64_t N = 50'000'000;
     if (argc >= 2) N = std::stoll(argv[1]);
     if (N <= 0) {
@@ -141,10 +128,8 @@ int main(int argc, char** argv) {
 
     std::vector<std::int64_t> moduli;
     if (argc >= 3) {
-        // Runtime parameter scenario
         moduli.push_back(std::stoll(argv[2]));
     } else {
-        // Constant scenario (default moduli)
         moduli = {
             257,
             997,
@@ -157,9 +142,9 @@ int main(int argc, char** argv) {
 
     std::int64_t step = 3;
     std::vector<Result> results;
-    results.reserve(moduli.size() * 2);
+    results.reserve(moduli.size() * 3);
 
-      // Collect system info
+    // Collect system info
     std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
 #ifndef _WIN32
     {
@@ -199,28 +184,33 @@ int main(int argc, char** argv) {
         }
     }
 #else
-    // Windows: get hostname
     char hn[256];
     DWORD hnSize = sizeof(hn);
     if (GetComputerNameA(hn, &hnSize)) hostname = hn;
     else hostname = "Unknown";
-    // Windows: get OS name
+    
+    FILE* fp = _popen("ver", "r");
+    if (fp) {
+        char buf[128];
+        if (fgets(buf, sizeof(buf), fp)) {
+            os_name = std::string(buf);
+            if (!os_name.empty() && os_name.back() == '\n') {
+                os_name.pop_back();
+            }
+        }
+        _pclose(fp);
+    }
     os_name = "Windows";
-    // Windows: get CPU info
+    
     HKEY hKey;
     if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
         char buf[256];
-        DWORD bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
+        DWORD size = sizeof(buf);
+        if (RegQueryValueExA(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)buf, &size) == ERROR_SUCCESS) {
             cpu_model = std::string(buf);
-        }
-        bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "~MHz", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
-            cpu_mhz = std::to_string(*(DWORD*)buf);
         }
         RegCloseKey(hKey);
     }
-    // Windows: get memory info
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(statex);
     if (GlobalMemoryStatusEx(&statex)) {
@@ -230,7 +220,7 @@ int main(int argc, char** argv) {
 
     std::cout << std::fixed << std::setprecision(6);
     std::cout << "========================================\n";
-    std::cout << "REIST modular-add benchmark suite\n";
+    std::cout << "REIST modular-add benchmark suite (NEON)\n";
     std::cout << "========================================\n";
     std::cout << "System Information:\n";
     std::cout << "  Hostname: " << hostname << "\n";
@@ -241,10 +231,11 @@ int main(int argc, char** argv) {
     std::cout << "========================================\n\n";
     std::cout << "Total iterations per modulus N = " << N << "\n";
     std::cout << "step = " << step << "\n\n";
-    std::cout << "Running benchmarks...\n\n";
+    std::cout << "Running benchmarks (with NEON vectorization)...\n\n";
 
     for (auto B : moduli) {
         std::cout << "Modulus B = " << B << "\n";
+        
         std::uint64_t sink1 = 0;
         double t_classic = time_loop([&](std::int64_t n){
             sink1 = bench_classic_mod(B, n, step);
@@ -252,21 +243,35 @@ int main(int argc, char** argv) {
         results.push_back({B, N, "classic_mod", t_classic});
 
         std::int64_t sink2 = 0;
-        double t_reist = time_loop([&](std::int64_t n){
-            sink2 = bench_reist_sym(B, n, step);
+        double t_reist_scalar = time_loop([&](std::int64_t n){
+            sink2 = bench_reist_sym_scalar(B, n, step);
         }, N);
-        results.push_back({B, N, "reist_sym", t_reist});
+        results.push_back({B, N, "reist_sym_scalar", t_reist_scalar});
 
-        std::cout << "  classic_mod: " << t_classic << " s\n";
-        std::cout << "  reist_sym  : " << t_reist   << " s\n";
-        if (t_reist > 0.0) {
-            std::cout << "  speedup    : " << (t_classic / t_reist) << "x (classic / REIST)\n";
+        std::int64_t sink3 = 0;
+        double t_reist_neon = time_loop([&](std::int64_t n){
+            sink3 = bench_reist_sym_neon(B, n, step);
+        }, N);
+        results.push_back({B, N, "reist_sym_neon", t_reist_neon});
+
+        std::cout << "  classic_mod        : " << t_classic        << " s\n";
+        std::cout << "  reist_sym (scalar) : " << t_reist_scalar   << " s\n";
+        std::cout << "  reist_sym (NEON)   : " << t_reist_neon     << " s\n";
+        
+        if (t_reist_scalar > 0.0) {
+            std::cout << "  speedup (classic / scalar) : " << (t_classic / t_reist_scalar) << "x\n";
         }
-        std::cout << "  sinks: " << sink1 << " / " << sink2 << "\n\n";
+        if (t_reist_neon > 0.0) {
+            std::cout << "  speedup (classic / NEON)   : " << (t_classic / t_reist_neon) << "x\n";
+        }
+        if (t_reist_scalar > 0.0 && t_reist_neon > 0.0) {
+            std::cout << "  NEON speedup (scalar / NEON): " << (t_reist_scalar / t_reist_neon) << "x\n";
+        }
+        std::cout << "  sinks: " << sink1 << " / " << sink2 << " / " << sink3 << "\n\n";
     }
 
     // Write CSV for plotting
-    const char* csv_name = "results_modadd_suite.csv";
+    const char* csv_name = "results_modadd_suite_neon.csv";
     std::ofstream csv(csv_name);
     if (csv) {
         csv << "modulus,N,scenario,seconds,ops_per_sec\n";

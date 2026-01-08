@@ -15,6 +15,7 @@ https://intracom.at/papers/reist-division.html
 https://github.com/rudolfstepan/reist-crypto-bench
 
 ⏱️ **REIST Division Live Demo Neon SIMD simulation:** 
+
 https://intracom.at/demo/reist/
 
 ---

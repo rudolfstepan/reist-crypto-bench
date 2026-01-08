@@ -14,6 +14,9 @@ https://intracom.at/papers/reist-division.html
 🔗 **Canonical Reference Repository:**  
 https://github.com/rudolfstepan/reist-crypto-bench
 
+⏱️ **REIST Division Live Demo Neon SIMD simulation:**
+https://intracom.at/demo/reist/
+
 ---
 
 ### What is REIST Division?

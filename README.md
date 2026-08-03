@@ -1,694 +1,176 @@
-# REIST Division – Cryptographic Benchmark Suite
+# REIST Division benchmark suite
 
-**REIST Division (Remainder Extended Inversion and Subtraction Technique)**  
-is an implementation-oriented framework for **centered remainder arithmetic** and **signed modular correction**, introduced by **Rudolf Stepan (2025)**.
+This repository evaluates the implementation pattern described in Rudolf Stepan's 2026 paper on REIST Division: keep an additive modular state in a centered residue interval and restore that interval after every update with at most one `+/-B` correction.
 
-This repository provides a comprehensive **cryptographic benchmark suite** for evaluating REIST-style symmetric remainder arithmetic against classical modulo-based arithmetic and Montgomery reduction on modern CPUs (x86-64, ARMv8-A).
+REIST is not a new ring, a general-purpose division algorithm, or a cryptographic primitive. Its intended fast path is narrower: repeated modular addition or subtraction with a positive modulus that remains stable for an accumulation phase and with centered inputs. Montgomery and Barrett reduction remain the appropriate tools for multiplication-dominated modular arithmetic.
 
-📄 **Scientific Paper (DOI):**  
-https://doi.org/10.5281/zenodo.17897540
+## Paper and FPGA provenance links
 
-🌐 **Project Website (paper & context):**  
-https://intracom.at/papers/reist-division.html
+- [German paper: *REIST-Division - Eine implementierungsorientierte Formulierung zentrierter Restarithmetik*](<docs/REIST-Division - Eine implementierungsorientierte Formulierung zentrierter Restarithmetik.pdf>)
+- DOI: [10.5281/zenodo.21206471](https://doi.org/10.5281/zenodo.21206471)
+- [Implementation note and paper errata](docs/PAPER_CORRECTIONS_DE.md)
+- [Historical English paper](docs/reist-division.pdf)
 
-🔗 **Canonical Reference Repository:**  
-https://github.com/rudolfstepan/reist-crypto-bench
+The actively maintained FPGA implementation lives in [`rudolfstepan/6502-sbc-fpga`](https://github.com/rudolfstepan/6502-sbc-fpga). The immutable published provenance snapshot cited here is pinned to commit [`dfe49fb15bebca66214de3c9d0eb7d333d980d13`](https://github.com/rudolfstepan/6502-sbc-fpga/commit/dfe49fb15bebca66214de3c9d0eb7d333d980d13):
 
-⏱️ **REIST Division Live Demo Neon SIMD simulation:** 
+- [REIST RTL](https://github.com/rudolfstepan/6502-sbc-fpga/tree/dfe49fb15bebca66214de3c9d0eb7d333d980d13/rtl/reist)
+- [core testbench](https://github.com/rudolfstepan/6502-sbc-fpga/blob/dfe49fb15bebca66214de3c9d0eb7d333d980d13/sim/tb/tb_reist_core.vhd)
+- [benchmark testbench](https://github.com/rudolfstepan/6502-sbc-fpga/blob/dfe49fb15bebca66214de3c9d0eb7d333d980d13/sim/tb/tb_reist_bench.vhd)
+- [Tang Primer 20K Gowin projects, constraints, and generated IP](https://github.com/rudolfstepan/6502-sbc-fpga/tree/dfe49fb15bebca66214de3c9d0eb7d333d980d13/boards/tang_primer_20k/reist)
 
-https://intracom.at/demo/reist/
+That historical pin identifies the published files, but it is not a clean checkout-and-build recipe: its Gowin projects still contain machine-local absolute `D:/` paths and it does not contain the later `build_reist.tcl` workflow. The active repository URL above is therefore the source for ongoing FPGA work. A new buildable pin must only be published after the relative-path Gowin projects and scripts have themselves been committed and pushed.
 
----
+## Canonical convention
 
-### What is REIST Division?
+For integers `T` and `B > 0`, the canonical decomposition is
 
-REIST Division is **not a new cryptographic algorithm** and **not a cryptocurrency**.  
-It is a **formal and implementation-friendly reframing of integer division** using a **centered remainder interval**  
-[-B/2, B/2) where the remainder is treated as an explicit **signed correction term** rather than a passive residue.
-
-This viewpoint maps naturally to:
-- balanced modular arithmetic
-- branchless correction logic
-- SIMD-friendly modular addition
-- hardware-efficient arithmetic pipelines
-
-The benchmark suite in this repository evaluates how this formulation behaves under **real cryptographic workloads**, especially **modular and polynomial modular addition** as used in lattice-based cryptography.
-
-## What REIST is NOT
-
-To avoid ambiguity and search engine misclassification:
-
-- ❌ Not a cryptocurrency
-- ❌ Not a blockchain project
-- ❌ Not a token, coin or payment system
-- ❌ Not a replacement for Montgomery or Barrett reduction
-- ❌ Not a cryptographic primitive by itself
-
-REIST Division is a **general arithmetic framework** whose behavior is evaluated here using cryptographic workloads as a high-stress test environment.
-
-
-## 🚀 Quick Start
-
-Run a complete benchmark analysis with a single command:
-
-```bash
-make all
+```text
+T = q*B + r,     -B/2 <= r < B/2.
 ```
 
-This **automated workflow** will:
-1. **Build** all benchmarks with three optimization levels (O0, O3, SIMD)
-2. **Run** benchmarks sequentially: O0 baseline → O3 optimized → SIMD vectorized
-3. **Generate** three-way optimization comparison plots
-4. **Create** a comprehensive markdown report with performance analysis and assembly inspection
-
-**Total runtime:** ~5-8 minutes depending on your system
-
-Results are stored in `tests/results/x86/` (or `tests/results/arm/` on ARM systems) with:
-- Timestamped `.txt` files containing detailed benchmark output with system information
-- `.csv` files with structured data for analysis  
-- `*_optimization_comparison_*.png` charts showing three-way performance comparison (O0 vs O3 vs SIMD)
-- `*_BENCHMARK_REPORT.md` - Complete publication-ready documentation with assembly analysis
-
----
-
-## 📊 Three-Way Optimization Analysis
-
-This benchmark suite provides **comprehensive optimization-level analysis** across three distinct compilation strategies:
-
-| Optimization Level | Purpose | Flags | Target Use Case |
-|-------------------|---------|-------|-----------------|
-| **O0 (Baseline)** | Unoptimized code behavior | `-O0 -fno-tree-vectorize` | Debug builds, compiler-agnostic performance |
-| **O3 (Optimized)** | Maximum scalar optimization | `-O3 -march=native -mtune=native` | Production builds, architecture-specific tuning |  
-| **SIMD (Vectorized)** | Explicit vectorization | `-O3 -march=native -mavx2` | High-performance computing, parallel workloads |
-
-### Key Benefits
-
-- **Performance Scaling**: Shows how REIST arithmetic responds to different optimization levels
-- **Architecture Analysis**: Demonstrates vectorization potential on modern CPUs
-- **Real-World Insights**: O0 reveals algorithmic efficiency, O3/SIMD show production performance  
-- **Comparison Fairness**: All algorithms tested under identical optimization conditions
-
-### Generated Analysis
-
-Each run produces:
-- **Three-way comparison charts** showing O0 → O3 → SIMD performance progression
-- **Assembly analysis** comparing optimized vs unoptimized code generation
-- **Speedup metrics** for each optimization transition
-- **Architecture-specific insights** (AVX2 vectorization on x86, NEON on ARM)
-
----
-
-## 📋 Benchmark Suite Overview
-
-### 1. **Modular Addition Suite** (`bench_modadd_suite`)
-Compares classical modulo operation `(a + b) % m` with REIST symmetric remainder using simple comparisons.
-
-**What it tests:**
-- Counter maintenance with periodic modular reduction
-- Various non-power-of-two moduli (257, 997, 10007, 1000003, etc.)
-- Classical `%` operator vs REIST signed addition with range correction
-
-**Why it matters:**
-- Division by non-power-of-two is expensive on standard CPUs
-- REIST eliminates division, using only signed addition and comparisons
-- Shows REIST advantage in modular counter scenarios
-
-**Example output:**
-```
-Modulus B = 257
-  classic_mod: 0.183826 s
-  reist_sym  : 0.058489 s
-  speedup    : 3.143x (classic / REIST)
-```
-
-### 2. **Polynomial Modular Addition** (`bench_poly_mod`)
-NTRU-style lattice operations with coefficient-wise modular addition for large prime moduli.
-
-**What it tests:**
-- Polynomial ring operations (common in lattice-based cryptography)
-- Large moduli: 1,000,003 up to 1,000,000,007
-- 1024 coefficients, 50,000 repetitions
-- Branchless REIST correction vs classical modulo
-
-**Why it matters:**
-- Critical for post-quantum cryptography (NTRU, Kyber, Dilithium)
-- Shows REIST performance on vectorizable operations
-- Tests efficiency with large polynomial degrees
-
-**Example output:**
-```
-q = 1000003
-  classic : 0.124283 s
-  REIST   : 0.143416 s
-  speedup : 0.867x
-```
-
-### 3. **Modular Remainder Operations** (`bench_modular`)
-Direct comparison of modular remainder computation methods.
-
-**What it tests:**
-- Random 64-bit values reduced modulo B
-- Classical remainder `a % B` vs REIST signed remainder
-- 5,000,000 operations per run
-
-**Why it matters:**
-- Pure microbenchmark of remainder computation
-- Shows overhead of classical division instruction
-- Demonstrates REIST advantage for individual operations
-
-**Example output:**
-```
---- Modular remainder ---
-classic  : 0.098328 s
-REIST    : 0.135289 s
-Speedup  : 0.727x (classic / REIST)
-```
-
-### 4. **ChaCha20 Block Operations** (`bench_chacha_reist`)
-ChaCha20-like cipher operations using REIST arithmetic.
-
-**What it tests:**
-- 32-bit modular addition performance
-- Quarter-round operations (core ChaCha20 building block)
-- 1,000,000 iterations
-
-**Why it matters:**
-- Demonstrates REIST in symmetric cipher context
-- Shows performance on mixed arithmetic/bitwise operations
-- Real-world cipher-like instruction mix
-
-**Example output:**
-```
---- Modular Addition (32-bit) ---
-std_add    : 0.012345 s
-reist_add32: 0.011111 s
-Speed ratio: 1.11x (std / REIST)
-```
-
-### 5. **ChaCha20 Stream Generation** (`bench_chacha_stream`)
-High-throughput keystream generation benchmark.
-
-**What it tests:**
-- Full ChaCha20 block transformation
-- Throughput measured in MB/s
-- 1,000,000 blocks (64 MB total)
-
-**Why it matters:**
-- Shows REIST impact on streaming cipher performance
-- Measures throughput for bulk encryption scenarios
-- Real-world performance metric
-
-**Example output:**
-```
-Classic : 0.123456 s (520.0 MB/s)
-REIST   : 0.111111 s (578.0 MB/s)
-Speedup : 1.11x (classic / REIST)
-```
-
-### 6. **Hash-Mix Operations** (`bench_hashmix`)
-Hash function mixing with modular reduction.
-
-**What it tests:**
-- Hash-like operations: `(x * A + B) % M`
-- Multiple large moduli
-- 100,000,000 iterations
-
-**Why it matters:**
-- Common pattern in hash functions and PRNGs
-- Shows REIST performance for multiplicative operations
-- Relevant for non-cryptographic hash applications
-
-**Example output:**
-```
-M = 1000003  classic : 0.404142  REIST   : 0.636984  speedup : 0.634x
-```
-
-### 7. **REIST vs Montgomery Arithmetic** (`bench_montgomery`) **[NEW]**
-Comprehensive comparison against Montgomery arithmetic, the industry-standard method for efficient modular operations.
-
-**What it tests:**
-- **Modular Addition**: Classic vs REIST vs Montgomery
-- **Modular Multiplication**: All three approaches compared
-- **Montgomery with conversion overhead**: Real-world usage scenario
-- Multiple moduli from 257 (8-bit) to 1,000,000,000,039 (40-bit)
-- 10,000,000 operations per test
-
-**Why it matters:**
-- **Montgomery arithmetic** is widely used in cryptography (RSA, ECC, DSA)
-- Shows REIST performance against a proven, optimized baseline
-- Demonstrates when each method excels:
-  - **REIST**: Best for additions and simple modular operations
-  - **Montgomery**: Optimal for multiplication chains (exponentiation)
-  - **Classic**: Baseline for comparison
-
-**Example output:**
-```
-Modulus = 257
-
---- Modular Addition ---
-  Classic     : 0.003385 s
-  REIST       : 0.000934 s
-  Montgomery  : 0.000425 s
-  REIST speedup vs Classic    : 3.624x
-  Montgomery speedup vs Classic: 7.957x
-  REIST speedup vs Montgomery : 0.455x
-
---- Modular Multiplication ---
-  Classic     : 0.003917 s
-  REIST       : 0.005205 s
-  Montgomery  : 0.002497 s
-  Montgomery speedup vs Classic: 1.569x
-```
-
-**Key insights:**
-- Montgomery excels at multiplication (requires fewer reductions)
-- REIST wins for addition-heavy workloads
-- Both significantly outperform classical modulo for non-power-of-2 moduli
-
----
-
-## 🏗️ Repository Structure
-
-```
-reist-crypto-bench/
-├── include/
-│   └── reist_mod.hpp          # REIST arithmetic implementations
-├── src/
-│   ├── bench_modadd_suite.cpp # Modular addition benchmark
-│   ├── bench_poly_mod.cpp     # Polynomial operations
-│   ├── bench_modular.cpp      # Direct remainder comparison
-│   ├── bench_chacha_reist.cpp # ChaCha20 block operations
-│   ├── bench_chacha_stream.cpp# ChaCha20 stream generation
-│   ├── bench_hashmix.cpp      # Hash-mix operations
-│   ├── bench_montgomery.cpp   # REIST vs Montgomery comparison
-│   └── bench_reist_arm.cpp    # ARM NEON optimizations (ARM only)
-├── scripts/
-│   ├── plot_benchmarks.py     # Chart generation
-│   ├── generate_benchmark_doc.py # Documentation generator
-│   └── run_all.sh             # Legacy build script
-├── tests/
-│   ├── results/
-│   │   ├── x86/               # x86_64 benchmark results
-│   │   └── arm/               # ARM64 benchmark results
-│   └── test_reist.cpp         # Unit tests
-├── docs/
-│   └── BENCHMARKS.md          # Benchmark methodology
-├── build/                     # Build artifacts (generated)
-├── Makefile                   # Main build system
-├── CMakeLists.txt             # Alternative CMake build
-└── README.md                  # This file
-```
-
-## ⚡ Prerequisites
-
-### Windows
-- **MinGW-w64** (recommended) or **Visual Studio Build Tools**
-- **Python 3.7+** with matplotlib (`pip install matplotlib`)
-- **GNU Make** (install via `winget install GnuWin32.Make` or use MinGW's make)
-
-### Linux/macOS  
-- **GCC 8+** or **Clang 10+**
-- **Python 3.7+** with matplotlib (`pip install matplotlib` or use package manager)
-- **GNU Make** (usually pre-installed)
-
-The build system automatically detects your platform and configures appropriate compiler flags.
-
-## 🔧 Build System
-
-### Makefile Commands
-
-| Command | Description |
-|---------|-------------|
-| `make all` | **Complete workflow:** Build all + Run O0/O3/SIMD + Generate report |
-| `make run` | Execute all benchmarks with O0 (no optimization) |
-| `make run_optimized` | Execute all benchmarks with O3 (full optimization + native tuning) |
-| `make run_simd` | Execute all benchmarks with SIMD vectorization (AVX2/NEON) |
-| `make plot_comparison` | Generate three-way optimization comparison plots |
-| `make report` | Generate comprehensive benchmark report with charts |
-| `make clean` | Remove all build artifacts |
-| `make list` | Show build configuration (arch, compiler, flags) |
-
-### Automated Build & Benchmark
-
-The Makefile automatically:
-- ✅ **Cross-platform support** (Windows, Linux, macOS)
-- ✅ **Detects architecture** (x86_64 or ARM64/aarch64)  
-- ✅ **Selects best compiler** (MinGW on Windows, Clang/GCC on Unix)
-- ✅ **Three optimization levels**: O0 baseline, O3 optimized, SIMD vectorized
-- ✅ **Sequential execution**: Ensures benchmarks complete before analysis
-- ✅ **Applies optimal flags**:
-  - x86_64: `-march=native -mtune=native` (uses AVX2, AVX-512 if available)
-  - ARM64: `-march=armv8-a+simd` (enables NEON)
-- ✅ **Creates timestamped results** in `tests/results/x86/` or `tests/results/arm/`
-- ✅ **Includes system information** (CPU model, frequency, memory) in every benchmark
-
-### Optimization Levels
-
-| Level | Flags | Purpose |
-|-------|-------|---------|
-| **O0** | `-O0 -fno-tree-vectorize` | Baseline performance, no optimization |
-| **O3** | `-O3 -march=native -mtune=native -flto` | Full optimization with architecture-specific tuning |
-| **SIMD** | `-O3 -march=native -mavx2 -flto` | Explicit SIMD vectorization (AVX2/NEON) |
-
-### Alternative: CMake Build
-
-For custom configurations or integration with existing CMake projects:
-
-```bash
-mkdir -p build && cd build
-cmake ..
-cmake --build . --config Release
-```
-
-Executables will be in `build/` directory.
-
-## 📊 Running Benchmarks
-
-### Complete Benchmark Suite (Recommended)
-
-Execute the complete automated benchmark workflow:
-
-```bash
-make all
-```
-
-**Sequential workflow (completely automated):**
-1. ⚙️ Compiles all benchmarks (O0, O3, SIMD variants)
-2. 🔢 Runs O0 benchmarks (baseline, ~2-3 minutes)
-3. 🚀 Runs O3 benchmarks (optimized, ~1-2 minutes)  
-4. ⚡ Runs SIMD benchmarks (vectorized, ~1-2 minutes)
-5. 📊 Generates three-way optimization comparison plots
-6. 📈 Creates comprehensive report with performance analysis and assembly inspection
-
-**Output files** (in `tests/results/x86/` or `tests/results/arm/`):
-```
-20251216_102018_bench_modadd_suite_O0.txt
-20251216_102111_bench_modadd_suite_O3.txt  
-20251216_102125_bench_modadd_suite_SIMD.txt
-20251216_102144_optimization_comparison_modadd.png
-20251216_102144_optimization_comparison_poly.png
-20251216_102145_BENCHMARK_REPORT.md  ← Complete analysis
-```
-
-### Individual Benchmark Execution
-
-Run specific benchmarks manually:
-
-```bash
-# After building with 'make all'
-./build/bench_modadd_suite_opt      # Optimized modular addition
-./build/bench_poly_mod_noopt 2048   # No-opt poly with 2048 coefficients
-./build/bench_modular_opt 997 10000000  # Custom modulus and iterations
-./build/bench_chacha_stream_opt 2000000 # 2M blocks (128 MB)
-./build/bench_hashmix_opt 200000000 # 200M iterations
-```
-
-**Custom Parameters:**
-
-Each benchmark accepts command-line arguments:
-
-| Benchmark | Arguments | Example |
-|-----------|-----------|---------|
-| `bench_modadd_suite` | `[N] [B]` | `./bench_modadd_suite_opt 100000000 1009` |
-| `bench_poly_mod` | `[N] [reps] [q]` | `./bench_poly_mod_opt 2048 10000 1000003` |
-| `bench_modular` | `[B] [N]` | `./bench_modular_opt 257 10000000` |
-| `bench_chacha_reist` | `[N] [B]` | `./bench_chacha_reist_opt 2000000 0xDEADBEEF` |
-| `bench_chacha_stream` | `[blocks] [B]` | `./bench_chacha_stream_opt 5000000` |
-| `bench_hashmix` | `[N] [B] [M]` | `./bench_hashmix_opt 500000000 6364136223846793005 1000003` |
-| `bench_montgomery` | `[N] [M]` | `./bench_montgomery_opt 50000000 65537` |
-
-### System Information in Results
-
-Every benchmark output includes detailed system information:
-
-```
-========================================
-REIST modular-add benchmark suite
-========================================
-System Information:
-  Hostname: ASUSPC
-  OS: GNU/Linux
-  CPU Model: Intel(R) Core(TM) i9-14900K
-  CPU MHz: 3187.200
-  Memory:       32706668 kB
-========================================
-```
-
-This ensures results are always contextualized with hardware specifications.
-
-## 📄 Documentation Generation
-
-### Automated Report Creation
-
-Generate a comprehensive benchmark report:
-
-```bash
-make doc
-```
-
-The script automatically:
-1. 🔍 Finds latest O0 and O3 benchmark results
-2. 📊 Parses all benchmark outputs
-3. 📈 Creates comparison charts (modadd, poly_mod, overall)
-4. 📝 Generates markdown report with tables and embedded images
-
-### Report Contents
-
-The generated `*_BENCHMARK_REPORT.md` includes:
-
-#### 1. System Information
-- Hostname, OS, CPU model and frequency
-- Total memory
-- Timestamp of report generation
-
-#### 2. Executive Summary
-- Overview of REIST vs classical arithmetic
-- Optimization levels tested (O0, O3)
-
-#### 3. Performance Overview
-- Overall comparison chart showing all benchmarks
-- High-level performance summary
-
-#### 4. Detailed Benchmark Results
-For each benchmark suite:
-- **Description** of what's being tested
-- **Comparison charts** (O0 vs O3)
-- **Data tables** with execution times and speedups
-- **Side-by-side comparison** of optimization levels
-
-#### 5. Conclusions
-- Key findings from benchmark data
-- Performance trends and patterns
-- Recommendations for REIST usage
-- Suggestions for further optimization
-
-### Example Report Section
-
-```markdown
-## Modular Addition Suite
-
-![Modadd Comparison](20251209_181408_comparison_modadd.png)
-
-### Results: O0 (No Optimization)
-
-| Modulus | Classic Time (s) | REIST Time (s) | Speedup |
-|---------|------------------|----------------|----------|
-| 257 | 0.183826 | 0.058489 | 3.143x |
-| 997 | 0.183690 | 0.056372 | 3.259x |
-...
-
-### Results: O3 (Optimized)
-
-| Modulus | Classic Time (s) | REIST Time (s) | Speedup |
-|---------|------------------|----------------|----------|
-| 257 | 0.193243 | 0.021527 | 8.977x |
-| 997 | 0.190182 | 0.020559 | 9.251x |
-...
-```
-
-The report is **publication-ready** and suitable for:
-- Research papers
-- Technical documentation
-- Performance analysis presentations
-- GitHub repository documentation
-
-## 🔬 Understanding the Results
-
-### What the Benchmarks Measure
-
-**Speedup = Classic Time / REIST Time**
-
-- **Speedup > 1.0**: REIST is faster than classical approach
-- **Speedup < 1.0**: REIST is slower (compiler may optimize classical % better in some cases)
-- **Speedup variation**: Depends on modulus size, optimization level, and CPU architecture
-
-### Key Observations
-
-1. **REIST shines with non-power-of-two moduli**
-   - Classical `%` requires division instruction (expensive)
-   - REIST uses signed addition + comparison (cheap)
-   - Larger moduli often show better REIST performance
-
-2. **Optimization level matters**
-   - O0: Shows raw algorithm efficiency
-   - O3: Compiler may optimize away some divisions, reducing REIST advantage
-   - Some benchmarks show REIST advantage increases with O3
-
-3. **Architectural differences**
-   - x86_64: Division latency 20-40 cycles
-   - ARM64: Different division performance characteristics
-   - Results vary significantly between architectures
-
-### Performance Expectations
-
-**Typical speedup ranges:**
-- Modular addition: 2-10x (O0), 5-15x (O3)
-- Polynomial operations: 0.8-1.5x (optimization-dependent)
-- Modular remainder: 0.5-2x (varies by modulus)
-- ChaCha20-like: 0.9-1.2x (mixed operations)
-- Hash-mix: 0.6-1.5x (multiplication dominant)
-
-## 🎯 Use Cases & Applications
-
-### When to Use REIST
-
-✅ **Cryptographic operations with frequent modular arithmetic**
-- Lattice-based cryptography (NTRU, Kyber, Dilithium)
-- Modular exponentiation in RSA/DSA
-- Elliptic curve operations
-- Polynomial ring arithmetic
-
-✅ **Hardware implementations**
-- FPGA designs (no division hardware needed)
-- Custom ASICs for cryptographic accelerators
-- Embedded systems with limited ALU capabilities
-
-✅ **High-throughput scenarios**
-- Bulk encryption/decryption
-- Hash function implementations
-- Stream cipher operations
-
-### Limitations
-
-⚠️ **Software simulation on standard CPUs**
-- True REIST benefit expected in dedicated hardware
-- Current CPUs have optimized division instructions
-- Software REIST is a proof-of-concept
-
-⚠️ **Not a replacement for standard arithmetic**
-- Use standard operations for general computation
-- REIST is specialized for modular arithmetic patterns
-
-⚠️ **Not production-ready cryptography**
-- Benchmarks use crypto-like operations for testing
-- Not vetted by cryptographic standards bodies
-- Intended as research and development tool
-
-## 🧪 Extending the Benchmark Suite
-
-### Adding New Benchmarks
-
-1. **Create benchmark source** in `src/bench_yourname.cpp`
-2. **Include system info collection** (copy from existing benchmarks)
-3. **Output results** to stdout (captured to `.txt` files)
-4. **Optional: Write CSV** for detailed data
-5. **Add to Makefile** in `SOURCES` variable
-6. **Update documentation generator** if custom parsing needed
-
-### Example Benchmark Template
+For even `B`, the midpoint is represented as `-B/2`, not `+B/2`. For odd `B`, the integer representatives are `-(B-1)/2 ... +(B-1)/2`. A safe one-step canonical correction is:
 
 ```cpp
-#include <iostream>
-#include <chrono>
-#include <fstream>
-#include <unistd.h>
-#include <cstdio>
-#include <string>
+half = B / 2;           // floor(B/2)
+lo   = -half;
+hi   = B - half;        // ceil(B/2)
+s    = r + x;           // r and x must already be centered
 
-int main() {
-    // Collect system info
-    std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
-    // ... (copy from existing benchmarks)
-    
-    // Print header with system info
-    std::cout << "========================================\n";
-    std::cout << "Your Benchmark Name\n";
-    std::cout << "========================================\n";
-    std::cout << "System Information:\n";
-    std::cout << "  Hostname: " << hostname << "\n";
-    // ... etc
-    
-    // Run your benchmark
-    // ... your code here
-    
-    // Print results
-    std::cout << "Classic: " << time_classic << " s\n";
-    std::cout << "REIST: " << time_reist << " s\n";
-    
-    return 0;
-}
+if (s >= hi)      s -= B;
+else if (s < lo)  s += B;
 ```
 
-### Customizing Report Generation
+The PDF's CPU Listings 2-4 retain the former mirrored boundary checks and are incorrect for odd moduli. The FPGA listing uses the correct `floor/ceil` boundaries. See [the implementation note](docs/PAPER_CORRECTIONS_DE.md) before treating the listings as reference code.
 
-Edit `scripts/generate_benchmark_doc.py`:
+## What is measured
 
-1. **Add parser function** for your benchmark format
-2. **Update `parse_benchmark_results()`** to call your parser
-3. **Add chart generation** if needed
-4. **Add markdown section** in report generation
+The manifest runner has seven primary report inputs. The table also lists the
+separately reported ARM-only NEON companion; together they provide positive,
+neutral, and negative controls:
 
-## 📚 Additional Resources
+| Benchmark | Purpose | Expected interpretation |
+|---|---|---|
+| `bench_modadd_suite` | persistent modular accumulator | target workload for one-correction REIST updates |
+| `bench_modadd_suite_neon` (ARM only) | four independent modular accumulators | architecture-specific scalar/NEON companion to the same workload |
+| `bench_poly_mod` | coefficient-wise modular addition | data-parallel target workload when inputs are centered |
+| `bench_modular` | independent full remainders | neutral/negative control; no persistent state to exploit |
+| `bench_chacha_stream` | ARX-style operations | control; no general-modulus reduction to remove |
+| `bench_hashmix` | multiplication and diffusion | negative control; REIST can add overhead |
+| `bench_montgomery` | comparison with Montgomery arithmetic | separates additive from multiplication-dominated use cases |
+| `bench_barret_reist` | Barrett, classic `%`, and centered addition | compares dependent addition and independent SIMD-stream baselines without conflating them |
 
-- **`include/reist_mod.hpp`**: Reference implementation of REIST arithmetic
-- **`docs/BENCHMARKS.md`**: Detailed benchmark methodology
-- **`tests/test_reist.cpp`**: Unit tests for REIST correctness
-- **Generated reports**: Check `tests/results/x86/` or `tests/results/arm/`
+Cryptographic algorithms are used as demanding sources of arithmetic kernels. Results from isolated additions must not be presented as end-to-end speedups for NTRU, Kyber, Dilithium, RSA, ECC, ChaCha20, or any other complete scheme.
 
-## 🤝 Contributing
+## Build and test
 
-Contributions are welcome! Areas of interest:
-- Additional benchmark scenarios
-- ARM NEON optimizations
-- SIMD implementations (AVX2, AVX-512)
-- Hardware synthesis examples
-- Cryptographic application case studies
+### CMake
 
-## 📖 Citation
-
-If you use REIST Division or this benchmark suite in academic or technical work, please cite the primary paper:
-
-```bibtex
-@article{stepan2025reist,
-  title   = {REIST Division: An Implementation-Oriented Framing of Centered Remainder Arithmetic for Modular Addition},
-  author  = {Rudolf Stepan},
-  year    = {2025},
-  doi     = {10.5281/zenodo.17611784},
-  url     = {https://intracom.at/papers/reist-division.html}
-}
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DREIST_WARNINGS_AS_ERRORS=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
 ```
 
+### Make benchmark workflow
+
+The runner requires Python 3.10 or newer; plotting/report generation additionally requires Matplotlib (`python -m pip install matplotlib`).
+
+```bash
+make validated # build the seven primary O0/O3/SIMD programs (+ NEON on ARM)
+make diagnostics # build the repaired Tree/NTT/ARM diagnostic targets
+make all       # build both groups and run unit tests
+make smoke     # quick O3 correctness-preflight run
+make run       # full O0/O3/SIMD benchmark runs with manifests
+make report    # generate the Markdown report from recorded results
+```
+
+The Make profiles use the following complete x86 flag sets (Clang spells the
+O0 vectorizer disable as `-fno-vectorize -fno-slp-vectorize`):
+
+| Profile | Exact flags |
+|---|---|
+| O0 | `-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP` |
+| O3 | `-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -MMD -MP` |
+| SIMD | `-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP` |
+
+On AArch64 the SIMD code-generation suffix is `-O3 -DNDEBUG -march=armv8-a+simd`; the complete recorded command also includes the common prefix and `-MMD -MP`.
+
+Benchmark output and schema-2 run manifests are written below `tests/results/x86/` or `tests/results/arm/`. Every Make-built timed binary has a compile-time `.build.json` sidecar containing its binary hash, compiler/version, exact command and flags, profile, and source/header hashes. The runner revalidates that sidecar and stops at the first missing, stale, or failing program, so a partial or differently built run is not silently reported as complete. Make deliberately rebuilds timed binaries when a run target is invoked, preventing a changed `CXX` or flag variable from inheriting a stale sidecar.
+
+Use `make list` to print the compiler, architecture, flags, and selected sources before comparing runs. Timing results are machine-, compiler-, and flag-specific; exact speedup values are not correctness criteria.
+
+The repaired Tree/NTT/ARM programs are available as CMake targets under `REIST_BUILD_DIAGNOSTICS` (enabled by default), as `make diagnostics`, and as CTest tests labelled `diagnostic`. They are correctness-checked diagnostics, but remain excluded from the seven-program manifest runner and from paper reports. Likewise, the tracked root-level `results_modadd_suite_neon.csv` and manifestless 2025 files under `tests/results/` are provenance-only legacy data, not current/reportable measurements.
+
+To separate the CTest groups explicitly:
+
+```bash
+cmake -S . -B build -DREIST_BUILD_DIAGNOSTICS=ON
+cmake --build build --parallel
+ctest --test-dir build -L 'correctness|smoke' --output-on-failure
+ctest --test-dir build -L diagnostic --output-on-failure
+```
+
+The reporter accepts only schema-2 complete O0/O3/SIMD sets with one shared `session_id`, host, commit, compiler identity, build system, and working-tree `state_sha256`. At report generation it revalidates the unchanged current repository state, still-present timed binaries and build sidecars, resolves `stdout`, `stderr`, `artifact_directory`, and CSV paths relative to each successful runner manifest, and verifies their recorded SHA-256 values. The embedded sidecar remains an archival integrity record, but regenerating a fully verified report requires the matching binary and sidecar in the recorded repository path; the results directory is not a self-contained binary archive. A dirty worktree is rejected by default; `--allow-dirty` creates a prominently marked **NON-REPORTABLE DIRTY WORKTREE** report. Quick runs likewise require explicit `--allow-quick`; manifestless legacy data require `--legacy` and are marked unverified.
+
+## Compiler artifact inspection
+
+The report generator and standalone checker inspect named benchmark kernels rather than classifying an entire assembly file from any incidental instruction:
+
+```bash
+tools/check_compiler_artifacts.sh src/bench_modadd_suite.cpp
+tools/check_compiler_artifacts.sh src/bench_poly_mod.cpp
+```
+
+Optional environment variables:
+
+```bash
+ARTIFACT_KERNELS='^(classic_modadd_runtime_kernel|reist_modadd_runtime_kernel)$' \
+ARTIFACT_CXXFLAGS='-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native' \
+tools/check_compiler_artifacts.sh src/bench_modadd_suite.cpp
+```
+
+Each run records the compiler version, exact analysis command, flags, source hash, architecture, and analyzed function in `compiler_reports/manifest.tsv`. Pattern matches are evidence about that emitted kernel only:
+
+- x86 `div`/`idiv` variants and AArch64 `sdiv`/`udiv` are hardware-division instructions;
+- a multiply plus a shift is reported only as a strength-reduction candidate, not proof of modulo lowering;
+- a centered-correction candidate requires a REIST-named kernel plus compare, conditional selection, and add/sub operations;
+- source-level branchlessness is not by itself a constant-time or side-channel claim.
+
+The report generator records a JSON build manifest beside generated assembly. It records both the Makefile profile and the exact source-assembly command, including any compiler-specific spelling used to disable vectorization.
+
+## Correctness requirements
+
+Implementations and tests should enforce:
+
+- `B > 0`;
+- exact canonical range and even-modulus tie behavior;
+- centered state and centered input before the one-correction loop;
+- re-centering when the modulus changes;
+- equivalence to a non-negative modulo reference for negative as well as positive inputs;
+- sufficiently wide intermediates or explicit overflow guards;
+- identical selected convention across scalar, SIMD, and FPGA implementations.
+
+Consumers that require residues in `[0,B)` must convert the centered result at the API boundary. A branchless correction is implementable, but constant-time behavior depends on the compiler and target and is not claimed by the paper.
+
+## Documentation
+
+- [Benchmark descriptions](docs/BENCHMARKS.md)
+- [Historical, non-reportable Apple M2 Pro diagnostic](docs/M2_PRO_BENCHMARK.md)
+- [German implementation note / errata](docs/PAPER_CORRECTIONS_DE.md)
+- Timestamped raw data and generated reports under `tests/results/`
+
+## Citation
+
 ```bibtex
-@software{reist_crypto_bench,
-  title  = {REIST Cryptographic Benchmark Suite},
+@article{stepan2026reist,
+  title  = {REIST-Division: Eine implementierungsorientierte Formulierung zentrierter Restarithmetik: Theorie, Architekturanalyse und empirische Evaluation auf ARMv8-A, x86-64 und FPGA},
   author = {Rudolf Stepan},
-  year   = {2025},
-  url    = {https://github.com/rudolfstepan/reist-crypto-bench}
+  year   = {2026},
+  doi    = {10.5281/zenodo.21206471},
+  url    = {https://doi.org/10.5281/zenodo.21206471}
 }
 ```
 
-## 📝 License
+## License
 
-See `LICENSE` file for details.
-
-## 🔗 Related Work
-
-- **REIST Division – Formal Paper (DOI)**  
-  https://doi.org/10.5281/zenodo.17897540
-
-- **REIST Division – Project Website**  
-  https://intracom.at/papers/reist-division.html
-
-- **Modular Arithmetic in Cryptography**: Standards like FIPS 186-4 (DSA)
-- **Lattice-Based Cryptography**: NIST PQC standardization
-- **Hardware Arithmetic**: Books on computer arithmetic and VLSI design
+See [LICENSE](LICENSE).

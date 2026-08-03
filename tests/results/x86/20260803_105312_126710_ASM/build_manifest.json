@@ -1,0 +1,724 @@
+{
+  "schema": 1,
+  "generated_utc": "2026-08-03T08:53:13+00:00",
+  "repository_revision": "39aa12d69ff4519f757ac8fc1be7cdf2aa492c02",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "compiler": "g++",
+  "compiler_version": "g++ (Rev13, Built by MSYS2 project) 15.2.0",
+  "flag_source": "Makefile CPPFLAGS/COMMON_FLAGS/NOOPT_FLAGS/OPT_FLAGS",
+  "assembly_note": "benchmark flags are used directly; compiler-equivalent vectorizer-disable flags may replace Makefile spelling",
+  "sources": [
+    {
+      "source": "src\\bench_barret_reist.cpp",
+      "sha256": "7330dc69dd35612245621afe349bbb26dcf77ed7a62ae2df254f65afc14bae5c",
+      "kernel_hints": [
+        "classic_modadd",
+        "BarrettContext64::reduce_centered",
+        "BarrettContext32::reduce_centered",
+        "barrett_reduce32_avx2",
+        "reist_add_avx2"
+      ],
+      "profiles": {
+        "O0": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_barret_reist_O0.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize",
+            "-S",
+            "src\\bench_barret_reist.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_barret_reist_O0.s"
+          ],
+          "kernels_found": [
+            "(anonymous namespace)::BarrettContext32::reduce_centered(int) const",
+            "(anonymous namespace)::BarrettContext64::reduce_centered(long long) const",
+            "(anonymous namespace)::classic_modadd(long long, long long, long long)"
+          ],
+          "kernel_hints_not_emitted": [
+            "barrett_reduce32_avx2",
+            "reist_add_avx2"
+          ]
+        },
+        "O3": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_barret_reist_O3.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native",
+            "-S",
+            "src\\bench_barret_reist.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_barret_reist_O3.s"
+          ],
+          "kernels_found": [],
+          "kernel_hints_not_emitted": [
+            "classic_modadd",
+            "BarrettContext64::reduce_centered",
+            "BarrettContext32::reduce_centered",
+            "barrett_reduce32_avx2",
+            "reist_add_avx2"
+          ]
+        }
+      }
+    },
+    {
+      "source": "src\\bench_hashmix.cpp",
+      "sha256": "ed342b6eeea479f28bc167975fff847539e4c1b8ea2dc3253c36b0d4f33cf296",
+      "kernel_hints": [
+        "classic_step",
+        "centered_step"
+      ],
+      "profiles": {
+        "O0": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_hashmix_O0.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize",
+            "-S",
+            "src\\bench_hashmix.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_hashmix_O0.s"
+          ],
+          "kernels_found": [
+            "(anonymous namespace)::centered_step(long long, long long)",
+            "(anonymous namespace)::classic_step(unsigned long long, unsigned long long)"
+          ],
+          "kernel_hints_not_emitted": []
+        },
+        "O3": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_hashmix_O3.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native",
+            "-S",
+            "src\\bench_hashmix.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_hashmix_O3.s"
+          ],
+          "kernels_found": [],
+          "kernel_hints_not_emitted": [
+            "classic_step",
+            "centered_step"
+          ]
+        }
+      }
+    },
+    {
+      "source": "src\\bench_modadd_suite.cpp",
+      "sha256": "be7f39d2a2687ac23cd6a35019fe1f183e197cf3ae317607c5059dc16b561412",
+      "kernel_hints": [
+        "classic_modadd_runtime_kernel",
+        "reist_modadd_runtime_kernel",
+        "classic_modadd_const_",
+        "reist_modadd_const_"
+      ],
+      "profiles": {
+        "O0": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modadd_suite_O0.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize",
+            "-S",
+            "src\\bench_modadd_suite.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modadd_suite_O0.s"
+          ],
+          "kernels_found": [
+            "classic_modadd_const_1000000007",
+            "classic_modadd_const_10000019",
+            "classic_modadd_const_1000003",
+            "classic_modadd_const_10007",
+            "classic_modadd_const_257",
+            "classic_modadd_const_997",
+            "classic_modadd_runtime_kernel",
+            "reist_modadd_const_1000000007",
+            "reist_modadd_const_10000019",
+            "reist_modadd_const_1000003",
+            "reist_modadd_const_10007",
+            "reist_modadd_const_257",
+            "reist_modadd_const_997",
+            "reist_modadd_runtime_kernel"
+          ],
+          "kernel_hints_not_emitted": []
+        },
+        "O3": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modadd_suite_O3.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native",
+            "-S",
+            "src\\bench_modadd_suite.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modadd_suite_O3.s"
+          ],
+          "kernels_found": [
+            "classic_modadd_const_1000000007",
+            "classic_modadd_const_10000019",
+            "classic_modadd_const_1000003",
+            "classic_modadd_const_10007",
+            "classic_modadd_const_257",
+            "classic_modadd_const_997",
+            "classic_modadd_runtime_kernel",
+            "reist_modadd_const_1000000007",
+            "reist_modadd_const_10000019",
+            "reist_modadd_const_1000003",
+            "reist_modadd_const_10007",
+            "reist_modadd_const_257",
+            "reist_modadd_const_997",
+            "reist_modadd_runtime_kernel"
+          ],
+          "kernel_hints_not_emitted": []
+        }
+      }
+    },
+    {
+      "source": "src\\bench_modular.cpp",
+      "sha256": "39e9711c40a482e71b7c0ad5867a6c9c7219a34d6250c33dd29b757afbb9776a",
+      "kernel_hints": [
+        "classic_checksum",
+        "centered_checksum"
+      ],
+      "profiles": {
+        "O0": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modular_O0.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize",
+            "-S",
+            "src\\bench_modular.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modular_O0.s"
+          ],
+          "kernels_found": [
+            "(anonymous namespace)::centered_checksum(std::vector<long long, std::allocator<long long> > const&, long long)",
+            "(anonymous namespace)::classic_checksum(std::vector<long long, std::allocator<long long> > const&, long long)"
+          ],
+          "kernel_hints_not_emitted": []
+        },
+        "O3": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modular_O3.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native",
+            "-S",
+            "src\\bench_modular.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_modular_O3.s"
+          ],
+          "kernels_found": [],
+          "kernel_hints_not_emitted": [
+            "classic_checksum",
+            "centered_checksum"
+          ]
+        }
+      }
+    },
+    {
+      "source": "src\\bench_montgomery.cpp",
+      "sha256": "ea2b179244d4a248df78ae2bb242e3318360fa375f5751f91524106159df4460",
+      "kernel_hints": [
+        "classic_modadd",
+        "classic_modmul",
+        "centered_modmul_reference",
+        "MontgomeryContext::add",
+        "MontgomeryContext::multiply"
+      ],
+      "profiles": {
+        "O0": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_montgomery_O0.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize",
+            "-S",
+            "src\\bench_montgomery.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_montgomery_O0.s"
+          ],
+          "kernels_found": [
+            "(anonymous namespace)::MontgomeryContext::add(unsigned long long, unsigned long long) const",
+            "(anonymous namespace)::MontgomeryContext::multiply(unsigned long long, unsigned long long) const",
+            "(anonymous namespace)::centered_modmul_reference(long long, long long, long long)",
+            "(anonymous namespace)::classic_modadd(unsigned long long, unsigned long long, unsigned long long)",
+            "(anonymous namespace)::classic_modmul(unsigned long long, unsigned long long, unsigned long long)"
+          ],
+          "kernel_hints_not_emitted": []
+        },
+        "O3": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_montgomery_O3.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native",
+            "-S",
+            "src\\bench_montgomery.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_montgomery_O3.s"
+          ],
+          "kernels_found": [],
+          "kernel_hints_not_emitted": [
+            "classic_modadd",
+            "classic_modmul",
+            "centered_modmul_reference",
+            "MontgomeryContext::add",
+            "MontgomeryContext::multiply"
+          ]
+        }
+      }
+    },
+    {
+      "source": "src\\bench_poly_mod.cpp",
+      "sha256": "65854abbb20ec04b8a19ae20d26f0e59a9be7c98b8db6afac0e46467d4048d7a",
+      "kernel_hints": [
+        "classic_poly_runtime_kernel",
+        "reist_poly_runtime_kernel",
+        "classic_poly_const_",
+        "reist_poly_const_"
+      ],
+      "profiles": {
+        "O0": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_poly_mod_O0.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O0",
+            "-g",
+            "-fno-tree-vectorize",
+            "-S",
+            "src\\bench_poly_mod.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_poly_mod_O0.s"
+          ],
+          "kernels_found": [
+            "classic_poly_const_1000000007",
+            "classic_poly_const_100000007",
+            "classic_poly_const_10000019",
+            "classic_poly_const_1000003",
+            "classic_poly_runtime_kernel",
+            "reist_poly_const_1000000007",
+            "reist_poly_const_100000007",
+            "reist_poly_const_10000019",
+            "reist_poly_const_1000003",
+            "reist_poly_runtime_kernel"
+          ],
+          "kernel_hints_not_emitted": []
+        },
+        "O3": {
+          "assembly": "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_poly_mod_O3.s",
+          "benchmark_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "analysis_flags": [
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native"
+          ],
+          "command": [
+            "g++",
+            "-Iinclude",
+            "-std=c++20",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-O3",
+            "-DNDEBUG",
+            "-march=native",
+            "-S",
+            "src\\bench_poly_mod.cpp",
+            "-o",
+            "build\\integration\\benchmark-check-20260803_105145_049176\\20260803_105312_126710_ASM\\bench_poly_mod_O3.s"
+          ],
+          "kernels_found": [
+            "classic_poly_const_1000000007",
+            "classic_poly_const_100000007",
+            "classic_poly_const_10000019",
+            "classic_poly_const_1000003",
+            "classic_poly_runtime_kernel",
+            "reist_poly_const_1000000007",
+            "reist_poly_const_100000007",
+            "reist_poly_const_10000019",
+            "reist_poly_const_1000003",
+            "reist_poly_runtime_kernel"
+          ],
+          "kernel_hints_not_emitted": []
+        }
+      }
+    }
+  ]
+}

@@ -1,412 +1,317 @@
-#include <iostream>
-#include <vector>
-#include <cstdint>
-#include <cmath>
-#include <cassert>
-#include <iomanip>
+#include "reist_mod.hpp"
 
-// ============================================================
-// Context for Tree-REIST operations
-// ============================================================
-struct ReistTreeCtx {
-    int64_t B;           // modulus
-    int64_t half;        // B >> 1
-    uint64_t invB;       // fixed-point reciprocal
-    int shift;           // shift amount for reciprocal
-    
-    explicit ReistTreeCtx(int64_t modulus) 
-        : B(modulus), half(modulus >> 1), shift(32) {
-        double inv = 1.0 / (double)B;
-        invB = (uint64_t)(inv * (1ULL << shift));
+#include <algorithm>
+#include <array>
+#include <bit>
+#include <chrono>
+#include <cstdint>
+#include <exception>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+namespace {
+
+using Clock = std::chrono::steady_clock;
+
+// This is an algorithmic diagnostic.  The vector-backed reduction tree models
+// dependency depth; it is not a claim that a scalar CPU executes its nodes in
+// parallel or that its wall-clock time predicts an FPGA implementation.
+class TreeContext {
+public:
+    explicit TreeContext(std::int64_t modulus)
+        : modulus_(modulus) {
+        constexpr std::int64_t maximum_modulus = std::int64_t{1} << 20;
+        if (modulus_ < 3 || modulus_ > maximum_modulus) {
+            throw std::invalid_argument(
+                "experimental tree modulus must satisfy 3 <= B <= 2^20");
+        }
+        lower_ = -(modulus_ / 2);
+        upper_ = (modulus_ - 1) / 2;
+        reciprocal_ = static_cast<std::uint64_t>(radix_) /
+                      static_cast<std::uint64_t>(modulus_);
+        if (reciprocal_ == 0) {
+            throw std::logic_error("fixed-point reciprocal is zero");
+        }
     }
+
+    [[nodiscard]] std::int64_t modulus() const noexcept { return modulus_; }
+    [[nodiscard]] std::int64_t lower() const noexcept { return lower_; }
+    [[nodiscard]] std::int64_t upper() const noexcept { return upper_; }
+
+    [[nodiscard]] std::int64_t approximate_quotient(
+        std::int32_t value) const noexcept {
+        // value is int32 and reciprocal <= 2^20/3, so this product is far
+        // inside int64.  Explicit floor division avoids implementation-defined
+        // right shifts of negative signed integers.
+        const std::int64_t product =
+            static_cast<std::int64_t>(value) *
+            static_cast<std::int64_t>(reciprocal_);
+        return product >= 0
+                   ? product / radix_
+                   : -(((-product) + radix_ - 1) / radix_);
+    }
+
+    [[nodiscard]] std::int64_t initial_remainder(
+        std::int32_t value) const noexcept {
+        const std::int64_t quotient = approximate_quotient(value);
+        return static_cast<std::int64_t>(value) - quotient * modulus_;
+    }
+
+    [[nodiscard]] std::int64_t correction_count(
+        std::int64_t remainder) const noexcept {
+        if (remainder > upper_) {
+            return 1 + (remainder - upper_ - 1) / modulus_;
+        }
+        if (remainder < lower_) {
+            return -(1 + (lower_ - remainder - 1) / modulus_);
+        }
+        return 0;
+    }
+
+private:
+    static constexpr std::int64_t radix_ = std::int64_t{1} << 20;
+    std::int64_t modulus_;
+    std::int64_t lower_ = 0;
+    std::int64_t upper_ = 0;
+    std::uint64_t reciprocal_ = 0;
 };
 
-// ============================================================
-// Helper: Compute initial approximation using reciprocal
-// ============================================================
-inline int64_t approx_quotient(int64_t T, const ReistTreeCtx& ctx) {
-#ifndef _WIN32
-    return (int64_t)(((__int128_t)T * ctx.invB) >> ctx.shift);
-#else
-    // Windows MSVC does not support __int128_t. Use 64-bit multiplication as fallback (less precise for large T).
-    return (int64_t)(((int64_t)T * (int64_t)ctx.invB) >> ctx.shift);
-    // NOTE: This fallback may lose precision for large T. For full 128-bit support, use a library like boost::multiprecision.
-#endif
+[[nodiscard]] std::uint64_t correction_magnitude(std::int64_t count) noexcept {
+    return count < 0
+               ? static_cast<std::uint64_t>(-(count + 1)) + 1U
+               : static_cast<std::uint64_t>(count);
 }
 
-// ============================================================
-// REIST-Linear: Sequential correction (baseline)
-// ============================================================
-inline int64_t reist_linear(int64_t T, const ReistTreeCtx& ctx) {
-    int64_t Q = approx_quotient(T, ctx);
-    int64_t R = T - Q * ctx.B;
-    
-    // Sequential correction
-    while (R > ctx.half) {
-        R -= ctx.B;
-        Q++;
+[[nodiscard]] std::int64_t reduce_linear(std::int32_t value,
+                                         const TreeContext& context) noexcept {
+    std::int64_t remainder = context.initial_remainder(value);
+    while (remainder > context.upper()) {
+        remainder -= context.modulus();
     }
-    while (R <= -ctx.half) {
-        R += ctx.B;
-        Q--;
+    while (remainder < context.lower()) {
+        remainder += context.modulus();
     }
-    
-    return R;
+    return remainder;
 }
 
-// ============================================================
-// REIST-Tree: Hierarchical parallel correction (CORRECTED)
-// ============================================================
-
-// Phase 1: Determine how many corrections are needed
-// Using CEILING division for correct count
-inline int64_t compute_correction_count(int64_t R, const ReistTreeCtx& ctx) {
-    if (R > ctx.half) {
-        // Positive corrections: ceiling division
-        // ceil((R - half) / B) = floor((R - half + B - 1) / B)
-        return (R - ctx.half + ctx.B - 1) / ctx.B;
-    } else if (R <= -ctx.half) {
-        // Negative corrections: ceiling of absolute value, negated
-        // -ceil((half - R) / B) = -floor((half - R + B - 1) / B)
-        return -((ctx.half - R + ctx.B - 1) / ctx.B);
+[[nodiscard]] std::int64_t tree_sum(std::int64_t correction_count,
+                                    std::int64_t modulus) {
+    const std::uint64_t count = correction_magnitude(correction_count);
+    constexpr std::uint64_t maximum_terms = 1'000'000;
+    if (count > maximum_terms) {
+        throw std::length_error(
+            "experimental correction tree exceeds one million terms");
     }
-    return 0;
+    if (count == 0) {
+        return 0;
+    }
+
+    const std::int64_t term = correction_count > 0 ? modulus : -modulus;
+    std::vector<std::int64_t> level(static_cast<std::size_t>(count), term);
+    while (level.size() > 1) {
+        std::size_t output = 0;
+        std::size_t input = 0;
+        for (; input + 1 < level.size(); input += 2) {
+            level[output++] = level[input] + level[input + 1];
+        }
+        if (input < level.size()) {
+            level[output++] = level[input];
+        }
+        level.resize(output);
+    }
+    return level.front();
 }
 
-// Phase 2: Evaluate independent correction terms
-// CORRECTED: Each c_i depends ONLY on R0, i, half, B
-// c_i is active if: (R0 - i*B) > half  (positive case)
-//                   (R0 + i*B) <= -half (negative case)
-inline void evaluate_corrections_correct(int64_t R0, const ReistTreeCtx& ctx, 
-                                         int64_t k, std::vector<int64_t>& corrections) {
-    corrections.clear();
-    corrections.reserve(std::abs(k));
-    
-    if (k > 0) {
-        // Positive corrections
-        for (int64_t i = 0; i < k; i++) {
-            // Check: R0 - i*B > half
-            // This is the INDEPENDENT condition for c_i
-            if (R0 - i * ctx.B > ctx.half) {
-                corrections.push_back(ctx.B);
-            } else {
-                corrections.push_back(0);
+[[nodiscard]] std::int64_t reduce_tree(std::int32_t value,
+                                       const TreeContext& context) {
+    const std::int64_t initial = context.initial_remainder(value);
+    const std::int64_t count = context.correction_count(initial);
+    const std::int64_t result =
+        initial - tree_sum(count, context.modulus());
+    if (result < context.lower() || result > context.upper()) {
+        throw std::logic_error("tree correction did not produce a centered result");
+    }
+    return result;
+}
+
+bool report_preflight_failure(std::int64_t modulus, std::int32_t value,
+                              std::int64_t expected,
+                              std::int64_t linear,
+                              std::int64_t tree) {
+    std::cerr << "Preflight failed: B=" << modulus << ", T=" << value
+              << ", expected=" << expected << ", linear=" << linear
+              << ", tree=" << tree << '\n';
+    return false;
+}
+
+bool preflight() {
+    const std::array<std::int64_t, 7> moduli{
+        3, 4, 13, 14, 257, 1'024, 65'521};
+    bool exercised_tree = false;
+
+    for (const std::int64_t modulus : moduli) {
+        const TreeContext context(modulus);
+        std::vector<std::int32_t> values{
+            std::numeric_limits<std::int32_t>::min(),
+            std::numeric_limits<std::int32_t>::min() + 1,
+            static_cast<std::int32_t>(-2 * modulus),
+            static_cast<std::int32_t>(-modulus - 1),
+            static_cast<std::int32_t>(-modulus),
+            static_cast<std::int32_t>(context.lower() - 1),
+            static_cast<std::int32_t>(context.lower()),
+            -1,
+            0,
+            1,
+            static_cast<std::int32_t>(context.upper()),
+            static_cast<std::int32_t>(context.upper() + 1),
+            static_cast<std::int32_t>(modulus),
+            static_cast<std::int32_t>(2 * modulus),
+            std::numeric_limits<std::int32_t>::max() - 1,
+            std::numeric_limits<std::int32_t>::max(),
+        };
+
+        std::uint64_t random = UINT64_C(0xD1B54A32D192ED03) ^
+                               static_cast<std::uint64_t>(modulus);
+        for (int iteration = 0; iteration < 1'024; ++iteration) {
+            random = random * UINT64_C(2862933555777941757) +
+                     UINT64_C(3037000493);
+            values.push_back(std::bit_cast<std::int32_t>(
+                static_cast<std::uint32_t>(random)));
+        }
+
+        for (const std::int32_t value : values) {
+            const std::int64_t expected = reist::center_remainder(
+                static_cast<std::int64_t>(value), modulus);
+            const std::int64_t linear = reduce_linear(value, context);
+            const std::int64_t tree = reduce_tree(value, context);
+            exercised_tree = exercised_tree ||
+                             correction_magnitude(context.correction_count(
+                                 context.initial_remainder(value))) > 2;
+            if (linear != expected || tree != expected) {
+                return report_preflight_failure(modulus, value, expected,
+                                                linear, tree);
             }
         }
-    } else if (k < 0) {
-        // Negative corrections
-        for (int64_t i = 0; i < -k; i++) {
-            // Check: R0 + i*B <= -half
-            if (R0 + i * ctx.B <= -ctx.half) {
-                corrections.push_back(-ctx.B);
-            } else {
-                corrections.push_back(0);
+    }
+    if (!exercised_tree) {
+        std::cerr << "Preflight did not exercise a non-trivial tree.\n";
+        return false;
+    }
+    return true;
+}
+
+template <class Reducer>
+double benchmark(const std::vector<std::int32_t>& inputs,
+                 std::vector<std::int64_t>& outputs,
+                 Reducer&& reducer) {
+    const auto start = Clock::now();
+    for (std::size_t index = 0; index < inputs.size(); ++index) {
+        outputs[index] = reducer(inputs[index]);
+    }
+    const auto stop = Clock::now();
+    return std::chrono::duration<double>(stop - start).count();
+}
+
+std::uint64_t hash_results(const std::vector<std::int64_t>& values) noexcept {
+    std::uint64_t hash = UINT64_C(1469598103934665603);
+    for (const std::int64_t value : values) {
+        hash ^= static_cast<std::uint64_t>(value);
+        hash *= UINT64_C(1099511628211);
+    }
+    return hash;
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+    std::int64_t operations = 20'000;
+    try {
+        if (argc > 1) {
+            operations = std::stoll(argv[1]);
+        }
+    } catch (const std::exception& error) {
+        std::cerr << "Invalid operation count: " << error.what() << '\n';
+        return 1;
+    }
+    if (operations <= 0 || operations > 5'000'000) {
+        std::cerr << "Operation count must be in [1, 5000000].\n";
+        return 1;
+    }
+
+    try {
+        if (!preflight()) {
+            return 2;
+        }
+    } catch (const std::exception& error) {
+        std::cerr << "Tree preflight raised an exception: " << error.what()
+                  << '\n';
+        return 2;
+    }
+
+    try {
+        const TreeContext context(13);
+        std::vector<std::int32_t> inputs(
+            static_cast<std::size_t>(operations));
+        std::uint64_t random = UINT64_C(0x9E3779B97F4A7C15);
+        for (auto& value : inputs) {
+            random = random * UINT64_C(6364136223846793005) +
+                     UINT64_C(1442695040888963407);
+            value = std::bit_cast<std::int32_t>(
+                static_cast<std::uint32_t>(random));
+        }
+
+        std::vector<std::int64_t> linear_results(inputs.size());
+        std::vector<std::int64_t> tree_results(inputs.size());
+        const double linear_seconds = benchmark(
+            inputs, linear_results,
+            [&](std::int32_t value) { return reduce_linear(value, context); });
+        const double tree_seconds = benchmark(
+            inputs, tree_results,
+            [&](std::int32_t value) { return reduce_tree(value, context); });
+
+        if (linear_results != tree_results) {
+            const auto mismatch = std::mismatch(
+                linear_results.begin(), linear_results.end(),
+                tree_results.begin());
+            const std::size_t index = static_cast<std::size_t>(
+                mismatch.first - linear_results.begin());
+            std::cerr << "Postflight mismatch at input " << index
+                      << ": T=" << inputs[index]
+                      << ", linear=" << linear_results[index]
+                      << ", tree=" << tree_results[index] << '\n';
+            return 3;
+        }
+
+        for (std::size_t index = 0; index < inputs.size(); ++index) {
+            const std::int64_t expected = reist::center_remainder(
+                static_cast<std::int64_t>(inputs[index]), context.modulus());
+            if (tree_results[index] != expected) {
+                std::cerr << "Postflight reference mismatch at input " << index
+                          << '\n';
+                return 3;
             }
         }
-    }
-}
 
-// Alternative: Simplified version (knowing all k corrections are needed)
-// This is what we'll use in practice since our k calculation is correct
-inline void evaluate_corrections_simple(int64_t k, const ReistTreeCtx& ctx,
-                                       std::vector<int64_t>& corrections) {
-    corrections.clear();
-    corrections.reserve(std::abs(k));
-    
-    if (k > 0) {
-        for (int64_t i = 0; i < k; i++) {
-            corrections.push_back(ctx.B);
-        }
-    } else if (k < 0) {
-        for (int64_t i = 0; i < -k; i++) {
-            corrections.push_back(-ctx.B);
-        }
+        const std::uint64_t sink = hash_results(tree_results);
+        std::cout << std::fixed << std::setprecision(6)
+                  << "Experimental scalar REIST correction-tree diagnostic\n"
+                  << "Preflight: passed (odd/even moduli and int32 edges)\n"
+                  << "Canonical interval: [-B/2, B/2)\n"
+                  << "Inputs: " << operations
+                  << " identical independent reductions, B=13\n"
+                  << "Linear correction chain: " << linear_seconds << " s\n"
+                  << "Vector-backed tree sum:  " << tree_seconds << " s\n"
+                  << "Note: CPU wall time includes tree allocation and does not "
+                     "predict hardware parallel latency.\n"
+                  << "Postflight: passed\n"
+                  << "Sink: " << sink << '\n';
+    } catch (const std::exception& error) {
+        std::cerr << "Tree diagnostic failed: " << error.what() << '\n';
+        return 4;
     }
-}
-
-// Phase 3: Tree reduction - combine corrections hierarchically
-// This is the key insight: instead of applying corrections sequentially,
-// we add them up in a tree structure: O(log k) depth instead of O(k)
-inline int64_t tree_reduce(const std::vector<int64_t>& corrections, bool verbose = false) {
-    if (corrections.empty()) return 0;
-    if (corrections.size() == 1) return corrections[0];
-    
-    std::vector<int64_t> current = corrections;
-    int level = 0;
-    
-    while (current.size() > 1) {
-        std::vector<int64_t> next_level;
-        next_level.reserve((current.size() + 1) / 2);
-        
-        if (verbose) {
-            std::cout << "  Level " << level << " (size=" << current.size() << "): [";
-            for (size_t i = 0; i < std::min(current.size(), size_t(4)); i++) {
-                std::cout << current[i];
-                if (i < std::min(current.size(), size_t(4)) - 1) std::cout << ", ";
-            }
-            if (current.size() > 4) std::cout << ", ...";
-            std::cout << "]\n";
-        }
-        
-        // Pairwise addition - in parallel hardware, all pairs computed simultaneously
-        for (size_t i = 0; i + 1 < current.size(); i += 2) {
-            next_level.push_back(current[i] + current[i + 1]);
-        }
-        
-        // Handle odd element
-        if (current.size() % 2 == 1) {
-            next_level.push_back(current.back());
-        }
-        
-        current = std::move(next_level);
-        level++;
-    }
-    
-    if (verbose && level > 0) {
-        std::cout << "  Level " << level << " (size=1): [" << current[0] << "]\n";
-    }
-    
-    return current[0];
-}
-
-// Complete REIST-Tree reduction
-inline int64_t reist_tree(int64_t T, const ReistTreeCtx& ctx, bool verbose = false) {
-    // Step 1: Initial approximation
-    int64_t Q = approx_quotient(T, ctx);
-    int64_t R = T - Q * ctx.B;
-    
-    if (verbose) {
-        std::cout << "Initial: Q=" << Q << ", R=" << R << "\n";
-    }
-    
-    // Step 2: Determine correction count (CORRECTED: using ceiling division)
-    int64_t k = compute_correction_count(R, ctx);
-    
-    if (verbose) {
-        std::cout << "Corrections needed: k=" << k << "\n";
-    }
-    
-    if (k == 0) {
-        return R;  // Already in centered range
-    }
-    
-    // Optimization: for small k, linear is faster (no tree overhead)
-    if (std::abs(k) <= 2) {
-        if (verbose) std::cout << "Using linear correction (k too small)\n";
-        while (R > ctx.half) R -= ctx.B;
-        while (R <= -ctx.half) R += ctx.B;
-        return R;
-    }
-    
-    // Step 3: Evaluate correction terms (parallel in hardware)
-    std::vector<int64_t> corrections;
-    evaluate_corrections_simple(k, ctx, corrections);
-    
-    if (verbose) {
-        std::cout << "Correction terms: k=" << corrections.size() << " terms of " 
-                  << (k > 0 ? ctx.B : -ctx.B) << " each\n";
-    }
-    
-    // Step 4: Tree reduction (logarithmic depth)
-    if (verbose) std::cout << "Tree reduction:\n";
-    int64_t total_correction = tree_reduce(corrections, verbose);
-    
-    if (verbose) {
-        std::cout << "Total correction: " << total_correction << "\n";
-    }
-    
-    // Step 5: Apply total correction
-    R -= total_correction;
-    
-    if (verbose) {
-        std::cout << "After correction: R=" << R << "\n";
-    }
-    
-    // Final centering (should be none if our math is correct!)
-    int final_corrections = 0;
-    while (R > ctx.half) {
-        R -= ctx.B;
-        final_corrections++;
-    }
-    while (R <= -ctx.half) {
-        R += ctx.B;
-        final_corrections--;
-    }
-    
-    if (verbose && final_corrections != 0) {
-        std::cout << "⚠️  Warning: " << final_corrections << " final corrections needed!\n";
-    }
-    
-    return R;
-}
-
-// ============================================================
-// Verification: Test the independent evaluation formula
-// ============================================================
-void test_independent_evaluation(int64_t R0, int64_t B, int64_t half) {
-    std::cout << "\n--- Testing Independent Evaluation Formula ---\n";
-    std::cout << "R0=" << R0 << ", B=" << B << ", half=" << half << "\n\n";
-    
-    // Compute k
-    int64_t k;
-    if (R0 > half) {
-        k = (R0 - half + B - 1) / B;
-    } else if (R0 <= -half) {
-        k = -((half - R0 + B - 1) / B);
-    } else {
-        k = 0;
-    }
-    
-    std::cout << "k = " << k << "\n\n";
-    
-    if (k > 0) {
-        std::cout << "Testing condition: c_i = B if (R0 - i*B) > half\n";
-        std::cout << std::setw(5) << "i" << std::setw(15) << "R0 - i*B" 
-                  << std::setw(15) << "> half?" << std::setw(10) << "c_i" << "\n";
-        std::cout << std::string(45, '-') << "\n";
-        
-        for (int64_t i = 0; i < std::min(k + 2, (int64_t)10); i++) {
-            int64_t remainder = R0 - i * B;
-            bool active = remainder > half;
-            std::cout << std::setw(5) << i 
-                      << std::setw(15) << remainder
-                      << std::setw(15) << (active ? "YES" : "NO")
-                      << std::setw(10) << (active ? B : 0) << "\n";
-        }
-        
-        if (k > 10) {
-            std::cout << "  ... (" << (k - 10) << " more corrections)\n";
-        }
-    }
-}
-
-// ============================================================
-// Testing and demonstration
-// ============================================================
-
-void test_equivalence(int64_t T, int64_t B) {
-    std::cout << "\n========================================\n";
-    std::cout << "Testing: T=" << T << ", B=" << B << "\n";
-    std::cout << "========================================\n";
-    
-    ReistTreeCtx ctx(B);
-    
-    std::cout << "\n--- REIST-Linear ---\n";
-    int64_t r_linear = reist_linear(T, ctx);
-    std::cout << "Result: " << r_linear << "\n";
-    
-    std::cout << "\n--- REIST-Tree (Corrected) ---\n";
-    int64_t r_tree = reist_tree(T, ctx, true);
-    std::cout << "Result: " << r_tree << "\n";
-    
-    std::cout << "\n--- Verification ---\n";
-    std::cout << "Linear result: " << r_linear << "\n";
-    std::cout << "Tree result:   " << r_tree << "\n";
-    
-    if (r_linear == r_tree) {
-        std::cout << "✓ Results match!\n";
-    } else {
-        std::cout << "✗ MISMATCH!\n";
-        std::cout << "  Expected (linear): " << r_linear << "\n";
-        std::cout << "  Got (tree):        " << r_tree << "\n";
-        assert(false && "Results don't match!");
-    }
-    
-    // Verify correctness: R must be in [-half, half]
-    assert(r_linear > -ctx.half && r_linear <= ctx.half);
-    assert(r_tree > -ctx.half && r_tree <= ctx.half);
-    
-    // Verify: T = q*B + r for some integer q
-    int64_t q_linear = (T - r_linear) / ctx.B;
-    assert(T == q_linear * ctx.B + r_linear);
-    
-    int64_t q_tree = (T - r_tree) / ctx.B;
-    assert(T == q_tree * ctx.B + r_tree);
-}
-
-void analyze_complexity(int64_t T, int64_t B) {
-    ReistTreeCtx ctx(B);
-    int64_t Q = approx_quotient(T, ctx);
-    int64_t R = T - Q * ctx.B;
-    int64_t k = compute_correction_count(R, ctx);
-    
-    std::cout << "\n--- Complexity Analysis ---\n";
-    std::cout << "T=" << T << ", B=" << B << "\n";
-    std::cout << "Initial remainder R=" << R << "\n";
-    std::cout << "Corrections needed: k=" << k << "\n";
-    
-    if (k != 0) {
-        int64_t abs_k = std::abs(k);
-        int tree_depth = 0;
-        int64_t level_size = abs_k;
-        while (level_size > 1) {
-            tree_depth++;
-            level_size = (level_size + 1) / 2;
-        }
-        
-        std::cout << "\nLinear method:\n";
-        std::cout << "  Critical path: O(" << abs_k << ") = " << abs_k << " sequential steps\n";
-        std::cout << "  Total work: " << abs_k << " corrections\n";
-        std::cout << "  Parallelism: None (fully sequential)\n";
-        
-        std::cout << "\nTree method:\n";
-        std::cout << "  Critical path: O(log " << abs_k << ") = " << (tree_depth + 1) << " levels\n";
-        std::cout << "  Total work: " << abs_k << " corrections (same)\n";
-        std::cout << "  Parallelism: Up to " << abs_k << " parallel evaluations\n";
-        
-        double speedup = (double)abs_k / (tree_depth + 1);
-        std::cout << "\nTheoretical speedup: " << std::fixed << std::setprecision(2) 
-                  << speedup << "x\n";
-        std::cout << "(assuming perfect parallelization)\n";
-        
-        // SIMD analysis
-        int simd_width = 8;  // AVX2 for int32
-        int simd_batches = (abs_k + simd_width - 1) / simd_width;
-        std::cout << "\nSIMD Analysis (AVX2, 8-wide):\n";
-        std::cout << "  Evaluation phase: " << simd_batches << " SIMD operations\n";
-        std::cout << "  Reduction phase: " << tree_depth << " levels\n";
-    }
-}
-
-int main() {
-    std::cout << "REIST Tree: Corrected Scalar Implementation\n";
-    std::cout << "============================================\n";
-    std::cout << "Using CEILING division for correct k calculation\n";
-    std::cout << "Independent evaluation: c_i = B if (R0 - i*B) > half\n\n";
-    
-    // Test the independent evaluation formula first
-    test_independent_evaluation(53, 13, 6);
-    test_independent_evaluation(10000010, 13, 6);
-    
-    // Test 1: Small correction
-    test_equivalence(157, 13);
-    analyze_complexity(157, 13);
-    
-    // Test 2: Medium correction
-    test_equivalence(10013, 13);
-    analyze_complexity(10013, 13);
-    
-    // Test 3: Large correction
-    test_equivalence(1000013, 13);
-    analyze_complexity(1000013, 13);
-    
-    // Test 4: Very large correction
-    test_equivalence(10000013, 13);
-    analyze_complexity(10000013, 13);
-    
-    // Test 5: Negative corrections
-    test_equivalence(-500007, 13);
-    analyze_complexity(-500007, 13);
-    
-    // Test 6: Edge case - exactly on boundary
-    test_equivalence(13 * 1000 + 6, 13);  // R0 = 6 (exactly at half)
-    
-    // Test 7: Edge case - just over boundary
-    test_equivalence(13 * 1000 + 7, 13);  // R0 = 7 (just over half)
-    
-    std::cout << "\n========================================\n";
-    std::cout << "All tests completed successfully! ✓\n";
-    std::cout << "========================================\n";
-    
     return 0;
 }

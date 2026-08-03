@@ -1,363 +1,322 @@
 #!/usr/bin/env python3
-import csv
-import os
-import glob
+"""Plot only benchmark data tied to a successful runner manifest.
+
+The old script selected files by timestamp glob and could accidentally mix
+different builds or consume a stale CSV.  This version resolves CSV artifacts
+through ``run_benchmarks.py`` manifests and verifies their SHA-256 hashes first.
+"""
+
+from __future__ import annotations
+
 import argparse
-from datetime import datetime
+import csv
+import datetime as dt
+import hashlib
+import json
+import pathlib
 import platform
+import sys
+from dataclasses import dataclass
+
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import numpy as np
+
+from generate_benchmark_report import (
+    load_run_manifest as load_verified_manifest,
+    calculate_repository_state,
+)
 
 
-# ---------------------------------------------------------
-# Data loading - handles O0, O3, and SIMD optimization levels
-# ---------------------------------------------------------
-def load_modadd(fname):
-    with open(fname, newline='') as f:
-        rows = list(csv.DictReader(f))
+REPOSITORY_ROOT = pathlib.Path(__file__).resolve().parents[1]
 
-    moduli = []
-    speedups = []
+@dataclass
+class DataSet:
+    label: str
+    manifest: pathlib.Path
+    quick: bool
+    dirty: bool = False
+    build_verified: bool = True
+    modadd: tuple[list[int], list[float]] | None = None
+    poly: tuple[list[int], list[float]] | None = None
 
-    for B in sorted({int(row["modulus"]) for row in rows}):
-        classic = [row for row in rows if int(row["modulus"]) == B and row["scenario"] == "classic_mod"]
-        reist   = [row for row in rows if int(row["modulus"]) == B and row["scenario"] == "reist_sym"]
 
-        if not classic or not reist:
+def sha256(path: pathlib.Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def load_modadd(path: pathlib.Path) -> tuple[list[int], list[float]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    points: list[tuple[int, float]] = []
+    keys = sorted({(int(row["modulus"]), row.get("mode", "")) for row in rows})
+    for modulus, mode in keys:
+        selected = [
+            row for row in rows
+            if int(row["modulus"]) == modulus and row.get("mode", "") == mode
+        ]
+        classic = next(
+            (row for row in selected if row["scenario"] == "classic_mod"), None
+        )
+        reist = next(
+            (row for row in selected if row["scenario"] == "reist_sym"), None
+        )
+        if classic is None or reist is None:
             continue
+        classic_seconds = float(classic["seconds"])
+        reist_seconds = float(reist["seconds"])
+        if classic_seconds <= 0.0 or reist_seconds <= 0.0:
+            raise ValueError(f"non-positive timing in {path}")
+        points.append((modulus, classic_seconds / reist_seconds))
 
-        tc = float(classic[0]["seconds"])
-        tr = float(reist[0]["seconds"])
-
-        if tr <= 0.0:
-            continue
-
-        moduli.append(B)
-        speedups.append(tc / tr)
-
-    return moduli, speedups
+    if not points:
+        raise ValueError(f"no paired classic/REIST rows in {path}")
+    return ([point[0] for point in points], [point[1] for point in points])
 
 
-def load_poly(fname):
-    qs, speedups = [], []
-    with open(fname, newline='') as f:
-        r = csv.DictReader(f)
-        for row in r:
-            qs.append(int(row["q"]))
-            speedups.append(float(row["speedup"]))
-    return qs, speedups
+def load_poly(path: pathlib.Path) -> tuple[list[int], list[float]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    points = [(int(row["q"]), float(row["speedup"])) for row in rows]
+    if not points or any(speedup <= 0.0 for _, speedup in points):
+        raise ValueError(f"invalid polynomial timing rows in {path}")
+    points.sort()
+    return ([point[0] for point in points], [point[1] for point in points])
 
 
-def parse_modadd_from_txt(txt_file):
-    """
-    Parse modadd speedup data directly from benchmark text output files.
-    Returns (moduli, speedups) lists.
-    """
-    moduli, speedups = [], []
-    
-    try:
-        with open(txt_file, 'r') as f:
-            content = f.read()
-            
-        # Extract speedup lines with regex
-        import re
-        pattern = r'Modulus B = (\d+).*?speedup\s*:\s*([0-9.]+)x'
-        matches = re.findall(pattern, content, re.DOTALL)
-        
-        for modulus_str, speedup_str in matches:
-            moduli.append(int(modulus_str))
-            speedups.append(float(speedup_str))
-            
-    except Exception as e:
-        print(f"Warning: Could not parse {txt_file}: {e}")
-        
-    return moduli, speedups
+def load_manifest(path: pathlib.Path, allow_quick: bool) -> DataSet:
+    bundle = load_verified_manifest(path, allow_quick=allow_quick)
+    document = bundle["data"]
+    current_status, current_state_hash = calculate_repository_state(path.parent)
+    repository = document.get("repository", {})
+    if (current_status != repository.get("status")
+            or current_state_hash != repository.get("state_sha256")):
+        raise ValueError(f"repository state changed after runner manifest {path}")
+    quick = bool(document.get("quick"))
 
+    build = document.get("build")
+    data = DataSet(
+        str(document.get("label", path.stem)),
+        path,
+        quick,
+        bool(document.get("repository", {}).get("status")),
+        bool(build["verified"]),
+    )
+    for records in bundle["artifacts"].values():
+        for artifact_record in records:
+            artifact = artifact_record["path"]
+            if artifact.name == "results_modadd_suite.csv":
+                data.modadd = load_modadd(artifact)
+            elif artifact.name == "results_poly_mod.csv":
+                data.poly = load_poly(artifact)
 
-def find_benchmark_files(result_dir, benchmark_name):
-    """
-    Find all benchmark result files for a given benchmark across optimization levels.
-    Returns dict with 'noopt', 'opt', 'simd' keys containing file paths and timestamps.
-    """
-    import glob
-    
-    files = {'noopt': [], 'opt': [], 'simd': []}
-    
-    # Map optimization suffixes to our keys
-    suffix_map = {'_O0.txt': 'noopt', '_O3.txt': 'opt', '_SIMD.txt': 'simd'}
-    
-    for suffix, key in suffix_map.items():
-        pattern = os.path.join(result_dir, f"*_bench_{benchmark_name}{suffix}")
-        matches = glob.glob(pattern)
-        
-        for match in matches:
-            # Extract timestamp from filename
-            filename = os.path.basename(match)
-            timestamp = filename.split('_bench_')[0]
-            files[key].append({'file': match, 'timestamp': timestamp})
-    
-    # Sort by timestamp (newest first)
-    for key in files:
-        files[key].sort(key=lambda x: x['timestamp'], reverse=True)
-    
-    return files
-
-
-def load_optimization_comparison_data(result_dir, prefix, benchmark_type):
-    """
-    Load data from all three optimization levels for comparison.
-    Returns dict with 'noopt', 'opt', 'simd' keys containing data.
-    """
-    data = {'noopt': None, 'opt': None, 'simd': None}
-    
-    # Find benchmark files for this benchmark type
-    benchmark_files = find_benchmark_files(result_dir, benchmark_type)
-    
-    for opt_level in data.keys():
-        file_list = benchmark_files.get(opt_level, [])
-        
-        if not file_list:
-            continue
-            
-        # Use the most recent file, or one matching the prefix if specified
-        target_file = None
-        if prefix:
-            # Look for file with matching timestamp prefix
-            for file_info in file_list:
-                if file_info['timestamp'].startswith(prefix):
-                    target_file = file_info['file']
-                    break
-        
-        if not target_file and file_list:
-            # Use the most recent file
-            target_file = file_list[0]['file']
-            
-        if target_file and os.path.exists(target_file):
-            try:
-                if benchmark_type == "modadd_suite":
-                    moduli, speedups = parse_modadd_from_txt(target_file)
-                    if moduli and speedups:
-                        data[opt_level] = {'moduli': moduli, 'speedups': speedups}
-                elif benchmark_type == "poly_mod":
-                    # For poly_mod, we still need to find the CSV file 
-                    # since the txt format is different
-                    timestamp = os.path.basename(target_file).split('_bench_')[0]
-                    csv_file = os.path.join(result_dir, f"{timestamp}_results_poly_mod.csv")
-                    if os.path.exists(csv_file):
-                        qs, speedups = load_poly(csv_file)
-                        if qs and speedups:
-                            data[opt_level] = {'qs': qs, 'speedups': speedups}
-                            
-            except Exception as e:
-                print(f"Warning: Could not load {opt_level} data from {target_file}: {e}")
-    
     return data
 
 
-# ---------------------------------------------------------
-# Enhanced plotting functions for three-way comparison
-# ---------------------------------------------------------
-def plot_optimization_comparison_modadd(data, out_path, title_suffix=""):
-    """
-    Plot modular addition speedup comparison across optimization levels.
-    """
-    plt.figure(figsize=(12, 8))
-    
-    colors = {'noopt': '#1f77b4', 'opt': '#ff7f0e', 'simd': '#2ca02c'}
-    # Use platform-appropriate SIMD label
-    simd_label = 'SIMD Optimization (O3+NEON)' if platform.machine() in ('aarch64', 'arm64') else 'SIMD Optimization (O3+AVX2)'
-    labels = {'noopt': 'No Optimization (O0)', 'opt': 'Standard Optimization (O3)', 'simd': simd_label}
-    markers = {'noopt': 'o', 'opt': 's', 'simd': '^'}
-    
-    for opt_level, level_data in data.items():
-        if level_data and level_data.get('moduli') and level_data.get('speedups'):
-            plt.plot(level_data['moduli'], level_data['speedups'], 
-                    marker=markers[opt_level], label=labels[opt_level], 
-                    color=colors[opt_level], linewidth=2, markersize=8)
-    
-    plt.xlabel("Modulus B", fontsize=12)
-    plt.ylabel("Speedup (classic / REIST)", fontsize=12)
-    plt.title(f"REIST Modular-Add Speedup Comparison{title_suffix}", fontsize=14, fontweight='bold')
-    plt.xscale("log")
-    plt.grid(True, alpha=0.3)
-    plt.legend(fontsize=11)
-    plt.tight_layout()
-    plt.savefig(out_path, dpi=300, bbox_inches="tight")
-    plt.close()
-    print("Saved", out_path)
-
-
-def plot_optimization_comparison_poly(data, out_path, title_suffix=""):
-    """
-    Plot polynomial modular addition speedup comparison across optimization levels.
-    """
-    plt.figure(figsize=(12, 8))
-    
-    colors = {'noopt': '#1f77b4', 'opt': '#ff7f0e', 'simd': '#2ca02c'}
-    labels = {'noopt': 'No Optimization (O0)', 'opt': 'Standard Optimization (O3)', 'simd': 'SIMD Optimization (O3+AVX2)'}
-    markers = {'noopt': 'o', 'opt': 's', 'simd': '^'}
-    
-    for opt_level, level_data in data.items():
-        if level_data and level_data.get('qs') and level_data.get('speedups'):
-            plt.plot(level_data['qs'], level_data['speedups'], 
-                    marker=markers[opt_level], label=labels[opt_level], 
-                    color=colors[opt_level], linewidth=2, markersize=8)
-    
-    plt.xlabel("Modulus q", fontsize=12)
-    plt.ylabel("Speedup (classic / REIST)", fontsize=12)
-    plt.title(f"Polynomial Modular-Add Speedup Comparison{title_suffix}", fontsize=14, fontweight='bold')
-    plt.xscale("log")
-    plt.grid(True, alpha=0.3)
-    plt.legend(fontsize=11)
-    plt.tight_layout()
-    plt.savefig(out_path, dpi=300, bbox_inches="tight")
-    plt.close()
-    print("Saved", out_path)
-
-
-# Legacy single-optimization plotting functions (kept for compatibility)
-def plot_speedup_modadd(csv_path, out_path):
-    moduli, speedups = load_modadd(csv_path)
-    if not moduli:
-        print("No data found in", csv_path)
-        return
-
-    plt.figure()
-    plt.plot(moduli, speedups, marker="o")
-    plt.xlabel("Modulus B")
-    plt.ylabel("Speedup (classic / REIST)")
-    plt.title("REIST modular-add speedup vs classic modulo")
-    plt.xscale("log")
-    plt.grid(True)
-    plt.savefig(out_path, bbox_inches="tight")
-    plt.close()
-    print("Saved", out_path)
-
-
-def plot_speedup_poly(csv_path, out_path):
-    qs, speedups = load_poly(csv_path)
-    if not qs:
-        print("No data found in", csv_path)
-        return
-
-    plt.figure()
-    plt.plot(qs, speedups, marker="o")
-    plt.xlabel("Modulus q")
-    plt.ylabel("Speedup (classic / REIST)")
-    plt.title("Polynomial modular-add speedup (large q)")
-    plt.xscale("log")
-    plt.grid(True)
-    plt.savefig(out_path, bbox_inches="tight")
-    plt.close()
-    print("Saved", out_path)
-
-
-# ---------------------------------------------------------
-# Result file resolver
-# ---------------------------------------------------------
-def resolve_result_file(result_dir, base_name, prefix):
-    """
-    Return file path based on:
-    1. exact prefix match (prefix_xxx.csv)
-    2. newest *_xxx.csv file
-    3. fallback xxx.csv if exists
-    """
+def discover_manifests(
+    result_dir: pathlib.Path,
+    explicit: list[pathlib.Path],
+    prefix: str | None,
+) -> list[pathlib.Path]:
+    candidates = explicit or list(result_dir.glob("*_MANIFEST.json"))
     if prefix:
-        candidate = os.path.join(result_dir, f"{prefix}_{base_name}")
-        if os.path.exists(candidate):
-            return candidate
+        candidates = [path for path in candidates if path.name.startswith(prefix)]
+    if not candidates:
+        raise ValueError(f"no runner manifests found in {result_dir}")
 
-    pattern = os.path.join(result_dir, f"*_{base_name}")
-    matches = glob.glob(pattern)
-    if matches:
-        matches.sort(key=os.path.getmtime, reverse=True)
-        return matches[0]
+    records: list[tuple[pathlib.Path, dict[str, object]]] = []
+    for path in candidates:
+        document = json.loads(path.read_text(encoding="utf-8"))
+        session_id = document.get("session_id")
+        if not isinstance(session_id, str) or not session_id:
+            if explicit:
+                raise ValueError(f"manifest has no session_id: {path}")
+            continue
+        records.append((path, document))
+    if not records:
+        raise ValueError("no session-bound runner manifests found")
 
-    fallback = os.path.join(result_dir, base_name)
-    return fallback if os.path.exists(fallback) else None
+    sessions = {str(document["session_id"]) for _, document in records}
+    if explicit and len(sessions) != 1:
+        raise ValueError("explicit manifests belong to different sessions")
+    if not explicit:
+        newest_session = max(
+            sessions,
+            key=lambda session: max(
+                path.stat().st_mtime_ns
+                for path, document in records
+                if document["session_id"] == session
+            ),
+        )
+        records = [
+            (path, document) for path, document in records
+            if document["session_id"] == newest_session
+        ]
+
+    by_label: dict[str, tuple[pathlib.Path, dict[str, object]]] = {}
+    for path, document in records:
+        label = str(document.get("label", path.stem))
+        if label not in {"O0", "O3", "SIMD"}:
+            if explicit:
+                raise ValueError(f"unexpected profile label in {path}: {label}")
+            continue
+        if label in by_label:
+            raise ValueError(f"selected session contains duplicate {label} manifests")
+        by_label[label] = (path, document)
+
+    missing = sorted({"O0", "O3", "SIMD"} - set(by_label))
+    if missing:
+        raise ValueError(
+            "selected session is incomplete; missing profiles: " + ", ".join(missing)
+        )
+
+    selected = list(by_label.values())
+    identity = {
+        (
+            document.get("repository", {}).get("commit"),
+            document.get("repository", {}).get("state_sha256"),
+            document.get("host", {}).get("platform"),
+            document.get("host", {}).get("machine"),
+            document.get("host", {}).get("processor"),
+            document.get("build", {}).get("system"),
+            document.get("build", {}).get("compiler", {}).get("executable"),
+            document.get("build", {}).get("compiler", {}).get("version"),
+            document.get("runner_sha256"),
+        )
+        for _, document in selected
+    }
+    if len(identity) != 1:
+        raise ValueError("selected manifests differ in source state or host")
+    return sorted((path for path, _ in selected), key=lambda item: item.name)
 
 
-# ---------------------------------------------------------
-# Main
-# ---------------------------------------------------------
-def main():
-    parser = argparse.ArgumentParser(description="Generate REIST benchmark plots comparing O0, O3, and SIMD optimizations.")
-    parser.add_argument("--prefix", type=str, help="Timestamp prefix of result files", default=None)
-    parser.add_argument("--legacy", action="store_true", help="Generate legacy single-optimization plots")
-    parser.add_argument("--result-dir", type=str, default=None, help="Directory where results live and where images will be written")
-    args = parser.parse_args()
+def legacy_data(result_dir: pathlib.Path) -> list[DataSet]:
+    """Explicit escape hatch for old, unverified flat CSV collections."""
+    modadd_files = sorted(
+        result_dir.rglob("*results_modadd_suite.csv"),
+        key=lambda path: path.stat().st_mtime_ns,
+    )
+    poly_files = sorted(
+        result_dir.rglob("*results_poly_mod.csv"),
+        key=lambda path: path.stat().st_mtime_ns,
+    )
+    data = DataSet("UNVERIFIED-LEGACY", result_dir, False)
+    if modadd_files:
+        data.modadd = load_modadd(modadd_files[-1])
+    if poly_files:
+        data.poly = load_poly(poly_files[-1])
+    if data.modadd is None and data.poly is None:
+        raise ValueError(f"no legacy CSV data found in {result_dir}")
+    return [data]
 
-    arch = platform.machine()
-    # Check for both aarch64 (Linux) and arm64 (macOS)
-    is_arm = arch in ("aarch64", "arm64")
-    default_result_dir = os.path.join("tests", "results", "arm" if is_arm else "x86")
 
-    # Allow override via CLI or environment
-    result_dir = args.result_dir or os.environ.get("RESULT_DIR") or default_result_dir
+def plot(
+    datasets: list[DataSet],
+    kind: str,
+    output: pathlib.Path,
+) -> bool:
+    available = [data for data in datasets if getattr(data, kind) is not None]
+    if not available:
+        return False
 
-    # Allow override for timestamp prefix via env/CLI
-    prefix = args.prefix or os.environ.get("RESULT_TIMESTAMP")
+    fig, axis = plt.subplots(figsize=(10, 6))
+    markers = ["o", "s", "^", "D", "v", "P"]
+    for index, data in enumerate(available):
+        x_values, speedups = getattr(data, kind)
+        qualifiers = []
+        if data.quick:
+            qualifiers.append("quick")
+        if data.dirty:
+            qualifiers.append("dirty")
+        if not data.build_verified:
+            qualifiers.append("declared build")
+        label = data.label + (f" ({', '.join(qualifiers)})" if qualifiers else "")
+        axis.plot(
+            x_values,
+            speedups,
+            marker=markers[index % len(markers)],
+            linewidth=2,
+            label=label,
+        )
 
-    # Output timestamp
-    timestamp = prefix or datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    if args.legacy:
-        # Legacy mode: generate single-optimization plots
-        modadd_csv = resolve_result_file(result_dir, "results_modadd_suite.csv", prefix)
-        poly_csv   = resolve_result_file(result_dir, "results_poly_mod.csv", prefix)
-        
-        modadd_img = os.path.join(result_dir, f"{timestamp}_plot_modadd_speedup.png")
-        poly_img   = os.path.join(result_dir, f"{timestamp}_plot_poly_speedup.png")
-        
-        if modadd_csv:
-            plot_speedup_modadd(modadd_csv, modadd_img)
-        else:
-            print("Missing modadd CSV for prefix:", prefix)
-        
-        if poly_csv:
-            plot_speedup_poly(poly_csv, poly_img)
-        else:
-            print("Missing poly CSV for prefix:", prefix)
+    noun = "Modular addition" if kind == "modadd" else "Polynomial addition"
+    if any(data.label == "UNVERIFIED-LEGACY" for data in available):
+        qualifier = "UNVERIFIED LEGACY DATA (not reportable)"
+    elif any(data.quick or data.dirty or not data.build_verified
+             for data in available):
+        reasons = []
+        if any(data.quick for data in available):
+            reasons.append("QUICK/SMOKE")
+        if any(data.dirty for data in available):
+            reasons.append("DIRTY WORKTREE")
+        if any(not data.build_verified for data in available):
+            reasons.append("DECLARED BUILD")
+        qualifier = " + ".join(reasons) + " DATA (not reportable)"
     else:
-        # New mode: generate three-way optimization comparison plots
-        print("Generating optimization comparison plots...")
-        
-        # Load data for all optimization levels
-        print("Searching for benchmark result files...")
-        modadd_data = load_optimization_comparison_data(result_dir, prefix, "modadd_suite")
-        poly_data = load_optimization_comparison_data(result_dir, prefix, "poly_mod")
-        
-        # Show which optimization levels have data
-        modadd_levels = [level for level, data in modadd_data.items() if data]
-        poly_levels = [level for level, data in poly_data.items() if data]
-        
-        if modadd_levels:
-            print(f"Found modadd data for optimization levels: {', '.join(modadd_levels)}")
-        if poly_levels:
-            print(f"Found poly data for optimization levels: {', '.join(poly_levels)}")
-        
-        # Generate comparison plots
-        modadd_comparison_img = os.path.join(result_dir, f"{timestamp}_optimization_comparison_modadd.png")
-        poly_comparison_img = os.path.join(result_dir, f"{timestamp}_optimization_comparison_poly.png")
-        
-        # Check if we have data from multiple optimization levels
-        modadd_levels = sum(1 for data in modadd_data.values() if data)
-        poly_levels = sum(1 for data in poly_data.values() if data)
-        
-        if modadd_levels > 0:
-            plot_optimization_comparison_modadd(modadd_data, modadd_comparison_img)
-            if modadd_levels == 1:
-                print("Warning: Only one optimization level found for modadd comparison")
+        qualifier = "validated optimization comparison"
+    axis.set_xlabel("Modulus B" if kind == "modadd" else "Modulus q")
+    axis.set_ylabel("Speedup (classic / canonical REIST)")
+    axis.set_title(f"{noun}: {qualifier}")
+    axis.set_xscale("log")
+    axis.grid(True, alpha=0.3)
+    axis.legend()
+    fig.tight_layout()
+    fig.savefig(output, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {output}")
+    return True
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Plot hash-verified REIST runner artifacts"
+    )
+    parser.add_argument("--result-dir", type=pathlib.Path)
+    parser.add_argument("--manifest", action="append", type=pathlib.Path, default=[])
+    parser.add_argument("--prefix")
+    parser.add_argument("--output-prefix")
+    parser.add_argument("--allow-quick", action="store_true")
+    parser.add_argument(
+        "--legacy",
+        action="store_true",
+        help="explicitly plot newest historical CSVs without claiming validation",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_arguments()
+    machine = platform.machine().lower()
+    family = "arm" if machine in {"aarch64", "arm64"} or machine.startswith("arm") else "x86"
+    result_dir = (args.result_dir or
+                  REPOSITORY_ROOT / "tests" / "results" / family)
+
+    try:
+        if args.legacy:
+            datasets = legacy_data(result_dir)
         else:
-            print("No modadd data found for optimization comparison")
-            
-        if poly_levels > 0:
-            plot_optimization_comparison_poly(poly_data, poly_comparison_img)
-            if poly_levels == 1:
-                print("Warning: Only one optimization level found for poly comparison")
-        else:
-            print("No poly data found for optimization comparison")
+            manifests = discover_manifests(result_dir, args.manifest, args.prefix)
+            datasets = [load_manifest(path, args.allow_quick) for path in manifests]
+
+        prefix = args.output_prefix or dt.datetime.now().strftime("%Y%m%d_%H%M%S")
+        result_dir.mkdir(parents=True, exist_ok=True)
+        modadd_output = result_dir / f"{prefix}_optimization_comparison_modadd.png"
+        poly_output = result_dir / f"{prefix}_optimization_comparison_poly.png"
+        produced = plot(datasets, "modadd", modadd_output)
+        produced = plot(datasets, "poly", poly_output) or produced
+        if not produced:
+            raise ValueError("selected manifests contain no plottable CSV artifacts")
+        return 0
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

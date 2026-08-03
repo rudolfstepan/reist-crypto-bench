@@ -1,19 +1,13 @@
-# Release
+# Archived application build
 
-This folder contains the Flutter application builds for each platform.
+`apple_silicon/reist_division.zip` is a historical Flutter/macOS convenience
+build. Its Flutter source, build recipe, compiler metadata, and correctness
+manifest are not present in this repository. The binary therefore cannot be
+reproduced or verified against the current canonical interval
+`[-B/2, B/2)` and **must not be used as a paper benchmark or cited artifact**.
 
-## About the Flutter App
-
-The Flutter app is a mobile application that implements the cryptographic benchmarks for different platforms (iOS, Android, etc.). While the compiled binaries are provided here, **the source code for the Flutter application is not public in this repository**.
-
-## C++ Benchmarks
-
-The C++ benchmark implementations used in this app are based on the benchmark files in the `src/` directory of this repository. The core cryptographic algorithms and their optimizations (including NEON, AVX2, and other SIMD implementations) are similar to those found in the public benchmark suite.
-
-## Platform-Specific Builds
-
-Each subdirectory contains the platform-specific release builds:
-
-- **apple_silicon/**: Builds optimized for Apple Silicon (ARM64) architecture
-
-For more information about the benchmarks and their results, refer to the [BENCHMARKS.md](../docs/BENCHMARKS.md) documentation.
+The maintained, reportable implementation is the C++ source under `src/` and
+`include/`, built with CMake or the top-level Makefile and checked by CTest plus
+the manifest-based runner described in [BENCHMARKS.md](../docs/BENCHMARKS.md).
+FPGA sources and the precise provenance/buildability status of the published
+pin are linked from the main [README](../README.md).

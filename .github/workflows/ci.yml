@@ -1,0 +1,205 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-build:
+    name: Linux ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: GCC
+            cxx: g++
+          - name: Clang
+            cxx: clang++
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+          -DREIST_WARNINGS_AS_ERRORS=ON
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  windows-clang:
+    name: Windows Clang
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate toolchain
+        shell: pwsh
+        run: |
+          clang++ --version
+          cmake --version
+          ninja --version
+      - name: Configure
+        shell: pwsh
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DREIST_WARNINGS_AS_ERRORS=ON
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --parallel 2
+      - name: Test
+        shell: pwsh
+        run: ctest --test-dir build --output-on-failure
+
+  linux-arm64:
+    name: Linux ARM64 GCC and NEON
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_COMPILER=g++
+          -DREIST_WARNINGS_AS_ERRORS=ON
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Test scalar and NEON paths
+        run: ctest --test-dir build --output-on-failure
+      - name: Run the complete ARM smoke manifest
+        run: |
+          python3 scripts/run_benchmarks.py --build-dir build --suffix '' --label ARM64-smoke --session-id "ci-arm-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" --quick --result-dir arm-results --compiler g++ --build-system CMake --build-profile Release --build-provenance declared --build-flags='CMake Release ARM64/NEON build (declared smoke metadata)'
+          python3 -c 'import json,pathlib; p=next(pathlib.Path("arm-results").glob("*_MANIFEST.json")); d=json.loads(p.read_text()); names={r["name"] for r in d["runs"]}; assert d["schema"] == 2 and d["build"]["verified"] is False; assert "bench_modadd_suite_neon" in names; assert all(r.get("returncode") == 0 for r in d["runs"])'
+      - name: Inspect stable AArch64 kernels
+        env:
+          ARTIFACT_COMPILERS: g++
+          ARTIFACT_CXXFLAGS: -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=armv8-a+simd
+          ARTIFACT_OUTDIR: compiler_reports/modadd-aarch64
+        run: |
+          chmod +x tools/check_compiler_artifacts.sh
+          tools/check_compiler_artifacts.sh src/bench_modadd_suite_neon.cpp
+          awk -F '\t' '$11 == "classic_modadd_4stream_runtime_kernel" && $13 == "1" { found=1 } END { exit !found }' compiler_reports/modadd-aarch64/manifest.tsv
+          awk -F '\t' '$11 == "reist_modadd_4stream_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-aarch64/manifest.tsv
+          awk -F '\t' '$11 == "reist_modadd_neon_4stream_runtime_kernel" { found=1 } $11 == "reist_modadd_neon_4stream_runtime_kernel" && $13 == "1" { bad=1 } END { exit !found || bad }' compiler_reports/modadd-aarch64/manifest.tsv
+
+  sanitizers:
+    name: ASan and UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: >-
+          cmake -S . -B build-sanitize
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=clang++
+          -DREIST_WARNINGS_AS_ERRORS=ON
+          -DREIST_ENABLE_SANITIZERS=ON
+      - name: Build
+        run: cmake --build build-sanitize --parallel 2
+      - name: Test
+        env:
+          ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ctest --test-dir build-sanitize --output-on-failure
+
+  runner-report:
+    name: Manifest-bound runner and report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install report dependency
+        run: python -m pip install 'matplotlib>=3.8,<4'
+      - name: Build and record one quick comparison session
+        run: |
+          session_id="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          make run CXX=g++ RUN_SESSION="$session_id" RUN_RESULT_DIR=ci-results RUN_QUICK=--quick
+      - name: Generate hash-verified quick report
+        run: python scripts/generate_benchmark_report.py --result-dir ci-results --compiler g++ --allow-quick
+      - name: Validate report session metadata
+        run: |
+          report=$(find ci-results -maxdepth 1 -name '*_BENCHMARK_REPORT.md' -print -quit)
+          test -n "$report"
+          grep -q "ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" "$report"
+          grep -q 'quick/smoke' "$report"
+          test "$(find ci-results -maxdepth 1 -name '*_MANIFEST.json' | wc -l)" -eq 3
+          python -c 'import json,pathlib; docs=[json.loads(p.read_text()) for p in pathlib.Path("ci-results").glob("*_MANIFEST.json")]; assert all(d["schema"] == 2 and d["build"]["verified"] is True for d in docs); assert {d["build"]["profile"] for d in docs} == {"O0","O3","SIMD"}; assert all(all(r["build_provenance"]["verified"] for r in d["runs"]) for d in docs)'
+      - name: Reject missing binaries and tampered stdout
+        run: |
+          if python scripts/run_benchmarks.py --build-dir does-not-exist --quick --result-dir ci-negative --session-id missing-primary --compiler g++ --build-system negative-test --build-profile smoke --build-provenance declared --build-flags='missing-binary negative test'; then
+            echo 'runner accepted a missing primary benchmark' >&2
+            exit 1
+          fi
+          if python scripts/run_benchmarks.py --build-dir build --suffix _opt --label wrong-flags --session-id wrong-flags --quick --bench bench_modadd_suite --result-dir ci-negative-flags --compiler g++ --build-system make --build-profile O3 --build-flags='INTENTIONALLY WRONG'; then
+            echo 'runner accepted a sidecar built with different flags' >&2
+            exit 1
+          fi
+          manifest=$(find ci-results -maxdepth 1 -name '*_O3_MANIFEST.json' -print -quit)
+          stdout=$(python -c 'import json,pathlib,sys; p=pathlib.Path(sys.argv[1]); d=json.loads(p.read_text()); print(p.parent / d["runs"][0]["stdout"])' "$manifest")
+          printf '\nTAMPER\n' >> "$stdout"
+          if python scripts/generate_benchmark_report.py --result-dir ci-results --compiler g++ --allow-quick; then
+            echo 'report generator accepted modified stdout' >&2
+            exit 1
+          fi
+
+  compiler-artifacts:
+    name: Compiler artifacts and documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax
+        run: >-
+          python3 -m py_compile
+          scripts/generate_benchmark_report.py
+          scripts/plot_benchmarks.py
+          scripts/run_benchmarks.py
+          scripts/write_build_provenance.py
+          scripts/check_compiler_artifacts.py
+      - name: Shell syntax
+        run: bash -n scripts/run_all.sh tools/check_compiler_artifacts.sh
+      - name: Inspect GCC and Clang kernels
+        env:
+          ARTIFACT_COMPILERS: g++ clang++
+        run: |
+          chmod +x tools/check_compiler_artifacts.sh
+          ARTIFACT_OUTDIR=compiler_reports/modadd-x86 tools/check_compiler_artifacts.sh src/bench_modadd_suite.cpp
+          ARTIFACT_OUTDIR=compiler_reports/poly-x86 tools/check_compiler_artifacts.sh src/bench_poly_mod.cpp
+          test -s compiler_reports/modadd-x86/report.md
+          test -s compiler_reports/modadd-x86/manifest.tsv
+          test -s compiler_reports/poly-x86/report.md
+          test -s compiler_reports/poly-x86/manifest.tsv
+      - name: Enforce scalar and polynomial DIV expectations
+        run: |
+          python3 scripts/check_compiler_artifacts.py --compiler g++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native' --build-dir compiler_python/gcc
+          python3 scripts/check_compiler_artifacts.py --compiler clang++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native' --build-dir compiler_python/clang
+      - name: Validate x86 artifact manifests
+        run: |
+          awk -F '\t' '$11 == "classic_modadd_runtime_kernel" && $13 == "1" { found=1 } END { exit !found }' compiler_reports/modadd-x86/manifest.tsv
+          awk -F '\t' '$11 == "reist_modadd_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
+          grep -Eq $'\tclassic_modadd_const_[0-9]+\tclassic\t' compiler_reports/modadd-x86/manifest.tsv
+          grep -Eq $'\treist_modadd_const_[0-9]+\tREIST\t' compiler_reports/modadd-x86/manifest.tsv
+          awk -F '\t' '$11 ~ /^classic_modadd_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
+          awk -F '\t' '$11 == "classic_poly_runtime_kernel" && $13 == "1" { found=1 } END { exit !found }' compiler_reports/poly-x86/manifest.tsv
+          awk -F '\t' '$11 == "reist_poly_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
+          grep -Eq $'\tclassic_poly_const_[0-9]+\tclassic\t' compiler_reports/poly-x86/manifest.tsv
+          grep -Eq $'\treist_poly_const_[0-9]+\tREIST\t' compiler_reports/poly-x86/manifest.tsv
+          awk -F '\t' '$11 ~ /^classic_poly_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
+          grep -q -- '-march=native' compiler_reports/modadd-x86/manifest.tsv
+      - name: Validate current paper references
+        shell: bash
+        run: |
+          test -f "docs/REIST-Division - Eine implementierungsorientierte Formulierung zentrierter Restarithmetik.pdf"
+          test -f docs/PAPER_CORRECTIONS_DE.md
+          grep -q '10.5281/zenodo.21206471' README.md
+          grep -q 'dfe49fb15bebca66214de3c9d0eb7d333d980d13' README.md
+          ! grep -R --include='*.md' --include='*.py' --include='*.sh' -E '10\.5281/zenodo\.(17897540|17611784|17612788)' README.md docs scripts tools
+      - name: Verify pinned FPGA paths
+        run: |
+          base=https://raw.githubusercontent.com/rudolfstepan/6502-sbc-fpga/dfe49fb15bebca66214de3c9d0eb7d333d980d13
+          curl --fail --silent --show-error --location --retry 3 --output /dev/null "$base/rtl/reist/reist_core.vhd"
+          curl --fail --silent --show-error --location --retry 3 --output /dev/null "$base/sim/tb/tb_reist_core.vhd"
+          curl --fail --silent --show-error --location --retry 3 --output /dev/null "$base/boards/tang_primer_20k/reist/reist_bench.gprj"

@@ -1,0 +1,91 @@
+========================================
+Validated centered vs Montgomery benchmark
+========================================
+Preflight: passed for all moduli
+Operations per modulus = 10000000
+
+Modulus = 257
+--- Modular addition, one dependent stream ---
+Classic       : 0.082948100 s
+REIST centered: 0.092150300 s
+Montgomery    : 0.027246900 s
+--- Modular multiplication, one dependent stream ---
+Classic %                 : 0.087789200 s
+Centered % (not REIST)    : 0.114336200 s
+Montgomery-domain multiply: 0.052969600 s
+--- Dependent full cycle with per-step conversion ---
+Classic full   : 0.237674700 s
+Montgomery full: 0.296556900 s
+Conversion overhead: 24.774281823 %
+
+Modulus = 65537
+--- Modular addition, one dependent stream ---
+Classic       : 0.080631400 s
+REIST centered: 0.094879700 s
+Montgomery    : 0.019646900 s
+--- Modular multiplication, one dependent stream ---
+Classic %                 : 0.086145400 s
+Centered % (not REIST)    : 0.139044000 s
+Montgomery-domain multiply: 0.050516800 s
+--- Dependent full cycle with per-step conversion ---
+Classic full   : 0.239574400 s
+Montgomery full: 0.301224700 s
+Conversion overhead: 25.733258645 %
+
+Modulus = 1000003
+--- Modular addition, one dependent stream ---
+Classic       : 0.084167000 s
+REIST centered: 0.094118500 s
+Montgomery    : 0.024564900 s
+--- Modular multiplication, one dependent stream ---
+Classic %                 : 0.086924100 s
+Centered % (not REIST)    : 0.153061000 s
+Montgomery-domain multiply: 0.050586200 s
+--- Dependent full cycle with per-step conversion ---
+Classic full   : 0.238906200 s
+Montgomery full: 0.298812500 s
+Conversion overhead: 25.075238734 %
+
+Modulus = 10000019
+--- Modular addition, one dependent stream ---
+Classic       : 0.080966800 s
+REIST centered: 0.093294200 s
+Montgomery    : 0.020589600 s
+--- Modular multiplication, one dependent stream ---
+Classic %                 : 0.090467300 s
+Centered % (not REIST)    : 0.153942700 s
+Montgomery-domain multiply: 0.051390700 s
+--- Dependent full cycle with per-step conversion ---
+Classic full   : 0.237755500 s
+Montgomery full: 0.304702200 s
+Conversion overhead: 28.157792354 %
+
+Modulus = 1000000007
+--- Modular addition, one dependent stream ---
+Classic       : 0.080250600 s
+REIST centered: 0.096047500 s
+Montgomery    : 0.024693000 s
+--- Modular multiplication, one dependent stream ---
+Classic %                 : 0.087673700 s
+Centered % (not REIST)    : 0.151351900 s
+Montgomery-domain multiply: 0.050377100 s
+--- Dependent full cycle with per-step conversion ---
+Classic full   : 0.242298800 s
+Montgomery full: 0.297448400 s
+Conversion overhead: 22.760987673 %
+
+Modulus = 1000000000039
+--- Modular addition, one dependent stream ---
+Classic       : 0.081071900 s
+REIST centered: 0.091220200 s
+Montgomery    : 0.021895200 s
+--- Modular multiplication, one dependent stream ---
+Classic %                 : 0.088120100 s
+Centered % (not REIST)    : 0.152794200 s
+Montgomery-domain multiply: 0.051010500 s
+--- Dependent full cycle with per-step conversion ---
+Classic full   : 0.241125700 s
+Montgomery full: 0.295952300 s
+Conversion overhead: 22.737767065 %
+
+Sink: 32130804014

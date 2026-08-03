@@ -1,206 +1,198 @@
-#include <iostream>
+#include <array>
+#include <bit>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
-#include <vector>
+#include <exception>
 #include <iomanip>
-#include <fstream>
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <winsock2.h>
-#include <windows.h>
-#endif
-#include <cstdio>
-#include <string>
-#include <cctype>
+#include <iostream>
+#include <limits>
 
-using Clock = std::chrono::high_resolution_clock;
+namespace {
 
-inline uint32_t std_add(uint32_t a, uint32_t b) {
+using Clock = std::chrono::steady_clock;
+using State = std::array<std::uint32_t, 16>;
+
+volatile std::uint64_t benchmark_sink = 0;
+
+constexpr std::uint32_t standard_add(std::uint32_t a, std::uint32_t b) {
     return a + b;
 }
 
-inline uint32_t reist_add32(uint32_t a, uint32_t b) {
-    // In real hardware, this would map to a REIST-style ALU.
-    // Here we keep it identical to std_add to avoid changing cipher behaviour.
+constexpr std::uint32_t identity_add(std::uint32_t a, std::uint32_t b) {
+    // ChaCha uses arithmetic modulo 2^32. REIST's centered invariant does not
+    // replace this ARX operation; this deliberately identical function is a
+    // neutral control for that scope boundary.
     return a + b;
 }
 
-#define ROTL32(x,n) ((x << n) | (x >> (32 - n)))
-
-inline void chacha_qr_std(uint32_t s[16]) {
-    s[0]  += s[4];  s[12] ^= s[0];  s[12] = ROTL32(s[12], 16);
-    s[8]  += s[12]; s[4]  ^= s[8];  s[4]  = ROTL32(s[4],  12);
-    s[0]  += s[4];  s[12] ^= s[0];  s[12] = ROTL32(s[12],  8);
-    s[8]  += s[12]; s[4]  ^= s[8];  s[4]  = ROTL32(s[4],   7);
+template <auto Add>
+inline void quarter_round(State& state, std::size_t a, std::size_t b,
+                          std::size_t c, std::size_t d) {
+    state[a] = Add(state[a], state[b]);
+    state[d] = std::rotl(state[d] ^ state[a], 16);
+    state[c] = Add(state[c], state[d]);
+    state[b] = std::rotl(state[b] ^ state[c], 12);
+    state[a] = Add(state[a], state[b]);
+    state[d] = std::rotl(state[d] ^ state[a], 8);
+    state[c] = Add(state[c], state[d]);
+    state[b] = std::rotl(state[b] ^ state[c], 7);
 }
 
-inline void chacha_qr_reist(uint32_t s[16]) {
-    s[0]  = reist_add32(s[0],  s[4]);  s[12] ^= s[0];  s[12] = ROTL32(s[12], 16);
-    s[8]  = reist_add32(s[8],  s[12]); s[4]  ^= s[8];  s[4]  = ROTL32(s[4],  12);
-    s[0]  = reist_add32(s[0],  s[4]);  s[12] ^= s[0];  s[12] = ROTL32(s[12],  8);
-    s[8]  = reist_add32(s[8],  s[12]); s[4]  ^= s[8];  s[4]  = ROTL32(s[4],   7);
-}
-
-void chacha_block_std(uint32_t out[16], const uint32_t in[16]) {
-    uint32_t x[16];
-    std::memcpy(x, in, 64);
-    for (int i = 0; i < 10; ++i) {
-        chacha_qr_std(x);
-        chacha_qr_std(x);
+template <auto Add>
+State chacha20_block(const State& input) {
+    State state = input;
+    for (int round = 0; round < 10; ++round) {
+        quarter_round<Add>(state, 0, 4, 8, 12);
+        quarter_round<Add>(state, 1, 5, 9, 13);
+        quarter_round<Add>(state, 2, 6, 10, 14);
+        quarter_round<Add>(state, 3, 7, 11, 15);
+        quarter_round<Add>(state, 0, 5, 10, 15);
+        quarter_round<Add>(state, 1, 6, 11, 12);
+        quarter_round<Add>(state, 2, 7, 8, 13);
+        quarter_round<Add>(state, 3, 4, 9, 14);
     }
-    for (int i = 0; i < 16; ++i) out[i] = x[i] + in[i];
-}
-
-void chacha_block_reist(uint32_t out[16], const uint32_t in[16]) {
-    uint32_t x[16];
-    std::memcpy(x, in, 64);
-    for (int i = 0; i < 10; ++i) {
-        chacha_qr_reist(x);
-        chacha_qr_reist(x);
+    for (std::size_t i = 0; i < state.size(); ++i) {
+        state[i] = Add(state[i], input[i]);
     }
-    for (int i = 0; i < 16; ++i) out[i] = std_add(x[i], in[i]);
+    return state;
 }
 
-template<typename F>
-double time_stream(F&& f, std::size_t blocks) {
-    auto t0 = Clock::now();
-    f(blocks);
-    auto t1 = Clock::now();
-    std::chrono::duration<double> dt = t1 - t0;
-    return dt.count();
+State make_input(std::uint32_t seed, std::uint32_t counter) {
+    State input{
+        0x61707865U, 0x3320646eU, 0x79622d32U, 0x6b206574U,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        counter, seed ^ 0x9e3779b9U, seed * 0x85ebca6bU,
+        seed * 0xc2b2ae35U,
+    };
+    for (std::size_t i = 4; i < 12; ++i) {
+        input[i] = seed + static_cast<std::uint32_t>(i) * 0x9e3779b9U;
+    }
+    return input;
 }
+
+template <auto Add>
+std::uint64_t run_stream(std::uint32_t seed, std::uint32_t blocks) {
+    std::uint64_t checksum = 0xcbf29ce484222325ULL;
+    for (std::uint32_t counter = 0; counter < blocks; ++counter) {
+        const auto output = chacha20_block<Add>(make_input(seed, counter));
+        for (const auto word : output) {
+            checksum ^= word;
+            checksum *= 0x100000001b3ULL;
+        }
+    }
+    return checksum;
+}
+
+template <class Function>
+double time_call(Function&& function) {
+    const auto begin = Clock::now();
+    function();
+    const auto end = Clock::now();
+    return std::chrono::duration<double>(end - begin).count();
+}
+
+bool preflight(std::uint32_t seed) {
+    // RFC 8439, section 2.3.2, expressed as little-endian 32-bit words.
+    constexpr State rfc_input{
+        0x61707865U, 0x3320646eU, 0x79622d32U, 0x6b206574U,
+        0x03020100U, 0x07060504U, 0x0b0a0908U, 0x0f0e0d0cU,
+        0x13121110U, 0x17161514U, 0x1b1a1918U, 0x1f1e1d1cU,
+        0x00000001U, 0x09000000U, 0x4a000000U, 0x00000000U,
+    };
+    constexpr State rfc_expected{
+        0xe4e7f110U, 0x15593bd1U, 0x1fdd0f50U, 0xc47120a3U,
+        0xc7f4d1c7U, 0x0368c033U, 0x9aaa2204U, 0x4e6cd4c3U,
+        0x466482d2U, 0x09aa9f07U, 0x05d7c214U, 0xa2028bd9U,
+        0xd19c12b5U, 0xb94e16deU, 0xe883d0cbU, 0x4e3c50a2U,
+    };
+    if (chacha20_block<standard_add>(rfc_input) != rfc_expected) {
+        std::cerr << "RFC 8439 ChaCha20 block preflight failed\n";
+        return false;
+    }
+
+    for (std::uint32_t counter = 0; counter < 128; ++counter) {
+        const auto standard =
+            chacha20_block<standard_add>(make_input(seed, counter));
+        const auto identity =
+            chacha20_block<identity_add>(make_input(seed, counter));
+        if (standard != identity) {
+            std::cerr << "ARX identity preflight failed at counter "
+                      << counter << '\n';
+            return false;
+        }
+    }
+    return true;
+}
+
+}  // namespace
 
 int main(int argc, char** argv) {
-    // Usage: bench_chacha_stream [blocks] [B]
-    std::size_t blocks = 1'000'000; // 1e6 * 64 bytes = 64 MB
-    uint32_t B = 0xCAFEBABE;
-    if (argc >= 2) blocks = static_cast<std::size_t>(std::stoull(argv[1]));
-    if (argc >= 3) B = static_cast<uint32_t>(std::stoul(argv[2]));
-
-    // Collect system info
-    std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
-#ifndef _WIN32
-    {
-        std::ifstream cpuinfo("/proc/cpuinfo");
-        std::string line;
-        while (std::getline(cpuinfo, line)) {
-            if (line.find("model name") != std::string::npos) {
-                cpu_model = line.substr(line.find(":") + 2);
+    try {
+        std::uint64_t requested_blocks = 1'000'000;
+        std::uint32_t seed = 0xCAFEBABE;
+        if (argc >= 2) {
+            requested_blocks = std::stoull(argv[1]);
+        }
+        if (argc >= 3) {
+            const auto parsed = std::stoull(argv[2], nullptr, 0);
+            if (parsed > std::numeric_limits<std::uint32_t>::max()) {
+                throw std::out_of_range("seed must fit uint32_t");
             }
-            if (line.find("cpu MHz") != std::string::npos) {
-                cpu_mhz = line.substr(line.find(":") + 2);
-            }
+            seed = static_cast<std::uint32_t>(parsed);
         }
-    }
-    {
-        std::ifstream meminfo("/proc/meminfo");
-        std::string line;
-        if (std::getline(meminfo, line)) {
-            if (line.find("MemTotal") != std::string::npos) {
-                mem_total = line.substr(line.find(":") + 2);
-            }
+        if (argc > 3 || requested_blocks == 0 ||
+            requested_blocks > std::numeric_limits<std::uint32_t>::max()) {
+            std::cerr << "Usage: " << argv[0]
+                      << " [blocks=1..2^32-1] [seed_uint32]\n";
+            return 2;
         }
-    }
-    char hn[256];
-    if (gethostname(hn, sizeof(hn)) == 0) hostname = hn;
-    {
-        FILE* fp = popen("uname -o", "r");
-        if (fp) {
-            char buf[128];
-            if (fgets(buf, sizeof(buf), fp)) {
-                os_name = std::string(buf);
-                if (!os_name.empty() && os_name.back() == '\n') {
-                    os_name.pop_back();
-                }
-            }
-            pclose(fp);
+        const auto blocks = static_cast<std::uint32_t>(requested_blocks);
+
+        if (!preflight(seed)) {
+            return 3;
         }
-    }
-#else
-    // Windows: get hostname
-    char hn[256];
-    DWORD hnSize = sizeof(hn);
-    if (GetComputerNameA(hn, &hnSize)) hostname = hn;
-    else hostname = "Unknown";
-    // Windows: get OS name
-    os_name = "Windows";
-    // Windows: get CPU info
-    HKEY hKey;
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-        char buf[256];
-        DWORD bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
-            cpu_model = std::string(buf);
+
+        std::uint64_t standard_sink = 0;
+        std::uint64_t identity_sink = 0;
+        const double standard_time = time_call([&] {
+            standard_sink = run_stream<standard_add>(seed, blocks);
+            benchmark_sink = standard_sink;
+        });
+        const double identity_time = time_call([&] {
+            identity_sink = run_stream<identity_add>(seed, blocks);
+            benchmark_sink = identity_sink;
+        });
+
+        if (standard_sink != identity_sink) {
+            std::cerr << "ARX identity checksum mismatch\n";
+            return 3;
         }
-        bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "~MHz", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
-            cpu_mhz = std::to_string(*(DWORD*)buf);
+
+        const double bytes = static_cast<double>(blocks) * 64.0;
+        std::cout << std::fixed << std::setprecision(6);
+        std::cout << "========================================\n"
+                  << "ChaCha20 ARX identity control\n"
+                  << "========================================\n"
+                  << "This is a scope/neutrality control, not a REIST speedup.\n"
+                  << "Each block uses a distinct counter and contributes to an\n"
+                  << "observable checksum.\n\n"
+                  << "Blocks       : " << blocks << '\n'
+                  << "std add      : " << standard_time << " s ("
+                  << (bytes / standard_time / 1e6) << " MB/s)\n"
+                  << "identity add : " << identity_time << " s ("
+                  << (bytes / identity_time / 1e6) << " MB/s)\n";
+        if (identity_time > 0.0) {
+            std::cout << "ratio        : "
+                      << (standard_time / identity_time)
+                      << "x (std / identity)\n";
         }
-        RegCloseKey(hKey);
+        std::cout << "checksum     : 0x" << std::hex << standard_sink
+                  << std::dec << '\n';
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << "Invalid argument or benchmark failure: "
+                  << error.what() << '\n';
+        return 2;
     }
-    // Windows: get memory info
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof(statex);
-    if (GlobalMemoryStatusEx(&statex)) {
-        mem_total = std::to_string(statex.ullTotalPhys / (1024 * 1024)) + " MB";
-    }
-#endif
-
-    uint32_t in[16];
-    for (int i = 0; i < 16; ++i) in[i] = i * B;
-
-    uint32_t out[16];
-    std::vector<uint32_t> sink(16);
-
-    std::cout << std::fixed << std::setprecision(6);
-    std::cout << "========================================\n";
-    std::cout << "ChaCha20 Stream Benchmark\n";
-    std::cout << "========================================\n";
-    std::cout << "System Information:\n";
-    std::cout << "  Hostname: " << hostname << "\n";
-    std::cout << "  OS: " << os_name << "\n";
-    std::cout << "  CPU Model: " << cpu_model << "\n";
-    std::cout << "  CPU MHz: " << cpu_mhz << "\n";
-    std::cout << "  Memory: " << mem_total << "\n";
-    std::cout << "========================================\n\n";
-
-    double t_std = time_stream([&](std::size_t n){
-        for (std::size_t i = 0; i < n; ++i) {
-            chacha_block_std(out, in);
-            for (int j = 0; j < 16; ++j) sink[j] ^= out[j];
-        }
-    }, blocks);
-
-    double t_reist = time_stream([&](std::size_t n){
-        for (std::size_t i = 0; i < n; ++i) {
-            chacha_block_reist(out, in);
-            for (int j = 0; j < 16; ++j) sink[j] ^= out[j];
-        }
-    }, blocks);
-
-    double bytes = static_cast<double>(blocks) * 64.0;
-    std::cout << "ChaCha20-like keystream benchmark ("
-            << (bytes / (1024.0 * 1024.0))
-            << " MB total)\n\n";
-
-    std::cout << "Classic : " << t_std
-            << " s (" << (bytes / t_std / 1e6) << " MB/s)\n";
-
-    std::cout << "REIST   : " << t_reist
-            << " s (" << (bytes / t_reist / 1e6) << " MB/s)\n";
-
-    if (t_reist > 0.0) {
-        std::cout << "Speed ratio (classic / REIST): "
-                << (t_std / t_reist) << "x\n";
-    }
-
-    std::cout << "\nSink XOR: ";
-    for (int j = 0; j < 16; ++j) {
-        std::cout << std::hex << sink[j] << " ";
-    }
-    std::cout << std::dec << "\n";
-
-    return 0;
 }

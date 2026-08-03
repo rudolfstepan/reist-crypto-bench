@@ -1,185 +1,162 @@
-#include <iostream>
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <exception>
 #include <iomanip>
+#include <iostream>
+#include <limits>
 #include <vector>
-#include <fstream>
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <winsock2.h>
-#include <windows.h>
-#endif
-#include <cstdio>
-#include <string>
-#include <cctype>
 
-using Clock = std::chrono::high_resolution_clock;
+#include "reist_mod.hpp"
 
-// Classic hash-mix style step: x = (x * A + B) % M
-static std::uint64_t hashmix_classic(std::uint64_t x, std::uint64_t A, std::uint64_t B, std::uint64_t M) {
-    return (x * A + B) % M;
+namespace {
+
+using Clock = std::chrono::steady_clock;
+
+constexpr std::int64_t multiplier = 1'664'525;
+constexpr std::int64_t increment = 1'013'904'223;
+constexpr std::uint64_t seed = 0x1234567890abcdefULL;
+
+volatile std::uint64_t benchmark_sink = 0;
+
+std::uint64_t classic_step(std::uint64_t value, std::uint64_t modulus) {
+    return (value * static_cast<std::uint64_t>(multiplier) +
+            static_cast<std::uint64_t>(increment)) % modulus;
 }
 
-// REIST-style: symmetrische Reduktion ohne Division
-static std::int64_t hashmix_reist(std::int64_t x, std::int64_t A, std::int64_t B, std::int64_t M) {
-    std::int64_t q = M;
-    std::int64_t half = q / 2;
-    std::int64_t neg_half = -half;
-
-    std::int64_t r = x * A + B;
-    r %= q; // optional: falls man overflow-einschränkung will; ansonsten kann man hier
-            // auch mit 128-Bit rechnen, je nach Plattform. Für dieses Benchmark
-            // bleibt der Fokus aber auf der Reduktion.
-
-    // REIST-Korrektur (branchless)
-    std::int64_t gt  = (r >  half);
-    std::int64_t leq = (r <= neg_half);
-    r -= gt  * q;
-    r += leq * q;
-    return r;
+std::int64_t centered_step(std::int64_t value, std::int64_t modulus) {
+    // The selected modulus range guarantees this exact signed expression does
+    // not overflow. This is a centered post-transformation control, not the
+    // division-free additive REIST kernel.
+    const std::int64_t raw = value * multiplier + increment;
+    return reist::center_remainder(raw, modulus);
 }
 
-template<typename F>
-double time_loop(F&& f, std::uint64_t iters) {
-    auto t0 = Clock::now();
-    f(iters);
-    auto t1 = Clock::now();
-    std::chrono::duration<double> dt = t1 - t0;
-    return dt.count();
+bool congruent(std::uint64_t classic, std::int64_t centered,
+               std::int64_t modulus) {
+    const auto normalized = centered < 0 ? centered + modulus : centered;
+    return classic == static_cast<std::uint64_t>(normalized);
 }
+
+bool preflight(std::uint64_t modulus, std::uint64_t iterations) {
+    auto classic = seed % modulus;
+    auto centered = reist::center_remainder(
+        static_cast<std::int64_t>(classic),
+        static_cast<std::int64_t>(modulus));
+
+    for (std::uint64_t i = 0; i < iterations; ++i) {
+        classic = classic_step(classic, modulus);
+        centered = centered_step(centered, static_cast<std::int64_t>(modulus));
+        if (!congruent(classic, centered, static_cast<std::int64_t>(modulus)) ||
+            !reist::is_centered(centered,
+                                static_cast<std::int64_t>(modulus))) {
+            std::cerr << "Preflight failed for M=" << modulus
+                      << " at iteration " << i << ": " << classic
+                      << " / " << centered << '\n';
+            return false;
+        }
+    }
+    return true;
+}
+
+template <class Function>
+double time_call(Function&& function) {
+    const auto begin = Clock::now();
+    function();
+    const auto end = Clock::now();
+    return std::chrono::duration<double>(end - begin).count();
+}
+
+}  // namespace
 
 int main(int argc, char** argv) {
-    std::uint64_t N = 100'000'000;
-    std::vector<std::uint64_t> moduli;
-    std::uint64_t A = 6364136223846793005ULL;
-    std::uint64_t B = 1442695040888963407ULL;
-
-    // Usage: bench_hashmix [N] [B]
-    if (argc >= 2) N = std::stoull(argv[1]);
-    if (argc >= 3) B = std::stoull(argv[2]);
-
-    if (argc >= 4) {
-        // Runtime parameter scenario for modulus
-        moduli.push_back(std::stoull(argv[3]));
-    } else {
-        // Constant scenario (default moduli)
-        moduli = {
+    try {
+        std::uint64_t iterations = 100'000'000;
+        std::vector<std::uint64_t> moduli{
             1'000'003ULL,
             10'000'019ULL,
             100'000'007ULL,
-            1'000'000'007ULL
+            1'000'000'007ULL,
         };
-    }
 
-      // Collect system info
-    std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
-#ifndef _WIN32
-    {
-        std::ifstream cpuinfo("/proc/cpuinfo");
-        std::string line;
-        while (std::getline(cpuinfo, line)) {
-            if (line.find("model name") != std::string::npos) {
-                cpu_model = line.substr(line.find(":") + 2);
-            }
-            if (line.find("cpu MHz") != std::string::npos) {
-                cpu_mhz = line.substr(line.find(":") + 2);
+        if (argc >= 2) {
+            iterations = std::stoull(argv[1]);
+        }
+        if (argc >= 3) {
+            moduli.assign(1, std::stoull(argv[2]));
+        }
+        if (argc > 3 || iterations == 0) {
+            std::cerr << "Usage: " << argv[0] << " [N>0] [M>0]\n";
+            return 2;
+        }
+
+        const auto safe_limit = static_cast<std::uint64_t>(
+            (std::numeric_limits<std::int64_t>::max() - increment) /
+            multiplier);
+        for (const auto modulus : moduli) {
+            if (modulus == 0 || modulus > safe_limit) {
+                std::cerr << "M must be in 1.." << safe_limit
+                          << " so both recurrences remain overflow-free.\n";
+                return 2;
             }
         }
-    }
-    {
-        std::ifstream meminfo("/proc/meminfo");
-        std::string line;
-        if (std::getline(meminfo, line)) {
-            if (line.find("MemTotal") != std::string::npos) {
-                mem_total = line.substr(line.find(":") + 2);
+
+        std::cout << std::fixed << std::setprecision(6);
+        std::cout << "===================================================\n"
+                  << "Hash-mixing negative control (runtime modulus)\n"
+                  << "===================================================\n"
+                  << "Both paths implement the same exact recurrence.\n"
+                  << "The centered path still uses remainder division; it is\n"
+                  << "not a division-free REIST accumulation benchmark.\n"
+                  << "Iterations N = " << iterations << "\n\n";
+
+        for (const auto modulus : moduli) {
+            if (!preflight(modulus, std::min<std::uint64_t>(iterations, 4096))) {
+                return 3;
             }
-        }
-    }
-    char hn[256];
-    if (gethostname(hn, sizeof(hn)) == 0) hostname = hn;
-    {
-        FILE* fp = popen("uname -o", "r");
-        if (fp) {
-            char buf[128];
-            if (fgets(buf, sizeof(buf), fp)) {
-                os_name = std::string(buf);
-                if (!os_name.empty() && os_name.back() == '\n') {
-                    os_name.pop_back();
+
+            std::uint64_t classic = seed % modulus;
+            std::int64_t centered = reist::center_remainder(
+                static_cast<std::int64_t>(classic),
+                static_cast<std::int64_t>(modulus));
+
+            const double classic_time = time_call([&] {
+                for (std::uint64_t i = 0; i < iterations; ++i) {
+                    classic = classic_step(classic, modulus);
                 }
+                benchmark_sink = classic;
+            });
+
+            const double centered_time = time_call([&] {
+                for (std::uint64_t i = 0; i < iterations; ++i) {
+                    centered = centered_step(
+                        centered, static_cast<std::int64_t>(modulus));
+                }
+                benchmark_sink = static_cast<std::uint64_t>(centered);
+            });
+
+            if (!congruent(classic, centered,
+                           static_cast<std::int64_t>(modulus))) {
+                std::cerr << "Final-state mismatch for M=" << modulus << '\n';
+                return 3;
             }
-            pclose(fp);
-        }
-    }
-#else
-    // Windows: get hostname
-    char hn[256];
-    DWORD hnSize = sizeof(hn);
-    if (GetComputerNameA(hn, &hnSize)) hostname = hn;
-    else hostname = "Unknown";
-    // Windows: get OS name
-    os_name = "Windows";
-    // Windows: get CPU info
-    HKEY hKey;
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-        char buf[256];
-        DWORD bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
-            cpu_model = std::string(buf);
-        }
-        bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "~MHz", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
-            cpu_mhz = std::to_string(*(DWORD*)buf);
-        }
-        RegCloseKey(hKey);
-    }
-    // Windows: get memory info
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof(statex);
-    if (GlobalMemoryStatusEx(&statex)) {
-        mem_total = std::to_string(statex.ullTotalPhys / (1024 * 1024)) + " MB";
-    }
-#endif
 
-    std::cout << std::fixed << std::setprecision(6);
-    std::cout << "========================================\n";
-    std::cout << "Hashmix benchmark (classic % vs REIST reduction)\n";
-    std::cout << "========================================\n";
-    std::cout << "System Information:\n";
-    std::cout << "  Hostname: " << hostname << "\n";
-    std::cout << "  OS: " << os_name << "\n";
-    std::cout << "  CPU Model: " << cpu_model << "\n";
-    std::cout << "  CPU MHz: " << cpu_mhz << "\n";
-    std::cout << "  Memory: " << mem_total << "\n";
-    std::cout << "========================================\n\n";
-    std::cout << "Iterations N = " << N << "\n";
-
-    for (auto M : moduli) {
-        std::uint64_t x1 = 0x1234567890abcdefULL;
-        std::int64_t  x2 = static_cast<std::int64_t>(0x1234567890abcdefULL);
-
-        double t_classic = time_loop([&](std::uint64_t n){
-            for (std::uint64_t i = 0; i < n; ++i) {
-                x1 = hashmix_classic(x1, A, B, M);
+            std::cout << "M = " << modulus << '\n'
+                      << "  classic  : " << classic_time << " s\n"
+                      << "  centered : " << centered_time << " s\n";
+            if (centered_time > 0.0) {
+                std::cout << "  ratio    : "
+                          << (classic_time / centered_time)
+                          << "x (classic / centered)\n";
             }
-        }, N);
-
-        double t_reist = time_loop([&](std::uint64_t n){
-            for (std::uint64_t i = 0; i < n; ++i) {
-                x2 = hashmix_reist(x2, static_cast<std::int64_t>(A),
-                                   static_cast<std::int64_t>(B),
-                                   static_cast<std::int64_t>(M));
-            }
-        }, N);
-
-        std::cout << "M = " << M << "";
-        std::cout << "  classic : " << t_classic << "";
-        std::cout << "  REIST   : " << t_reist   << "";
-        if (t_reist > 0.0) {
-            std::cout << "  speedup : " << (t_classic / t_reist) << "x (classic / REIST)";
+            std::cout << "  sinks    : " << classic << " / "
+                      << centered << "\n\n";
         }
-        std::cout << "  sink values: " << std::hex << x1 << " / " << x2 << std::dec << "";
-    }
 
-    return 0;
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << "Invalid argument or benchmark failure: "
+                  << error.what() << '\n';
+        return 2;
+    }
 }

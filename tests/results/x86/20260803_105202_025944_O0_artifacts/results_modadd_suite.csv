@@ -1,0 +1,13 @@
+modulus,N,scenario,seconds,ops_per_sec,mode
+257,50000000,classic_mod,0.0706215,7.08e+08,compile_time
+257,50000000,reist_sym,0.0252876,1.97725e+09,compile_time
+997,50000000,classic_mod,0.0806163,6.20222e+08,compile_time
+997,50000000,reist_sym,0.0207953,2.40439e+09,compile_time
+10007,50000000,classic_mod,0.108151,4.62314e+08,compile_time
+10007,50000000,reist_sym,0.0188292,2.65545e+09,compile_time
+1000003,50000000,classic_mod,0.107235,4.66265e+08,compile_time
+1000003,50000000,reist_sym,0.0185962,2.68872e+09,compile_time
+10000019,50000000,classic_mod,0.0808951,6.18084e+08,compile_time
+10000019,50000000,reist_sym,0.0186463,2.6815e+09,compile_time
+1000000007,50000000,classic_mod,0.0824525,6.0641e+08,compile_time
+1000000007,50000000,reist_sym,0.020144,2.48213e+09,compile_time

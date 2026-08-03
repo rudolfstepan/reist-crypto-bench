@@ -1,0 +1,49 @@
+========================================
+Polynomial canonical modular-add benchmark
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: Windows
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 
+  Memory: 65230 MB
+========================================
+
+N = 1024, reps = 50000
+Inputs are regenerated per q inside [-floor(q/2), ceil(q/2)).
+Boundary vectors are injected and correction rates are reported.
+SIMD status: portable scalar source only; an O3/SIMD-labelled binary relies on compiler auto-vectorization, not explicit intrinsics.
+
+[compile_time]
+q = 1000003
+  classic : 0.005629 s
+  REIST   : 0.004981 s
+  speedup : 1.129941x
+  correction mix per pass: upper 130 (12.695312%), lower 129 (12.597656%), none 765 (74.707031%)
+  checksums: 0xb40fdd9272b4f65f / 0xcf589bf93fd84344 (representations checked element-wise)
+
+[compile_time]
+q = 10000019
+  classic : 0.004960 s
+  REIST   : 0.004978 s
+  speedup : 0.996384x
+  correction mix per pass: upper 132 (12.890625%), lower 140 (13.671875%), none 752 (73.437500%)
+  checksums: 0xe82b5b6af032d948 / 0x83b31c17ec021eac (representations checked element-wise)
+
+[compile_time]
+q = 100000007
+  classic : 0.004966 s
+  REIST   : 0.004916 s
+  speedup : 1.010131x
+  correction mix per pass: upper 120 (11.718750%), lower 129 (12.597656%), none 775 (75.683594%)
+  checksums: 0xa03133045ba25d62 / 0xbbcaa9c8ab02834b (representations checked element-wise)
+
+[compile_time]
+q = 1000000007
+  classic : 0.004963 s
+  REIST   : 0.004980 s
+  speedup : 0.996686x
+  correction mix per pass: upper 106 (10.351562%), lower 159 (15.527344%), none 759 (74.121094%)
+  checksums: 0xca080168e124352f / 0x6d05bb9a277a387c (representations checked element-wise)
+
+CSV written to results_poly_mod.csv

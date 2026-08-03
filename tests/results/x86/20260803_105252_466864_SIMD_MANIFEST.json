@@ -1,0 +1,418 @@
+{
+  "artifact_directory": "20260803_105252_466864_SIMD_artifacts",
+  "build": {
+    "compiler": {
+      "argv": [
+        "g++"
+      ],
+      "command": "g++",
+      "executable": "C:/msys64/mingw64/bin/g++.exe",
+      "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+    "profile": "SIMD",
+    "provenance_mode": "sidecar",
+    "system": "make",
+    "verified": true
+  },
+  "host": {
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.12.9 (tags/v3.12.9:fdb8142, Feb  4 2025, 15:27:58) [MSC v.1942 64 bit (AMD64)]"
+  },
+  "label": "SIMD",
+  "quick": false,
+  "repository": {
+    "commit": "39aa12d69ff4519f757ac8fc1be7cdf2aa492c02",
+    "state_sha256": "2b18e08fddfcae41dfd1dc08da2dcb5501b539f630bcc14875587a689b6c3a75",
+    "status": " D src/bench_chacha_reist.cpp\n M .gitignore\n M CMakeLists.txt\n M Makefile\n M README.md\n M docs/BENCHMARKS.md\n M docs/M2_PRO_BENCHMARK.md\n M docs/REIST_Appendix_Community_Feedback.md\n M docs/REIST_Appendix_Community_Feedback_DE.md\n M include/reist_mod.hpp\n M release/README.md\n M scripts/generate_benchmark_report.py\n M scripts/plot_benchmarks.py\n M scripts/run_all.sh\n M src/bench_barret_reist.cpp\n M src/bench_chacha_stream.cpp\n M src/bench_hashmix.cpp\n M src/bench_modadd_suite.cpp\n M src/bench_modadd_suite_neon.cpp\n M src/bench_modular.cpp\n M src/bench_mont_vs_reist_tree_ntt.cpp\n M src/bench_montgomery.cpp\n M src/bench_poly_mod.cpp\n M src/bench_reist_arm.cpp\n M src/bench_tree_reist.cpp\n M src/bench_tree_reist_avx2.cpp\n M src/bench_tree_reist_neon.cpp\n M src/reist_neon_diag_mt.cpp\n M tests/test_reist.cpp\n M tools/check_compiler_artifacts.sh\n?? .github/workflows/ci.yml\n?? docs/PAPER_CORRECTIONS_DE.md\n?? docs/REIST-Division - Eine implementierungsorientierte Formulierung zentrierter Restarithmetik.pdf\n?? scripts/check_compiler_artifacts.py\n?? scripts/run_benchmarks.py\n?? scripts/write_build_provenance.py\n?? tests/results/README.md"
+  },
+  "runner_sha256": "670d6cbd4509d148c47c3b6e1ca2631aa9fe838d7b5729228cbc3459fefe6587",
+  "runs": [
+    {
+      "artifacts": [
+        {
+          "path": "20260803_105252_466864_SIMD_artifacts/results_modadd_suite.csv",
+          "sha256": "bece5743619dd53586c255fce49cd48864047dd5deeabfa94f535831a73aacc5"
+        }
+      ],
+      "binary": "build/bench_modadd_suite_simd.exe",
+      "binary_sha256": "50e3038f10213e37cd998d2293e6d82581bbd6a72c47b9521fe028e3938b82e8",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_modadd_suite_simd.exe",
+            "sha256": "50e3038f10213e37cd998d2293e6d82581bbd6a72c47b9521fe028e3938b82e8"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP src/bench_modadd_suite.cpp -o build/bench_modadd_suite_simd.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+            "profile": "SIMD",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:45.037276+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_modadd_suite.cpp",
+              "sha256": "be7f39d2a2687ac23cd6a35019fe1f183e197cf3ae317607c5059dc16b561412"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "a50a7778c571fa682ad39caaedc56ba6f849d27fbf0b1c3e02ccc8f633ef3cc6",
+        "mode": "sidecar",
+        "sidecar_sha256": "df5ddc550f0587757a993e174a0009d91f4033d3ad93c8b8b57b4c984a249e1c",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_modadd_suite_simd.exe"
+      ],
+      "elapsed_seconds": 0.5985536999942269,
+      "name": "bench_modadd_suite",
+      "returncode": 0,
+      "stderr": "20260803_105252_466864_bench_modadd_suite_SIMD.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105252_466864_bench_modadd_suite_SIMD.txt",
+      "stdout_sha256": "4774519346d7d12d2bd57d77190c064d45ee324e87f5fb2e6a0d722adf031443"
+    },
+    {
+      "artifacts": [
+        {
+          "path": "20260803_105252_466864_SIMD_artifacts/results_poly_mod.csv",
+          "sha256": "45e5134e6d873cf733ff27e1ab28484c0b8f64b10386b9d04173705ed230a60f"
+        }
+      ],
+      "binary": "build/bench_poly_mod_simd.exe",
+      "binary_sha256": "b4da14ab859bb3e278183f525d7808c10fbc261ddba0a05a736aaff4be9842c9",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_poly_mod_simd.exe",
+            "sha256": "b4da14ab859bb3e278183f525d7808c10fbc261ddba0a05a736aaff4be9842c9"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP src/bench_poly_mod.cpp -o build/bench_poly_mod_simd.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+            "profile": "SIMD",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:46.673233+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_poly_mod.cpp",
+              "sha256": "65854abbb20ec04b8a19ae20d26f0e59a9be7c98b8db6afac0e46467d4048d7a"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "5e26b391b68857967493802bcf210ef987ddbd3b7ba37d581ee3c761976d0ed6",
+        "mode": "sidecar",
+        "sidecar_sha256": "af0ca469eb77f655304494de1157c0a65813c3fbc66072412592209e1b1232b1",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_poly_mod_simd.exe"
+      ],
+      "elapsed_seconds": 0.08142719999887049,
+      "name": "bench_poly_mod",
+      "returncode": 0,
+      "stderr": "20260803_105252_466864_bench_poly_mod_SIMD.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105252_466864_bench_poly_mod_SIMD.txt",
+      "stdout_sha256": "49f4af0b75d7c429e5ffbd7ea51076538deecdb6c3d6c69894ec8e1cffc586fe"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_modular_simd.exe",
+      "binary_sha256": "8033163f6e87e9c51cf3068a62d55a8253f31b86216ee0149db5f5c2e6118689",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_modular_simd.exe",
+            "sha256": "8033163f6e87e9c51cf3068a62d55a8253f31b86216ee0149db5f5c2e6118689"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP src/bench_modular.cpp -o build/bench_modular_simd.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+            "profile": "SIMD",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:47.500024+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_modular.cpp",
+              "sha256": "39e9711c40a482e71b7c0ad5867a6c9c7219a34d6250c33dd29b757afbb9776a"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "8aa7d7013a805ac63479f8737fa2611bbd8a5f0e6b783a047f95a629bcc7e362",
+        "mode": "sidecar",
+        "sidecar_sha256": "29d97d9fbfb8343b104ade9c7746b19062211af3d36f9ab00fba3ea7b8b3a424",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_modular_simd.exe"
+      ],
+      "elapsed_seconds": 0.08993349999946076,
+      "name": "bench_modular",
+      "returncode": 0,
+      "stderr": "20260803_105252_466864_bench_modular_SIMD.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105252_466864_bench_modular_SIMD.txt",
+      "stdout_sha256": "712a5dbcd1043d665afd88129386c0a73a52b285ab49f631f2fdcebc7c983224"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_chacha_stream_simd.exe",
+      "binary_sha256": "39199fd06492e638c771abfcf0a07b57e8bd71d1e54720f9069ab9cdeb6dd138",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_chacha_stream_simd.exe",
+            "sha256": "39199fd06492e638c771abfcf0a07b57e8bd71d1e54720f9069ab9cdeb6dd138"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP src/bench_chacha_stream.cpp -o build/bench_chacha_stream_simd.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+            "profile": "SIMD",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:48.264186+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_chacha_stream.cpp",
+              "sha256": "6de3c745baa7579c9d20b86f3b761b04e77c0bd3fd91944400b6ed21fbdc69f3"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "61dd96bfe3cd30a6e26a3ad84db38d50443b71bc30ad9e0894cf1508dd5edc69",
+        "mode": "sidecar",
+        "sidecar_sha256": "40ef48c688d330f45edb120df0df1df7d77fa27eaa5d1b25174fb22bcd9c7deb",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_chacha_stream_simd.exe"
+      ],
+      "elapsed_seconds": 0.18889710000075866,
+      "name": "bench_chacha_stream",
+      "returncode": 0,
+      "stderr": "20260803_105252_466864_bench_chacha_stream_SIMD.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105252_466864_bench_chacha_stream_SIMD.txt",
+      "stdout_sha256": "e9fce86fc7c623477ec15408ad5aaea03e0eee8bf31898fe3f5f2c4e41f3f167"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_hashmix_simd.exe",
+      "binary_sha256": "bac2820d23b4355a56f625bde9f8fc93389fb7bb9df2c50dd854b304dd818a11",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_hashmix_simd.exe",
+            "sha256": "bac2820d23b4355a56f625bde9f8fc93389fb7bb9df2c50dd854b304dd818a11"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP src/bench_hashmix.cpp -o build/bench_hashmix_simd.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+            "profile": "SIMD",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:49.040349+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_hashmix.cpp",
+              "sha256": "ed342b6eeea479f28bc167975fff847539e4c1b8ea2dc3253c36b0d4f33cf296"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "6f4700330296e4c7f6c11b308b2f808d0a328c494190c5057a9f394bcc62d422",
+        "mode": "sidecar",
+        "sidecar_sha256": "5e26fab4101468f1cbea754353d2fc6ae16c65bd203dd3cbd03d791e10387e9e",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_hashmix_simd.exe"
+      ],
+      "elapsed_seconds": 3.6103588999976637,
+      "name": "bench_hashmix",
+      "returncode": 0,
+      "stderr": "20260803_105252_466864_bench_hashmix_SIMD.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105252_466864_bench_hashmix_SIMD.txt",
+      "stdout_sha256": "9e45b57d6c844cb046c179615164c40c72525146fc6e20ff72655c738ed5ea1c"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_montgomery_simd.exe",
+      "binary_sha256": "a462db227347e81e6e5017119f80895674be7438cb758c4a7dba28bd24dbd09c",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_montgomery_simd.exe",
+            "sha256": "a462db227347e81e6e5017119f80895674be7438cb758c4a7dba28bd24dbd09c"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP src/bench_montgomery.cpp -o build/bench_montgomery_simd.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+            "profile": "SIMD",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:49.932858+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_montgomery.cpp",
+              "sha256": "ea2b179244d4a248df78ae2bb242e3318360fa375f5751f91524106159df4460"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "5c35c613971fb5ab50fa74389f39d77ed1fb68ea7a11d408bacba193b5c4559c",
+        "mode": "sidecar",
+        "sidecar_sha256": "424817089dedd7fe59da291f840be93217a06c18abaadef50c89060f72c1f8f2",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_montgomery_simd.exe"
+      ],
+      "elapsed_seconds": 4.6770385000127135,
+      "name": "bench_montgomery",
+      "returncode": 0,
+      "stderr": "20260803_105252_466864_bench_montgomery_SIMD.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105252_466864_bench_montgomery_SIMD.txt",
+      "stdout_sha256": "29060ef9a218beb3c4565c0760534366b107669e6b4ec937ef4a7ebf7312bd87"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_barret_reist_simd.exe",
+      "binary_sha256": "1890a16ae4b4f258b402c3454fa57b1bd79cb8ef2815866aedf80aba44f0266d",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_barret_reist_simd.exe",
+            "sha256": "1890a16ae4b4f258b402c3454fa57b1bd79cb8ef2815866aedf80aba44f0266d"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP src/bench_barret_reist.cpp -o build/bench_barret_reist_simd.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native -mavx2 -MMD -MP",
+            "profile": "SIMD",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:51.223450+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_barret_reist.cpp",
+              "sha256": "7330dc69dd35612245621afe349bbb26dcf77ed7a62ae2df254f65afc14bae5c"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "803426ddbb9d6898802f87c402bb756da165af5a9c542dd0721520049b87dffb",
+        "mode": "sidecar",
+        "sidecar_sha256": "115b10c9660ea95c2fd5e8321b1951d00f89a23584190266e0f84381f321294e",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_barret_reist_simd.exe"
+      ],
+      "elapsed_seconds": 0.7720560000016121,
+      "name": "bench_barret_reist",
+      "returncode": 0,
+      "stderr": "20260803_105252_466864_bench_barret_reist_SIMD.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105252_466864_bench_barret_reist_SIMD.txt",
+      "stdout_sha256": "80d32c8c4a1cbb4773c073c0a51871683377bb141099d434e527ddf24b46ffa8"
+    }
+  ],
+  "schema": 2,
+  "session_id": "20260803_105145_049176",
+  "timestamp": "20260803_105252_466864"
+}

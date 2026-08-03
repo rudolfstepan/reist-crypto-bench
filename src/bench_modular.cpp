@@ -1,150 +1,132 @@
-#include <iostream>
+#include <bit>
 #include <chrono>
-#include <random>
-#include <vector>
-#include <iomanip>
 #include <cstdint>
-#include <fstream>
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <winsock2.h>
-#include <windows.h>
-#endif
-#include <cstdio>
+#include <exception>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <random>
 #include <string>
-#include <cctype>
-#include "../include/reist_mod.hpp"
+#include <vector>
 
-using namespace std;
+#include "reist_mod.hpp"
 
-template<typename F>
-double bench(F func, long long iters) {
-    auto t0 = chrono::high_resolution_clock::now();
-    func(iters);
-    auto t1 = chrono::high_resolution_clock::now();
-    return chrono::duration<double>(t1 - t0).count();
+namespace {
+
+using Clock = std::chrono::steady_clock;
+
+volatile std::uint64_t benchmark_sink = 0;
+
+template <class Function>
+double time_call(Function&& function) {
+    const auto begin = Clock::now();
+    function();
+    const auto end = Clock::now();
+    return std::chrono::duration<double>(end - begin).count();
 }
 
+std::uint64_t classic_checksum(const std::vector<std::int64_t>& inputs,
+                               std::int64_t modulus) {
+    std::uint64_t checksum = 0;
+    for (const auto value : inputs) {
+        checksum += static_cast<std::uint64_t>(
+            reist::classic_remainder(value, modulus));
+    }
+    return checksum;
+}
+
+std::uint64_t centered_checksum(const std::vector<std::int64_t>& inputs,
+                                std::int64_t modulus) {
+    std::uint64_t checksum = 0;
+    for (const auto value : inputs) {
+        checksum += static_cast<std::uint64_t>(
+            reist::center_remainder(value, modulus));
+    }
+    return checksum;
+}
+
+bool preflight(const std::vector<std::int64_t>& inputs, std::int64_t modulus) {
+    for (const auto value : inputs) {
+        const auto classic = reist::classic_remainder(value, modulus);
+        const auto centered = reist::center_remainder(value, modulus);
+        const auto normalized_centered =
+            centered < 0 ? centered + modulus : centered;
+
+        if (classic != normalized_centered ||
+            !reist::is_centered(centered, modulus)) {
+            std::cerr << "Preflight failed for T=" << value
+                      << ", B=" << modulus << ", classic=" << classic
+                      << ", centered=" << centered << '\n';
+            return false;
+        }
+    }
+    return true;
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
-    long long N = 5'000'000;
-    long long B = 257;
+    try {
+        std::int64_t modulus = 257;
+        std::uint64_t count = 5'000'000;
 
-    if (argc >= 2) B = stoll(argv[1]);
-    if (argc >= 3) N = stoll(argv[2]);
-
-    if (B <= 1 || N <= 0) {
-        cerr << "Usage: " << argv[0] << " [B>1] [N>0]\n";
-        return 1;
-    }
-
-    mt19937_64 rng(0xBEEF);
-    uniform_int_distribution<int64_t> dist(0, (int64_t(1) << 62));
-
-      // Collect system info
-    std::string cpu_model, cpu_mhz, mem_total, hostname, os_name;
-#ifndef _WIN32
-    {
-        std::ifstream cpuinfo("/proc/cpuinfo");
-        std::string line;
-        while (std::getline(cpuinfo, line)) {
-            if (line.find("model name") != std::string::npos) {
-                cpu_model = line.substr(line.find(":") + 2);
-            }
-            if (line.find("cpu MHz") != std::string::npos) {
-                cpu_mhz = line.substr(line.find(":") + 2);
-            }
+        if (argc >= 2) {
+            modulus = std::stoll(argv[1]);
         }
-    }
-    {
-        std::ifstream meminfo("/proc/meminfo");
-        std::string line;
-        if (std::getline(meminfo, line)) {
-            if (line.find("MemTotal") != std::string::npos) {
-                mem_total = line.substr(line.find(":") + 2);
-            }
+        if (argc >= 3) {
+            count = std::stoull(argv[2]);
         }
-    }
-    char hn[256];
-    if (gethostname(hn, sizeof(hn)) == 0) hostname = hn;
-    {
-        FILE* fp = popen("uname -o", "r");
-        if (fp) {
-            char buf[128];
-            if (fgets(buf, sizeof(buf), fp)) {
-                os_name = std::string(buf);
-                if (!os_name.empty() && os_name.back() == '\n') {
-                    os_name.pop_back();
-                }
-            }
-            pclose(fp);
+        if (argc > 3 || modulus <= 0 || count == 0 ||
+            count > static_cast<std::uint64_t>(
+                        std::numeric_limits<std::size_t>::max())) {
+            std::cerr << "Usage: " << argv[0] << " [B>0] [N>0]\n";
+            return 2;
         }
-    }
-#else
-    // Windows: get hostname
-    char hn[256];
-    DWORD hnSize = sizeof(hn);
-    if (GetComputerNameA(hn, &hnSize)) hostname = hn;
-    else hostname = "Unknown";
-    // Windows: get OS name
-    os_name = "Windows";
-    // Windows: get CPU info
-    HKEY hKey;
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-        char buf[256];
-        DWORD bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
-            cpu_model = std::string(buf);
-        }
-        bufSize = sizeof(buf);
-        if (RegQueryValueExA(hKey, "~MHz", NULL, NULL, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS) {
-            cpu_mhz = std::to_string(*(DWORD*)buf);
-        }
-        RegCloseKey(hKey);
-    }
-    // Windows: get memory info
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof(statex);
-    if (GlobalMemoryStatusEx(&statex)) {
-        mem_total = std::to_string(statex.ullTotalPhys / (1024 * 1024)) + " MB";
-    }
-#endif
 
-    cout << fixed << setprecision(6);
-    cout << "========================================\n";
-    cout << "Modular Benchmark\n";
-    cout << "========================================\n";
-    cout << "System Information:\n";
-    cout << "  Hostname: " << hostname << "\n";
-    cout << "  OS: " << os_name << "\n";
-    cout << "  CPU Model: " << cpu_model << "\n";
-    cout << "  CPU MHz: " << cpu_mhz << "\n";
-    cout << "  Memory: " << mem_total << "\n";
-    cout << "========================================\n\n";
-    cout << "Benchmark with B = " << B << ", N = " << N << "\n";
-
-    double t_classic = bench([&](long long n){
-        for (long long i = 0; i < n; ++i) {
-            int64_t a = dist(rng);
-            volatile auto r = reist::classic_remainder(a, B);
-            (void)r;
+        // Generate one deterministic, full-width signed data set outside the
+        // timed region. Both kernels consume exactly the same values.
+        std::mt19937_64 rng(0xBEEF);
+        std::vector<std::int64_t> inputs(static_cast<std::size_t>(count));
+        for (auto& value : inputs) {
+            value = std::bit_cast<std::int64_t>(rng());
         }
-    }, N);
 
-    double t_reist = bench([&](long long n){
-        for (long long i = 0; i < n; ++i) {
-            int64_t a = dist(rng);
-            volatile auto r = reist::signed_remainder(a, B);
-            (void)r;
+        if (!preflight(inputs, modulus)) {
+            return 3;
         }
-    }, N);
 
-    cout << "\n--- Modular remainder ---\n";
-    cout << "classic  : " << t_classic << " s\n";
-    cout << "REIST    : " << t_reist   << " s\n";
-    if (t_reist > 0.0) {
-        cout << "Speedup  : " << (t_classic / t_reist) << "x (classic / REIST)\n";
+        std::uint64_t classic_sink = 0;
+        std::uint64_t centered_sink = 0;
+
+        const double classic_time = time_call([&] {
+            classic_sink = classic_checksum(inputs, modulus);
+            benchmark_sink = classic_sink;
+        });
+        const double centered_time = time_call([&] {
+            centered_sink = centered_checksum(inputs, modulus);
+            benchmark_sink = centered_sink;
+        });
+
+        std::cout << std::fixed << std::setprecision(6);
+        std::cout << "========================================\n"
+                  << "Pure remainder control (runtime modulus)\n"
+                  << "========================================\n"
+                  << "B = " << modulus << ", N = " << count << "\n"
+                  << "Input domain: deterministic full-width signed int64\n"
+                  << "RNG and allocation are outside the timed regions.\n\n"
+                  << "classic  : " << classic_time << " s\n"
+                  << "centered : " << centered_time << " s\n";
+        if (centered_time > 0.0) {
+            std::cout << "Ratio    : " << (classic_time / centered_time)
+                      << "x (classic / centered)\n";
+        }
+        std::cout << "sinks    : " << classic_sink << " / "
+                  << centered_sink << '\n';
+
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << "Invalid argument or benchmark failure: "
+                  << error.what() << '\n';
+        return 2;
     }
-
-    return 0;
 }

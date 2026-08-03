@@ -1,0 +1,5 @@
+q,N,reps,classic,reist,speedup,mode,vectorization,upper_corrections,lower_corrections,no_corrections
+1000003,1024,50000,0.0056288,0.0049815,1.12994,compile_time,compiler_auto_only,130,129,765
+10000019,1024,50000,0.0049604,0.0049784,0.996384,compile_time,compiler_auto_only,132,140,752
+100000007,1024,50000,0.0049655,0.0049157,1.01013,compile_time,compiler_auto_only,120,129,775
+1000000007,1024,50000,0.004963,0.0049795,0.996686,compile_time,compiler_auto_only,106,159,759

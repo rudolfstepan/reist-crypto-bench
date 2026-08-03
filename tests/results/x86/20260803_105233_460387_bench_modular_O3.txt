@@ -1,0 +1,11 @@
+========================================
+Pure remainder control (runtime modulus)
+========================================
+B = 257, N = 5000000
+Input domain: deterministic full-width signed int64
+RNG and allocation are outside the timed regions.
+
+classic  : 0.008853 s
+centered : 0.009067 s
+Ratio    : 0.976366x (classic / centered)
+sinks    : 640066873 / 18446744073709403990

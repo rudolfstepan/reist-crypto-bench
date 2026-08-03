@@ -16,3 +16,5 @@ bench_chacha_reist
 *.log
 *.tmp
 .venv
+__pycache__/
+*.py[cod]

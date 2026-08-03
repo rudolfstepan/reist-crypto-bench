@@ -1,0 +1,58 @@
+========================================
+REIST canonical modular-add benchmark
+========================================
+System Information:
+  Hostname: ASUSPC
+  OS: Windows
+  CPU Model: Intel(R) Core(TM) i9-14900K
+  CPU MHz: 3187
+  Memory: 65230 MB
+========================================
+
+Updates per modulus N = 50000000
+Source step = 3 (centered once before the REIST loop)
+Canonical interval: [-floor(B/2), ceil(B/2))
+
+[compile-time template modulus]
+Modulus B = 257
+  classic_mod: 0.066286 s
+  reist_sym  : 0.015672 s
+  speedup    : 4.229559x (classic / canonical REIST)
+  results    : 151 / -106 (congruent, canonical checked)
+
+[compile-time template modulus]
+Modulus B = 997
+  classic_mod: 0.081267 s
+  reist_sym  : 0.012133 s
+  speedup    : 6.697823x (classic / canonical REIST)
+  results    : 353 / 353 (congruent, canonical checked)
+
+[compile-time template modulus]
+Modulus B = 10007
+  classic_mod: 0.089200 s
+  reist_sym  : 0.011495 s
+  speedup    : 7.759743x (classic / canonical REIST)
+  results    : 5077 / -4930 (congruent, canonical checked)
+
+[compile-time template modulus]
+Modulus B = 1000003
+  classic_mod: 0.107153 s
+  reist_sym  : 0.011062 s
+  speedup    : 9.686787x (classic / canonical REIST)
+  results    : 999553 / -450 (congruent, canonical checked)
+
+[compile-time template modulus]
+Modulus B = 10000019
+  classic_mod: 0.080226 s
+  reist_sym  : 0.011005 s
+  speedup    : 7.289911x (classic / canonical REIST)
+  results    : 9999734 / -285 (congruent, canonical checked)
+
+[compile-time template modulus]
+Modulus B = 1000000007
+  classic_mod: 0.080485 s
+  reist_sym  : 0.011616 s
+  speedup    : 6.929129x (classic / canonical REIST)
+  results    : 150000000 / 150000000 (congruent, canonical checked)
+
+CSV written to results_modadd_suite.csv

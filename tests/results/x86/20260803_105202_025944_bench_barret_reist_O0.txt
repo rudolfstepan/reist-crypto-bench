@@ -1,0 +1,48 @@
+====================================================
+Validated Barrett / centered-addition benchmark
+====================================================
+Preflight: passed for all scalar kernels
+Total lane updates per modulus: 10000000
+SIMD rows are eight independent streams, not one serial accumulator.
+
+Modulus = 257
+  One dependent stream:
+    Classic %                 : 0.035727 s
+    REIST add_centered        : 0.089375 s
+    Barrett reciprocal, int64: 0.112554 s
+    Barrett reciprocal, int32: 0.046849 s
+    Speedup classic / REIST   : 0.399743x
+
+Modulus = 65537
+  One dependent stream:
+    Classic %                 : 0.035747 s
+    REIST add_centered        : 0.086982 s
+    Barrett reciprocal, int64: 0.100798 s
+    Barrett reciprocal, int32: 0.045390 s
+    Speedup classic / REIST   : 0.410973x
+
+Modulus = 1000003
+  One dependent stream:
+    Classic %                 : 0.035399 s
+    REIST add_centered        : 0.093342 s
+    Barrett reciprocal, int64: 0.097145 s
+    Barrett reciprocal, int32: 0.046874 s
+    Speedup classic / REIST   : 0.379246x
+
+Modulus = 10000019
+  One dependent stream:
+    Classic %                 : 0.035778 s
+    REIST add_centered        : 0.094280 s
+    Barrett reciprocal, int64: 0.097520 s
+    Barrett reciprocal, int32: 0.053104 s
+    Speedup classic / REIST   : 0.379491x
+
+Modulus = 1000000007
+  One dependent stream:
+    Classic %                 : 0.035507 s
+    REIST add_centered        : 0.090399 s
+    Barrett reciprocal, int64: 0.086537 s
+    Barrett reciprocal, int32: 0.033991 s
+    Speedup classic / REIST   : 0.392774x
+
+Sink: 111172197

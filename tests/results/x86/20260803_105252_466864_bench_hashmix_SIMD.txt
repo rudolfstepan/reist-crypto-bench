@@ -1,0 +1,32 @@
+===================================================
+Hash-mixing negative control (runtime modulus)
+===================================================
+Both paths implement the same exact recurrence.
+The centered path still uses remainder division; it is
+not a division-free REIST accumulation benchmark.
+Iterations N = 100000000
+
+M = 1000003
+  classic  : 0.393377 s
+  centered : 0.505200 s
+  ratio    : 0.778657x (classic / centered)
+  sinks    : 943194 / -56809
+
+M = 10000019
+  classic  : 0.392117 s
+  centered : 0.504829 s
+  ratio    : 0.776732x (classic / centered)
+  sinks    : 310919 / 310919
+
+M = 100000007
+  classic  : 0.392930 s
+  centered : 0.502887 s
+  ratio    : 0.781347x (classic / centered)
+  sinks    : 7401450 / 7401450
+
+M = 1000000007
+  classic  : 0.390931 s
+  centered : 0.505087 s
+  ratio    : 0.773988x (classic / centered)
+  sinks    : 108279260 / 108279260
+

@@ -1,0 +1,12 @@
+========================================
+ChaCha20 ARX identity control
+========================================
+This is a scope/neutrality control, not a REIST speedup.
+Each block uses a distinct counter and contributes to an
+observable checksum.
+
+Blocks       : 1000000
+std add      : 0.084795 s (754.764154 MB/s)
+identity add : 0.085422 s (749.218004 MB/s)
+ratio        : 0.992652x (std / identity)
+checksum     : 0x964975bdc347c604

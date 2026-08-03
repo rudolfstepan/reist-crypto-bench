@@ -1,0 +1,418 @@
+{
+  "artifact_directory": "20260803_105202_025944_O0_artifacts",
+  "build": {
+    "compiler": {
+      "argv": [
+        "g++"
+      ],
+      "command": "g++",
+      "executable": "C:/msys64/mingw64/bin/g++.exe",
+      "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+    "profile": "O0",
+    "provenance_mode": "sidecar",
+    "system": "make",
+    "verified": true
+  },
+  "host": {
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.12.9 (tags/v3.12.9:fdb8142, Feb  4 2025, 15:27:58) [MSC v.1942 64 bit (AMD64)]"
+  },
+  "label": "O0",
+  "quick": false,
+  "repository": {
+    "commit": "39aa12d69ff4519f757ac8fc1be7cdf2aa492c02",
+    "state_sha256": "2b18e08fddfcae41dfd1dc08da2dcb5501b539f630bcc14875587a689b6c3a75",
+    "status": " D src/bench_chacha_reist.cpp\n M .gitignore\n M CMakeLists.txt\n M Makefile\n M README.md\n M docs/BENCHMARKS.md\n M docs/M2_PRO_BENCHMARK.md\n M docs/REIST_Appendix_Community_Feedback.md\n M docs/REIST_Appendix_Community_Feedback_DE.md\n M include/reist_mod.hpp\n M release/README.md\n M scripts/generate_benchmark_report.py\n M scripts/plot_benchmarks.py\n M scripts/run_all.sh\n M src/bench_barret_reist.cpp\n M src/bench_chacha_stream.cpp\n M src/bench_hashmix.cpp\n M src/bench_modadd_suite.cpp\n M src/bench_modadd_suite_neon.cpp\n M src/bench_modular.cpp\n M src/bench_mont_vs_reist_tree_ntt.cpp\n M src/bench_montgomery.cpp\n M src/bench_poly_mod.cpp\n M src/bench_reist_arm.cpp\n M src/bench_tree_reist.cpp\n M src/bench_tree_reist_avx2.cpp\n M src/bench_tree_reist_neon.cpp\n M src/reist_neon_diag_mt.cpp\n M tests/test_reist.cpp\n M tools/check_compiler_artifacts.sh\n?? .github/workflows/ci.yml\n?? docs/PAPER_CORRECTIONS_DE.md\n?? docs/REIST-Division - Eine implementierungsorientierte Formulierung zentrierter Restarithmetik.pdf\n?? scripts/check_compiler_artifacts.py\n?? scripts/run_benchmarks.py\n?? scripts/write_build_provenance.py\n?? tests/results/README.md"
+  },
+  "runner_sha256": "670d6cbd4509d148c47c3b6e1ca2631aa9fe838d7b5729228cbc3459fefe6587",
+  "runs": [
+    {
+      "artifacts": [
+        {
+          "path": "20260803_105202_025944_O0_artifacts/results_modadd_suite.csv",
+          "sha256": "513d74e47764d41020b2a050799d7c347195d6bf5b97516f733a0a3f2f648736"
+        }
+      ],
+      "binary": "build/bench_modadd_suite_noopt.exe",
+      "binary_sha256": "fcd5fd49d15a55afc02d6874412128ed6467d2b8514e806b475fa92b9be103dd",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_modadd_suite_noopt.exe",
+            "sha256": "fcd5fd49d15a55afc02d6874412128ed6467d2b8514e806b475fa92b9be103dd"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP src/bench_modadd_suite.cpp -o build/bench_modadd_suite_noopt.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+            "profile": "O0",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:51:54.544513+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_modadd_suite.cpp",
+              "sha256": "be7f39d2a2687ac23cd6a35019fe1f183e197cf3ae317607c5059dc16b561412"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "cc1ef9989ea2f78f7088c4a3f4aae0514244cb4006a8cab9112428327ceba5a5",
+        "mode": "sidecar",
+        "sidecar_sha256": "a5d32f6ce5c0f1e5e55ce5d831b6384d58c8eda862a08081169984b3b2a1930d",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_modadd_suite_noopt.exe"
+      ],
+      "elapsed_seconds": 0.674234999998589,
+      "name": "bench_modadd_suite",
+      "returncode": 0,
+      "stderr": "20260803_105202_025944_bench_modadd_suite_O0.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105202_025944_bench_modadd_suite_O0.txt",
+      "stdout_sha256": "20ba63ec107ef774d9afcc0d636f6df8e1f3e2c2101794916a6a2bad1dbad9cb"
+    },
+    {
+      "artifacts": [
+        {
+          "path": "20260803_105202_025944_O0_artifacts/results_poly_mod.csv",
+          "sha256": "c1b50289fec7f0ba2607abc5cdde0a27541bd3cd0dfc189e428f621f13f4d3c7"
+        }
+      ],
+      "binary": "build/bench_poly_mod_noopt.exe",
+      "binary_sha256": "87cc5bb0004ba10aa1aff8c016fd3f224460726a1a1b9da0614a6f4abc386d95",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_poly_mod_noopt.exe",
+            "sha256": "87cc5bb0004ba10aa1aff8c016fd3f224460726a1a1b9da0614a6f4abc386d95"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP src/bench_poly_mod.cpp -o build/bench_poly_mod_noopt.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+            "profile": "O0",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:51:56.168808+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_poly_mod.cpp",
+              "sha256": "65854abbb20ec04b8a19ae20d26f0e59a9be7c98b8db6afac0e46467d4048d7a"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "972366611fc3e0d94efb96c315528799932551b9ef02b5f2ec9b0d0f405de2cf",
+        "mode": "sidecar",
+        "sidecar_sha256": "7449e9ebd3d3d47c8eb3e8f6bb601ef114e1023f1119c4ddc60383a38238fce5",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_poly_mod_noopt.exe"
+      ],
+      "elapsed_seconds": 0.47617280000122264,
+      "name": "bench_poly_mod",
+      "returncode": 0,
+      "stderr": "20260803_105202_025944_bench_poly_mod_O0.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105202_025944_bench_poly_mod_O0.txt",
+      "stdout_sha256": "4eb1f1fbfdada4e9529f922f45a9b09bc8a125af97c3e70a0366394473fc2dfe"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_modular_noopt.exe",
+      "binary_sha256": "79f8bc342eed15a8f946b3d07e34c30f07e3094e812ed81a4d378dc5e06d7397",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_modular_noopt.exe",
+            "sha256": "79f8bc342eed15a8f946b3d07e34c30f07e3094e812ed81a4d378dc5e06d7397"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP src/bench_modular.cpp -o build/bench_modular_noopt.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+            "profile": "O0",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:51:57.046512+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_modular.cpp",
+              "sha256": "39e9711c40a482e71b7c0ad5867a6c9c7219a34d6250c33dd29b757afbb9776a"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "1ba1c139e1832df6b160e6f1e0432a90fefe99987779fb44e78d859cb7c34595",
+        "mode": "sidecar",
+        "sidecar_sha256": "d3a390a39ef672c9fd0b9ef0d04397f8a01747b178967653b01a7fe20af159c0",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_modular_noopt.exe"
+      ],
+      "elapsed_seconds": 0.2650626000104239,
+      "name": "bench_modular",
+      "returncode": 0,
+      "stderr": "20260803_105202_025944_bench_modular_O0.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105202_025944_bench_modular_O0.txt",
+      "stdout_sha256": "79b4c5d628a05ae144fe7ddb41b148b295fd71ed08d5946cf6b2c525ecad51d9"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_chacha_stream_noopt.exe",
+      "binary_sha256": "bebc96fb57552a9b717744a9fac2461e96953aed27b4ea5349da193d68e484b2",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_chacha_stream_noopt.exe",
+            "sha256": "bebc96fb57552a9b717744a9fac2461e96953aed27b4ea5349da193d68e484b2"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP src/bench_chacha_stream.cpp -o build/bench_chacha_stream_noopt.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+            "profile": "O0",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:51:57.846457+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_chacha_stream.cpp",
+              "sha256": "6de3c745baa7579c9d20b86f3b761b04e77c0bd3fd91944400b6ed21fbdc69f3"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "644355ff7baadec0cef69413023f39ffc687d6592f107429e91c474f2ffab32a",
+        "mode": "sidecar",
+        "sidecar_sha256": "643591748389a2f0ac1f2e987163fdd009a4e745ae99a565a21f9c4140a17562",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_chacha_stream_noopt.exe"
+      ],
+      "elapsed_seconds": 6.756359499995597,
+      "name": "bench_chacha_stream",
+      "returncode": 0,
+      "stderr": "20260803_105202_025944_bench_chacha_stream_O0.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105202_025944_bench_chacha_stream_O0.txt",
+      "stdout_sha256": "596e986392c019cc4644559232ba407fc03368ab012ed2049531fb8084b7560c"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_hashmix_noopt.exe",
+      "binary_sha256": "603677d44bd255fd955689601f67c27005b22c1ce4cf4e023689df692693330a",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_hashmix_noopt.exe",
+            "sha256": "603677d44bd255fd955689601f67c27005b22c1ce4cf4e023689df692693330a"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP src/bench_hashmix.cpp -o build/bench_hashmix_noopt.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+            "profile": "O0",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:51:58.682103+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_hashmix.cpp",
+              "sha256": "ed342b6eeea479f28bc167975fff847539e4c1b8ea2dc3253c36b0d4f33cf296"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "5a95b7a2b1050ac45cdf2f1c4680c8fd6f7357b08d3839acd6d4abf7890dd7fa",
+        "mode": "sidecar",
+        "sidecar_sha256": "a59a6de0681b95fefa835967971d529ffb76d41917e4138df69ea3e285a028c6",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_hashmix_noopt.exe"
+      ],
+      "elapsed_seconds": 6.567917000007583,
+      "name": "bench_hashmix",
+      "returncode": 0,
+      "stderr": "20260803_105202_025944_bench_hashmix_O0.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105202_025944_bench_hashmix_O0.txt",
+      "stdout_sha256": "c67382e05b9ec11b83f3b2eabe1f80adfffcd6709a0095771c12555e70af2393"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_montgomery_noopt.exe",
+      "binary_sha256": "2a1c5b5eb251c65c1017adc1e9a53e3ad788a343a4df320eee37895b54f18d46",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_montgomery_noopt.exe",
+            "sha256": "2a1c5b5eb251c65c1017adc1e9a53e3ad788a343a4df320eee37895b54f18d46"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP src/bench_montgomery.cpp -o build/bench_montgomery_noopt.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+            "profile": "O0",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:51:59.540655+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_montgomery.cpp",
+              "sha256": "ea2b179244d4a248df78ae2bb242e3318360fa375f5751f91524106159df4460"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "3308a7474612db5aac7403ec9413c0a7b4e31d87b9dde942e381a49ff7c152c9",
+        "mode": "sidecar",
+        "sidecar_sha256": "c97ce7a8b4c7671f9b21fc3a3efccc9de6584114708e80d5031664852ab2e030",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_montgomery_noopt.exe"
+      ],
+      "elapsed_seconds": 6.145319900009781,
+      "name": "bench_montgomery",
+      "returncode": 0,
+      "stderr": "20260803_105202_025944_bench_montgomery_O0.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105202_025944_bench_montgomery_O0.txt",
+      "stdout_sha256": "c7ffdc02bb5619f49a6b19647ede86c7f9e2edb316c7219ab8a63faf25decab2"
+    },
+    {
+      "artifacts": [],
+      "binary": "build/bench_barret_reist_noopt.exe",
+      "binary_sha256": "9297ae60804980384197e297a9f9db88e3f2c0c480258e8e14d1fcaddf5a85e2",
+      "build_provenance": {
+        "metadata": {
+          "binary": {
+            "path": "build/bench_barret_reist_noopt.exe",
+            "sha256": "9297ae60804980384197e297a9f9db88e3f2c0c480258e8e14d1fcaddf5a85e2"
+          },
+          "build": {
+            "command": "g++ -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP src/bench_barret_reist.cpp -o build/bench_barret_reist_noopt.exe",
+            "flags": "-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize -MMD -MP",
+            "profile": "O0",
+            "system": "make"
+          },
+          "compiler": {
+            "argv": [
+              "g++"
+            ],
+            "command": "g++",
+            "executable": "C:/msys64/mingw64/bin/g++.exe",
+            "version": "g++ (Rev13, Built by MSYS2 project) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "created_utc": "2026-08-03T08:52:00.721155+00:00",
+          "inputs": [
+            {
+              "path": "include/reist_mod.hpp",
+              "sha256": "8c3f124fa88ef7395f43beb03c97146a6a97e2e4de788a2523b52e1850e18649"
+            },
+            {
+              "path": "src/bench_barret_reist.cpp",
+              "sha256": "7330dc69dd35612245621afe349bbb26dcf77ed7a62ae2df254f65afc14bae5c"
+            }
+          ],
+          "schema": 1
+        },
+        "metadata_sha256": "63896221caaf66b10cae52b0fd9c900df8129f53c5b72ba58d7e0d8e4b17cf47",
+        "mode": "sidecar",
+        "sidecar_sha256": "f355c164ac41773ba17d5a8b27b461777215aebf48fa6d908531d0222a24f1e3",
+        "verified": true
+      },
+      "command": [
+        "D:\\Development\\reist-crypto-bench\\build\\bench_barret_reist_noopt.exe"
+      ],
+      "elapsed_seconds": 1.3921603000053437,
+      "name": "bench_barret_reist",
+      "returncode": 0,
+      "stderr": "20260803_105202_025944_bench_barret_reist_O0.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "20260803_105202_025944_bench_barret_reist_O0.txt",
+      "stdout_sha256": "fee850d656496db9763315e169996d3dbdf6e6739452efb8fee16efcd448921f"
+    }
+  ],
+  "schema": 2,
+  "session_id": "20260803_105145_049176",
+  "timestamp": "20260803_105202_025944"
+}

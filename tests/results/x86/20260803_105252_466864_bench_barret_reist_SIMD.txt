@@ -1,0 +1,83 @@
+====================================================
+Validated Barrett / centered-addition benchmark
+====================================================
+Preflight: passed for all scalar and AVX2 kernels
+Total lane updates per modulus: 10000000
+SIMD rows are eight independent streams, not one serial accumulator.
+
+Modulus = 257
+  One dependent stream:
+    Classic %                 : 0.035561 s
+    REIST add_centered        : 0.006340 s
+    Barrett reciprocal, int64: 0.059273 s
+    Barrett reciprocal, int32: 0.023849 s
+    Speedup classic / REIST   : 5.608757x
+  Eight independent streams (1250000 updates per lane):
+    REIST scalar 8-stream     : 0.003887 s
+    REIST AVX2 8-stream       : 0.001177 s
+    Barrett scalar 8-stream   : 0.007388 s
+    Barrett AVX2 8-stream     : 0.007132 s
+    REIST SIMD speedup        : 3.301682x
+    Barrett SIMD speedup      : 1.035907x
+
+Modulus = 65537
+  One dependent stream:
+    Classic %                 : 0.035706 s
+    REIST add_centered        : 0.006469 s
+    Barrett reciprocal, int64: 0.061659 s
+    Barrett reciprocal, int32: 0.028505 s
+    Speedup classic / REIST   : 5.519594x
+  Eight independent streams (1250000 updates per lane):
+    REIST scalar 8-stream     : 0.003869 s
+    REIST AVX2 8-stream       : 0.001179 s
+    Barrett scalar 8-stream   : 0.007886 s
+    Barrett AVX2 8-stream     : 0.007156 s
+    REIST SIMD speedup        : 3.281099x
+    Barrett SIMD speedup      : 1.101926x
+
+Modulus = 1000003
+  One dependent stream:
+    Classic %                 : 0.035971 s
+    REIST add_centered        : 0.006450 s
+    Barrett reciprocal, int64: 0.059417 s
+    Barrett reciprocal, int32: 0.024219 s
+    Speedup classic / REIST   : 5.576828x
+  Eight independent streams (1250000 updates per lane):
+    REIST scalar 8-stream     : 0.003770 s
+    REIST AVX2 8-stream       : 0.001177 s
+    Barrett scalar 8-stream   : 0.007695 s
+    Barrett AVX2 8-stream     : 0.006978 s
+    REIST SIMD speedup        : 3.201529x
+    Barrett SIMD speedup      : 1.102812x
+
+Modulus = 10000019
+  One dependent stream:
+    Classic %                 : 0.035346 s
+    REIST add_centered        : 0.007318 s
+    Barrett reciprocal, int64: 0.058962 s
+    Barrett reciprocal, int32: 0.022720 s
+    Speedup classic / REIST   : 4.829956x
+  Eight independent streams (1250000 updates per lane):
+    REIST scalar 8-stream     : 0.004480 s
+    REIST AVX2 8-stream       : 0.001186 s
+    Barrett scalar 8-stream   : 0.008357 s
+    Barrett AVX2 8-stream     : 0.007109 s
+    REIST SIMD speedup        : 3.775792x
+    Barrett SIMD speedup      : 1.175574x
+
+Modulus = 1000000007
+  One dependent stream:
+    Classic %                 : 0.036063 s
+    REIST add_centered        : 0.006437 s
+    Barrett reciprocal, int64: 0.059465 s
+    Barrett reciprocal, int32: 0.023037 s
+    Speedup classic / REIST   : 5.602234x
+  Eight independent streams (1250000 updates per lane):
+    REIST scalar 8-stream     : 0.004075 s
+    REIST AVX2 8-stream       : 0.001239 s
+    Barrett scalar 8-stream   : 0.005970 s
+    Barrett AVX2 8-stream     : 0.007205 s
+    REIST SIMD speedup        : 3.289127x
+    Barrett SIMD speedup      : 0.828587x
+
+Sink: 4474215936966088819

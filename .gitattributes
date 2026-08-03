@@ -1,0 +1,3 @@
+# Benchmark archives are hash-bound byte artifacts. Preserve their generated
+# line endings and do not treat CRLF as trailing whitespace during diff checks.
+tests/results/** -text whitespace=-trailing-space

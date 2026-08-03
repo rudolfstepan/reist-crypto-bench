@@ -541,16 +541,16 @@ int main(int argc, char** argv) {
     }
     if (parsed_N < 8
         || static_cast<std::uint64_t>(parsed_N)
-            > std::numeric_limits<std::size_t>::max()) {
+            > (std::numeric_limits<std::size_t>::max)()) {
         std::cerr << "N must be in [8, SIZE_MAX]\n";
         return 2;
     }
-    if (parsed_reps > std::numeric_limits<std::int32_t>::max()) {
+    if (parsed_reps > (std::numeric_limits<std::int32_t>::max)()) {
         std::cerr << "reps must be in [1, INT32_MAX]\n";
         return 2;
     }
     if (runtime_mode
-        && parsed_q > std::numeric_limits<std::int32_t>::max()) {
+        && parsed_q > (std::numeric_limits<std::int32_t>::max)()) {
         std::cerr << "q must be in [1, INT32_MAX]\n";
         return 2;
     }

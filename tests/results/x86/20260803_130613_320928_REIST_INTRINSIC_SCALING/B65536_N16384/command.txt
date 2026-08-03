@@ -1,0 +1,1 @@
+D:\Development\reist-crypto-bench\build\integration\const-mod-scaling\bench_reist_intrinsics.exe --elements 16384 --repetitions 2048 --modulus 65536 --trials 12

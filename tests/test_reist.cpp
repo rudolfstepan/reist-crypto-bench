@@ -290,12 +290,17 @@ void test_centered_addition(test_context& ctx) {
     CHECK(ctx, reist::add_centered(-half, -half, max) == 1);
 
     // The compatibility helper must not overflow before reduction.
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(_MSC_VER) && !defined(__clang__)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#elif defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
     CHECK(ctx, reist::reist_add_mod(max, max, 10) == 4);
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(_MSC_VER) && !defined(__clang__)
+#pragma warning(pop)
+#elif defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 }

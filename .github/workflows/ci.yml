@@ -31,6 +31,58 @@ jobs:
         run: cmake --build build --parallel 2
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Validate automatic scaling runner
+        if: matrix.name == 'GCC'
+        run: >-
+          python3 scripts/run_reist_intrinsic_scaling.py
+          --binary build/bench_reist_intrinsics
+          --result-dir scaling-runner-smoke
+          --sizes 17,4096
+          --moduli 256,1000003
+          --target-updates 1048576
+          --trials 6
+      - name: Validate fixed-repetition complexity runner
+        if: matrix.name == 'GCC'
+        run: >-
+          python3 scripts/run_reist_intrinsic_complexity.py
+          --binary build/bench_reist_intrinsics
+          --result-dir complexity-runner-smoke
+          --sizes 65536,131072,262144
+          --moduli 1000003
+          --repetitions 2
+          --trials 6
+          --bootstrap-iterations 100
+      - name: Verify compiler-optimized constant modulo kernels
+        shell: bash
+        run: |
+          moduli='256 257 12289 65536 65537 1000000 1000003 1000000007 2147483647'
+          for backend in portable avx2; do
+            for modulus in $moduli; do
+              symbol="compiler_const_percent_${modulus}_${backend}"
+              body=$(objdump -d -C --disassemble="$symbol" build/bench_reist_intrinsics)
+              grep -q "<$symbol>:" <<< "$body"
+              if grep -Eq '[[:space:]](div|idiv)[bwlq]?[[:space:]]' <<< "$body"; then
+                echo "unexpected runtime division in $symbol" >&2
+                exit 1
+              fi
+            done
+          done
+      - name: Configure portable fallback
+        if: matrix.name == 'GCC'
+        run: >-
+          cmake -S . -B build-portable
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_COMPILER=g++
+          -DREIST_WARNINGS_AS_ERRORS=ON
+          -DREIST_ENABLE_EXPLICIT_SIMD=OFF
+      - name: Build portable fallback
+        if: matrix.name == 'GCC'
+        run: >-
+          cmake --build build-portable --parallel 2
+          --target reist_intrinsic_tests bench_reist_intrinsics
+      - name: Test portable REIST fallback and modulo comparison
+        if: matrix.name == 'GCC'
+        run: ctest --test-dir build-portable -L intrinsic --output-on-failure
 
   windows-clang:
     name: Windows Clang
@@ -53,6 +105,21 @@ jobs:
         shell: pwsh
         run: ctest --test-dir build --output-on-failure
 
+  windows-msvc:
+    name: Windows MSVC
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        shell: pwsh
+        run: cmake -S . -B build -A x64 -DREIST_WARNINGS_AS_ERRORS=ON
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config Release --parallel 2
+      - name: Test
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure
+
   linux-arm64:
     name: Linux ARM64 GCC and NEON
     runs-on: ubuntu-24.04-arm
@@ -68,6 +135,20 @@ jobs:
         run: cmake --build build --parallel 2
       - name: Test scalar and NEON paths
         run: ctest --test-dir build --output-on-failure
+      - name: Verify compiler-optimized constant modulo kernels
+        run: |
+          moduli='256 257 12289 65536 65537 1000000 1000003 1000000007 2147483647'
+          for backend in portable neon; do
+            for modulus in $moduli; do
+              symbol="compiler_const_percent_${modulus}_${backend}"
+              body=$(objdump -d -C --disassemble="$symbol" build/bench_reist_intrinsics)
+              grep -q "<$symbol>:" <<< "$body"
+              if grep -Eq '[[:space:]](sdiv|udiv)[[:space:]]' <<< "$body"; then
+                echo "unexpected runtime division in $symbol" >&2
+                exit 1
+              fi
+            done
+          done
       - name: Run the complete ARM smoke manifest
         run: |
           python3 scripts/run_benchmarks.py --build-dir build --suffix '' --label ARM64-smoke --session-id "ci-arm-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" --quick --result-dir arm-results --compiler g++ --build-system CMake --build-profile Release --build-provenance declared --build-flags='CMake Release ARM64/NEON build (declared smoke metadata)'
@@ -75,14 +156,20 @@ jobs:
       - name: Inspect stable AArch64 kernels
         env:
           ARTIFACT_COMPILERS: g++
-          ARTIFACT_CXXFLAGS: -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=armv8-a+simd
-          ARTIFACT_OUTDIR: compiler_reports/modadd-aarch64
         run: |
           chmod +x tools/check_compiler_artifacts.sh
-          tools/check_compiler_artifacts.sh src/bench_modadd_suite_neon.cpp
+          ARTIFACT_CXXFLAGS='-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=armv8-a+simd' ARTIFACT_OUTDIR=compiler_reports/modadd-aarch64 tools/check_compiler_artifacts.sh src/bench_modadd_suite_neon.cpp
+          ARTIFACT_OUTDIR=compiler_reports/compiler-const-portable-aarch64 tools/check_compiler_artifacts.sh src/bench_reist_intrinsics_const_portable.cpp
+          ARTIFACT_OUTDIR=compiler_reports/compiler-const-neon-aarch64 tools/check_compiler_artifacts.sh src/bench_reist_intrinsics_const_neon.cpp
+          ARTIFACT_CXXFLAGS='-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=armv8-a+simd -DREIST_HAVE_NEON_BACKEND=1' ARTIFACT_OUTDIR=compiler_reports/intrinsics-aarch64 tools/check_compiler_artifacts.sh src/reist_intrinsics_neon.cpp
           awk -F '\t' '$11 == "classic_modadd_4stream_runtime_kernel" && $13 == "1" { found=1 } END { exit !found }' compiler_reports/modadd-aarch64/manifest.tsv
           awk -F '\t' '$11 == "reist_modadd_4stream_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-aarch64/manifest.tsv
           awk -F '\t' '$11 == "reist_modadd_neon_4stream_runtime_kernel" { found=1 } $11 == "reist_modadd_neon_4stream_runtime_kernel" && $13 == "1" { bad=1 } END { exit !found || bad }' compiler_reports/modadd-aarch64/manifest.tsv
+          awk -F '\t' '$5 == "g++" && $7 == "O3" && $11 ~ /^compiler_const_percent_[0-9]+_portable$/ { seen++; if ($13 != "0" || index($8, "-march=") != 0) bad=1 } END { if (seen != 9 || bad) exit 1 }' compiler_reports/compiler-const-portable-aarch64/manifest.tsv
+          awk -F '\t' '$5 == "g++" && $7 == "O3" && $11 ~ /^compiler_const_percent_[0-9]+_neon$/ { seen++; if ($13 != "0" || index($8, "-march=armv8-a+simd") == 0) bad=1 } END { if (seen != 9 || bad) exit 1 }' compiler_reports/compiler-const-neon-aarch64/manifest.tsv
+          for kernel in add_i32_compiler_auto_neon add_i32_explicit_neon; do
+            awk -F '\t' -v kernel="$kernel" '$5 == "g++" && index($11, kernel) { found=1; if ($13 != "0" || $17 != "1") bad=1 } END { if (!found || bad) exit 1 }' compiler_reports/intrinsics-aarch64/manifest.tsv
+          done
 
   sanitizers:
     name: ASan and UBSan
@@ -168,10 +255,19 @@ jobs:
           chmod +x tools/check_compiler_artifacts.sh
           ARTIFACT_OUTDIR=compiler_reports/modadd-x86 tools/check_compiler_artifacts.sh src/bench_modadd_suite.cpp
           ARTIFACT_OUTDIR=compiler_reports/poly-x86 tools/check_compiler_artifacts.sh src/bench_poly_mod.cpp
+          ARTIFACT_OUTDIR=compiler_reports/compiler-const-portable-x86 tools/check_compiler_artifacts.sh src/bench_reist_intrinsics_const_portable.cpp
+          ARTIFACT_OUTDIR=compiler_reports/compiler-const-avx2-x86 tools/check_compiler_artifacts.sh src/bench_reist_intrinsics_const_avx2.cpp
+          ARTIFACT_CXXFLAGS='-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -mavx2 -DREIST_HAVE_AVX2_BACKEND=1' ARTIFACT_OUTDIR=compiler_reports/intrinsics-x86 tools/check_compiler_artifacts.sh src/reist_intrinsics_avx2.cpp
           test -s compiler_reports/modadd-x86/report.md
           test -s compiler_reports/modadd-x86/manifest.tsv
           test -s compiler_reports/poly-x86/report.md
           test -s compiler_reports/poly-x86/manifest.tsv
+          test -s compiler_reports/compiler-const-portable-x86/report.md
+          test -s compiler_reports/compiler-const-portable-x86/manifest.tsv
+          test -s compiler_reports/compiler-const-avx2-x86/report.md
+          test -s compiler_reports/compiler-const-avx2-x86/manifest.tsv
+          test -s compiler_reports/intrinsics-x86/report.md
+          test -s compiler_reports/intrinsics-x86/manifest.tsv
       - name: Enforce scalar and polynomial DIV expectations
         run: |
           python3 scripts/check_compiler_artifacts.py --compiler g++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native' --build-dir compiler_python/gcc
@@ -189,6 +285,13 @@ jobs:
           grep -Eq $'\treist_poly_const_[0-9]+\tREIST\t' compiler_reports/poly-x86/manifest.tsv
           awk -F '\t' '$11 ~ /^classic_poly_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
           grep -q -- '-march=native' compiler_reports/modadd-x86/manifest.tsv
+          for compiler in g++ clang++; do
+            awk -F '\t' -v compiler="$compiler" '$5 == compiler && $7 == "O3" && $11 ~ /^compiler_const_percent_[0-9]+_portable$/ { seen++; if ($13 != "0" || index($8, "-mavx2") != 0 || index($8, "-march=") != 0) bad=1 } END { if (seen != 9 || bad) exit 1 }' compiler_reports/compiler-const-portable-x86/manifest.tsv
+            awk -F '\t' -v compiler="$compiler" '$5 == compiler && $7 == "O3" && $11 ~ /^compiler_const_percent_[0-9]+_avx2$/ { seen++; if ($13 != "0" || index($8, "-mavx2") == 0) bad=1 } END { if (seen != 9 || bad) exit 1 }' compiler_reports/compiler-const-avx2-x86/manifest.tsv
+            for kernel in add_i32_compiler_auto_avx2 add_i32_explicit_avx2; do
+              awk -F '\t' -v compiler="$compiler" -v kernel="$kernel" '$5 == compiler && index($11, kernel) { found=1; if ($13 != "0" || $17 != "1") bad=1 } END { if (!found || bad) exit 1 }' compiler_reports/intrinsics-x86/manifest.tsv
+            done
+          done
       - name: Validate current paper references
         shell: bash
         run: |

@@ -1,0 +1,40 @@
+REIST developer-API modulo benchmark
+  primary comparison: compiler-optimized constant C++ % vs REIST automatic
+  secondary paths: REIST compiler_auto and automatic
+  operation  : dst[i] = (dst[i] + rhs[i]) mod B
+  timing     : prepared steady-state updates only; input normalization, copies, output conversion and validation are excluded
+  architecture: x86_64
+  compiler   : GCC 15.2.0
+  constant-% backend: avx2 (B is a compile-time template constant)
+  automatic backend: avx2
+  elements   : 1
+  repetitions: 33554432
+  modulus B  : 2147483647
+  trials     : 12 (balanced across all six execution orders)
+  preflight  : PASS (independent oracle, boundary and tail sizes)
+  trial  1 [compiler_const_percent>reist_compiler_auto>reist_automatic]: const %=0.095508 s, REIST compiler_auto=0.050771 s, REIST automatic=0.049770 s, const/automatic=1.918980x
+  trial  2 [compiler_const_percent>reist_automatic>reist_compiler_auto]: const %=0.096727 s, REIST compiler_auto=0.050668 s, REIST automatic=0.049995 s, const/automatic=1.934753x
+  trial  3 [reist_compiler_auto>compiler_const_percent>reist_automatic]: const %=0.096253 s, REIST compiler_auto=0.050641 s, REIST automatic=0.050585 s, const/automatic=1.902780x
+  trial  4 [reist_compiler_auto>reist_automatic>compiler_const_percent]: const %=0.095527 s, REIST compiler_auto=0.051446 s, REIST automatic=0.050652 s, const/automatic=1.885970x
+  trial  5 [reist_automatic>compiler_const_percent>reist_compiler_auto]: const %=0.095332 s, REIST compiler_auto=0.051108 s, REIST automatic=0.049754 s, const/automatic=1.916057x
+  trial  6 [reist_automatic>reist_compiler_auto>compiler_const_percent]: const %=0.095432 s, REIST compiler_auto=0.051252 s, REIST automatic=0.050395 s, const/automatic=1.893703x
+  trial  7 [compiler_const_percent>reist_compiler_auto>reist_automatic]: const %=0.095364 s, REIST compiler_auto=0.051011 s, REIST automatic=0.050237 s, const/automatic=1.898280x
+  trial  8 [compiler_const_percent>reist_automatic>reist_compiler_auto]: const %=0.095667 s, REIST compiler_auto=0.051589 s, REIST automatic=0.050605 s, const/automatic=1.890457x
+  trial  9 [reist_compiler_auto>compiler_const_percent>reist_automatic]: const %=0.094417 s, REIST compiler_auto=0.051251 s, REIST automatic=0.051311 s, const/automatic=1.840092x
+  trial 10 [reist_compiler_auto>reist_automatic>compiler_const_percent]: const %=0.095582 s, REIST compiler_auto=0.051677 s, REIST automatic=0.050238 s, const/automatic=1.902572x
+  trial 11 [reist_automatic>compiler_const_percent>reist_compiler_auto]: const %=0.095676 s, REIST compiler_auto=0.050920 s, REIST automatic=0.049803 s, const/automatic=1.921101x
+  trial 12 [reist_automatic>reist_compiler_auto>compiler_const_percent]: const %=0.095311 s, REIST compiler_auto=0.050743 s, REIST automatic=0.050132 s, const/automatic=1.901197x
+
+Median and central 50% (Q1..Q3):
+  compiler constant %: 0.095518 s [0.095356, 0.095669], 351289832.889786 updates/s
+  REIST compiler_auto: 0.051060 s [0.050764, 0.051301], 657160774.544308 updates/s
+  REIST automatic    : 0.050238 s [0.049947, 0.050590], 667914044.546272 updates/s
+  const % / REIST automatic: 1.901885x [1.892891, 1.916788]
+  const % / REIST compiler_auto: 1.867383x [1.856229, 1.879500]
+  REIST compiler_auto / automatic: 1.016354x [1.013150, 1.020692]
+  interpretation: in every ratio, >1 means the method named after '/' was faster.
+  claim boundary: this is a prepared, repeated modular-addition workload, not a universal modulo or end-to-end application claim.
+  const % / REIST automatic: descriptively positive (Q1 > 1.0)
+  const % / REIST compiler_auto: descriptively positive (Q1 > 1.0)
+  REIST compiler_auto / automatic: descriptively positive (Q1 > 1.0)
+CSV written to results_reist_intrinsics.csv

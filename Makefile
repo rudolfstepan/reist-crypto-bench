@@ -81,6 +81,41 @@ SIMD_BUILD_FLAGS = $(CPPFLAGS) $(COMMON_FLAGS) $(SIMD_FLAGS) -MMD -MP
 PROVENANCE_INPUTS = $(foreach header,$(HEADERS),--input "$(header)")
 RUN_RESULT_OPTION = $(if $(strip $(RUN_RESULT_DIR)),--result-dir "$(RUN_RESULT_DIR)",)
 RUN_QUICK ?=
+INTRINSIC_SCALING_RESULT_DIR ?= \
+  $(BUILD_DIR)/intrinsic-scaling-$(RUN_SESSION)
+INTRINSIC_SCALING_ARGS ?=
+INTRINSIC_COMPLEXITY_RESULT_DIR ?= \
+  $(BUILD_DIR)/intrinsic-complexity-$(RUN_SESSION)
+INTRINSIC_COMPLEXITY_ARGS ?=
+
+INTRINSIC_DISPATCH_OBJ := $(BUILD_DIR)/reist_intrinsics_dispatch.o
+INTRINSIC_BENCH_OBJ := $(BUILD_DIR)/bench_reist_intrinsics.o
+INTRINSIC_CONST_PORTABLE_OBJ := \
+  $(BUILD_DIR)/bench_reist_intrinsics_const_portable.o
+INTRINSIC_CONST_BACKEND_OBJ :=
+INTRINSIC_CONST_BENCH_DEFINE :=
+INTRINSIC_TEST_OBJ := $(BUILD_DIR)/test_reist_intrinsics.o
+INTRINSIC_BENCH_BIN := $(BUILD_DIR)/bench_reist_intrinsics_diagnostic$(EXE_EXT)
+INTRINSIC_TEST_BIN := $(BUILD_DIR)/test_reist_intrinsics$(EXE_EXT)
+INTRINSIC_BACKEND_OBJ :=
+INTRINSIC_BACKEND_DEFINE :=
+INTRINSIC_BACKEND_FLAGS :=
+
+ifeq ($(HOST_ARCH),x86_64)
+  INTRINSIC_BACKEND_OBJ := $(BUILD_DIR)/reist_intrinsics_avx2.o
+  INTRINSIC_BACKEND_DEFINE := -DREIST_HAVE_AVX2_BACKEND=1
+  INTRINSIC_BACKEND_FLAGS := -O3 -DNDEBUG -mavx2
+  INTRINSIC_CONST_BACKEND_OBJ := \
+    $(BUILD_DIR)/bench_reist_intrinsics_const_avx2.o
+  INTRINSIC_CONST_BENCH_DEFINE := -DREIST_BENCH_HAVE_AVX2_CONST=1
+else ifeq ($(HOST_ARCH),aarch64)
+  INTRINSIC_BACKEND_OBJ := $(BUILD_DIR)/reist_intrinsics_neon.o
+  INTRINSIC_BACKEND_DEFINE := -DREIST_HAVE_NEON_BACKEND=1
+  INTRINSIC_BACKEND_FLAGS := -O3 -DNDEBUG -march=armv8-a+simd
+  INTRINSIC_CONST_BACKEND_OBJ := \
+    $(BUILD_DIR)/bench_reist_intrinsics_const_neon.o
+  INTRINSIC_CONST_BENCH_DEFINE := -DREIST_BENCH_HAVE_NEON_CONST=1
+endif
 
 # Only these programs are suitable for manifest-backed paper measurements.
 # The narrower, correctness-checked experiments below are built separately and
@@ -108,6 +143,8 @@ OPT_BINS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%_opt$(EXE_EXT),$(VALIDATED
 SIMD_BINS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%_simd$(EXE_EXT),$(VALIDATED_SOURCES))
 TEST_BIN := $(BUILD_DIR)/test_reist$(EXE_EXT)
 SANITIZER_BIN := $(BUILD_DIR)/test_reist_sanitized$(EXE_EXT)
+SANITIZER_INTRINSIC_BIN := \
+  $(BUILD_DIR)/test_reist_intrinsics_sanitized$(EXE_EXT)
 DIAGNOSTIC_BINS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%_diagnostic$(EXE_EXT),$(DIAGNOSTIC_SOURCES))
 
 all: validated diagnostics test
@@ -120,7 +157,7 @@ optimized: $(OPT_BINS)
 
 simd: $(SIMD_BINS)
 
-diagnostics: $(DIAGNOSTIC_BINS)
+diagnostics: $(DIAGNOSTIC_BINS) $(INTRINSIC_BENCH_BIN)
 
 $(BUILD_DIR):
 	@$(MKDIR_BUILD)
@@ -152,6 +189,70 @@ $(BUILD_DIR)/%_simd$(EXE_EXT): $(SRC_DIR)/%.cpp $(HEADERS) $(PROVENANCE_WRITER) 
 $(BUILD_DIR)/%_diagnostic$(EXE_EXT): $(SRC_DIR)/%.cpp $(HEADERS) | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O2 $(THREAD_FLAGS) -MMD -MP $< -o $@
 
+$(INTRINSIC_DISPATCH_OBJ): $(SRC_DIR)/reist_intrinsics_dispatch.cpp \
+        $(SRC_DIR)/reist_intrinsics_backend.hpp \
+        $(SRC_DIR)/reist_intrinsics_avx2.hpp \
+        $(SRC_DIR)/reist_intrinsics_neon.hpp $(HEADERS) | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O3 -DNDEBUG \
+		$(INTRINSIC_BACKEND_DEFINE) -MMD -MP -c $< -o $@
+
+$(BUILD_DIR)/reist_intrinsics_avx2.o: \
+        $(SRC_DIR)/reist_intrinsics_avx2.cpp \
+        $(SRC_DIR)/reist_intrinsics_avx2.hpp \
+        $(SRC_DIR)/reist_intrinsics_backend.hpp $(HEADERS) | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) $(INTRINSIC_BACKEND_FLAGS) \
+		$(INTRINSIC_BACKEND_DEFINE) \
+		-MMD -MP -c $< -o $@
+
+$(BUILD_DIR)/reist_intrinsics_neon.o: \
+        $(SRC_DIR)/reist_intrinsics_neon.cpp \
+        $(SRC_DIR)/reist_intrinsics_neon.hpp \
+        $(SRC_DIR)/reist_intrinsics_backend.hpp $(HEADERS) | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) $(INTRINSIC_BACKEND_FLAGS) \
+		$(INTRINSIC_BACKEND_DEFINE) \
+		-MMD -MP -c $< -o $@
+
+$(INTRINSIC_BENCH_OBJ): $(SRC_DIR)/bench_reist_intrinsics.cpp $(HEADERS) \
+        $(SRC_DIR)/bench_reist_intrinsics_const.hpp \
+        | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O3 -DNDEBUG \
+		-DREIST_INTRINSIC_BENCH_OPTIMIZED=1 \
+		$(INTRINSIC_CONST_BENCH_DEFINE) -MMD -MP -c $< -o $@
+
+$(INTRINSIC_CONST_PORTABLE_OBJ): \
+		$(SRC_DIR)/bench_reist_intrinsics_const_portable.cpp \
+		$(SRC_DIR)/bench_reist_intrinsics_const_impl.hpp \
+		$(SRC_DIR)/bench_reist_intrinsics_const.hpp | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O3 -DNDEBUG \
+		-MMD -MP -c $< -o $@
+
+$(BUILD_DIR)/bench_reist_intrinsics_const_avx2.o: \
+		$(SRC_DIR)/bench_reist_intrinsics_const_avx2.cpp \
+		$(SRC_DIR)/bench_reist_intrinsics_const_impl.hpp \
+		$(SRC_DIR)/bench_reist_intrinsics_const.hpp | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) $(INTRINSIC_BACKEND_FLAGS) \
+		-MMD -MP -c $< -o $@
+
+$(BUILD_DIR)/bench_reist_intrinsics_const_neon.o: \
+		$(SRC_DIR)/bench_reist_intrinsics_const_neon.cpp \
+		$(SRC_DIR)/bench_reist_intrinsics_const_impl.hpp \
+		$(SRC_DIR)/bench_reist_intrinsics_const.hpp | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) $(INTRINSIC_BACKEND_FLAGS) \
+		-MMD -MP -c $< -o $@
+
+$(INTRINSIC_TEST_OBJ): $(TEST_DIR)/test_reist_intrinsics.cpp $(HEADERS) \
+        | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O2 -MMD -MP -c $< -o $@
+
+$(INTRINSIC_BENCH_BIN): $(INTRINSIC_BENCH_OBJ) \
+        $(INTRINSIC_CONST_PORTABLE_OBJ) $(INTRINSIC_CONST_BACKEND_OBJ) \
+        $(INTRINSIC_DISPATCH_OBJ) $(INTRINSIC_BACKEND_OBJ)
+	$(CXX) $^ -o $@
+
+$(INTRINSIC_TEST_BIN): $(INTRINSIC_TEST_OBJ) \
+        $(INTRINSIC_DISPATCH_OBJ) $(INTRINSIC_BACKEND_OBJ)
+	$(CXX) $^ -o $@
+
 ifeq ($(HOST_ARCH),x86_64)
 $(BUILD_DIR)/bench_tree_reist_avx2_diagnostic$(EXE_EXT): $(SRC_DIR)/bench_tree_reist_avx2.cpp $(HEADERS) | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) $(SIMD_FLAGS) -MMD -MP $< -o $@
@@ -160,13 +261,19 @@ endif
 $(TEST_BIN): $(TEST_DIR)/test_reist.cpp $(HEADERS) | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O2 -MMD -MP $< -o $@
 
-test: $(TEST_BIN)
+test: $(TEST_BIN) $(INTRINSIC_TEST_BIN)
 	$(TEST_BIN)
+	$(INTRINSIC_TEST_BIN)
 
 sanitizers: | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O1 -g -fno-omit-frame-pointer \
 		-fsanitize=address,undefined $(TEST_DIR)/test_reist.cpp -o $(SANITIZER_BIN)
 	$(SANITIZER_BIN)
+	$(CXX) $(CPPFLAGS) $(COMMON_FLAGS) -O1 -g -fno-omit-frame-pointer \
+		-fsanitize=address,undefined $(TEST_DIR)/test_reist_intrinsics.cpp \
+		$(SRC_DIR)/reist_intrinsics_dispatch.cpp \
+		-o $(SANITIZER_INTRINSIC_BIN)
+	$(SANITIZER_INTRINSIC_BIN)
 
 # Full benchmark runs. The Python runner stops on the first non-zero exit and
 # writes an environment/command/binary-hash manifest next to the raw results.
@@ -196,6 +303,20 @@ smoke: validated
 		--build-system make --build-profile O3 \
 		--build-flags="$(OPT_BUILD_FLAGS)" $(RUN_RESULT_OPTION) --quick
 
+# Complete, predeclared constant-%/REIST matrix. Each invocation uses a fresh
+# timestamped directory unless INTRINSIC_SCALING_RESULT_DIR is overridden.
+intrinsic-scaling: $(INTRINSIC_BENCH_BIN)
+	$(PYTHON) scripts/run_reist_intrinsic_scaling.py \
+		--binary "$(INTRINSIC_BENCH_BIN)" \
+		--result-dir "$(INTRINSIC_SCALING_RESULT_DIR)" $(INTRINSIC_SCALING_ARGS)
+
+# Fixed-repetition N sweep for empirical complexity characterization. Unlike
+# intrinsic-scaling, this target never rescales repetitions as N grows.
+intrinsic-complexity: $(INTRINSIC_BENCH_BIN)
+	$(PYTHON) scripts/run_reist_intrinsic_complexity.py \
+		--binary "$(INTRINSIC_BENCH_BIN)" \
+		--result-dir "$(INTRINSIC_COMPLEXITY_RESULT_DIR)" $(INTRINSIC_COMPLEXITY_ARGS)
+
 report:
 	$(PYTHON) scripts/generate_benchmark_report.py --compiler "$(CXX)" \
 		$(RUN_RESULT_OPTION) $(REPORT_ARGS)
@@ -221,6 +342,7 @@ clean:
 FORCE:
 
 .PHONY: all validated diagnostics noopt optimized simd test sanitizers run run-noopt \
-	run-optimized run-simd smoke report compiler-artifacts list clean FORCE
+	run-optimized run-simd smoke intrinsic-scaling intrinsic-complexity report compiler-artifacts \
+	list clean FORCE
 
 -include $(wildcard $(BUILD_DIR)/*.d)

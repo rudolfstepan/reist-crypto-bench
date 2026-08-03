@@ -4,7 +4,8 @@ set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
     echo "Usage: tools/check_compiler_artifacts.sh <source.cpp>" >&2
-    echo "Optional: ARTIFACT_KERNELS, ARTIFACT_CXXFLAGS, ARTIFACT_COMPILERS, ARTIFACT_ARCH, ARTIFACT_OUTDIR" >&2
+    echo "Optional: ARTIFACT_KERNELS, ARTIFACT_MAGIC_KERNELS, ARTIFACT_INTEGER_SIMD_KERNELS," >&2
+    echo "          ARTIFACT_CXXFLAGS, ARTIFACT_COMPILERS, ARTIFACT_ARCH, ARTIFACT_OUTDIR" >&2
     exit 2
 fi
 
@@ -55,6 +56,21 @@ case "$SOURCE_NAME" in
     bench_reist_arm.cpp)
         DEFAULT_KERNELS='classic_poly_scalar|reist_poly_scalar|reist_poly_neon'
         ;;
+    bench_reist_intrinsics_const_portable.cpp)
+        DEFAULT_KERNELS='^compiler_const_percent_[[:digit:]]+_portable$'
+        ;;
+    bench_reist_intrinsics_const_avx2.cpp)
+        DEFAULT_KERNELS='^compiler_const_percent_[[:digit:]]+_avx2$'
+        ;;
+    bench_reist_intrinsics_const_neon.cpp)
+        DEFAULT_KERNELS='^compiler_const_percent_[[:digit:]]+_neon$'
+        ;;
+    reist_intrinsics_avx2.cpp)
+        DEFAULT_KERNELS='add_i32_(compiler_auto|explicit)_avx2'
+        ;;
+    reist_intrinsics_neon.cpp)
+        DEFAULT_KERNELS='add_i32_(compiler_auto|explicit)_neon'
+        ;;
     *)
         DEFAULT_KERNELS=''
         ;;
@@ -73,11 +89,33 @@ case "$SOURCE_NAME" in
     bench_poly_mod.cpp)
         DEFAULT_MAGIC_KERNELS='^classic_poly_const_[[:digit:]]+$'
         ;;
+    bench_reist_intrinsics_const_portable.cpp)
+        DEFAULT_MAGIC_KERNELS='^compiler_const_percent_(257|12289|65537|1000000|1000003|1000000007|2147483647)_portable$'
+        ;;
+    bench_reist_intrinsics_const_avx2.cpp)
+        DEFAULT_MAGIC_KERNELS='^compiler_const_percent_(257|12289|65537|1000000|1000003|1000000007|2147483647)_avx2$'
+        ;;
+    bench_reist_intrinsics_const_neon.cpp)
+        DEFAULT_MAGIC_KERNELS='^compiler_const_percent_(257|12289|65537|1000000|1000003|1000000007|2147483647)_neon$'
+        ;;
     *)
         DEFAULT_MAGIC_KERNELS=''
         ;;
 esac
 MAGIC_KERNEL_REGEX="${ARTIFACT_MAGIC_KERNELS:-$DEFAULT_MAGIC_KERNELS}"
+
+case "$SOURCE_NAME" in
+    reist_intrinsics_avx2.cpp)
+        DEFAULT_INTEGER_SIMD_KERNELS='add_i32_(compiler_auto|explicit)_avx2'
+        ;;
+    reist_intrinsics_neon.cpp)
+        DEFAULT_INTEGER_SIMD_KERNELS='add_i32_(compiler_auto|explicit)_neon'
+        ;;
+    *)
+        DEFAULT_INTEGER_SIMD_KERNELS=''
+        ;;
+esac
+INTEGER_SIMD_KERNEL_REGEX="${ARTIFACT_INTEGER_SIMD_KERNELS:-$DEFAULT_INTEGER_SIMD_KERNELS}"
 
 if [[ -n "${ARTIFACT_COMPILERS:-}" ]]; then
     read -r -a COMPILERS <<< "$ARTIFACT_COMPILERS"
@@ -88,6 +126,36 @@ fi
 ARCH="${ARTIFACT_ARCH:-$(uname -m 2>/dev/null || echo unknown)}"
 BENCH_O0=(-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O0 -g -fno-tree-vectorize)
 BENCH_O3=(-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native)
+
+# Backend sources are intentionally guarded so a generic dispatcher can be
+# built safely.  Artifact-only compilation must opt into the same ISA and
+# definition that the build system applies to the backend translation unit.
+case "$SOURCE_NAME" in
+    bench_reist_intrinsics_const_portable.cpp)
+        # The portable diagnostic object is built without a target-specific
+        # ISA option in both CMake and Make.
+        BENCH_O3=(-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG)
+        ;;
+    bench_reist_intrinsics_const_avx2.cpp)
+        # Match the AVX2 REIST backend translation unit exactly; do not enable
+        # AVX2 for the dispatcher or the rest of the executable.
+        BENCH_O0+=(-mavx2)
+        BENCH_O3=(-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -mavx2)
+        ;;
+    bench_reist_intrinsics_const_neon.cpp)
+        # Match the AArch64 REIST backend translation unit exactly.
+        BENCH_O0+=(-march=armv8-a+simd)
+        BENCH_O3=(-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=armv8-a+simd)
+        ;;
+    reist_intrinsics_avx2.cpp)
+        BENCH_O0+=(-mavx2 -DREIST_HAVE_AVX2_BACKEND=1)
+        BENCH_O3+=(-mavx2 -DREIST_HAVE_AVX2_BACKEND=1)
+        ;;
+    reist_intrinsics_neon.cpp)
+        BENCH_O0+=(-march=armv8-a+simd -DREIST_HAVE_NEON_BACKEND=1)
+        BENCH_O3+=(-march=armv8-a+simd -DREIST_HAVE_NEON_BACKEND=1)
+        ;;
+esac
 
 # These profiles mirror CPPFLAGS + COMMON_FLAGS + NOOPT_FLAGS/OPT_FLAGS in the
 # Makefile.  A compiler-dialect translation is applied below only when needed
@@ -127,13 +195,14 @@ REPO_REVISION="$(git -C "$ROOT_DIR" rev-parse HEAD 2>/dev/null || echo unavailab
     echo "- Architecture: \`$ARCH\`"
     echo "- Kernel manifest: \`$KERNEL_REGEX\`"
     echo "- Multiply/shift eligibility manifest: \`${MAGIC_KERNEL_REGEX:-none}\`"
+    echo "- Integer-SIMD eligibility manifest: \`${INTEGER_SIMD_KERNEL_REGEX:-none}\`"
     echo "- Flag note: benchmark and analysis profiles mirror the Makefile; any compiler-dialect translation is recorded separately."
     echo
-    echo "| Compiler | Profile | Emitted kernel | Role | DIV | Sign-mask | Multiply+shift candidate | Centered-correction candidate | Assembly |"
-    echo "|---|---|---|---|---|---|---|---|---|"
+    echo "| Compiler | Profile | Emitted kernel | Role | DIV | Sign-mask | Multiply+shift candidate | Centered-correction candidate | Integer SIMD | Assembly |"
+    echo "|---|---|---|---|---|---|---|---|---|---|"
 } > "$REPORT"
 
-printf 'source\tsha256\trepository_revision\tarchitecture\tcompiler\tcompiler_version\tprofile\tbenchmark_flags\tanalysis_flags\tcommand\tkernel\trole\tdiv\tsignmask\tmultiply_shift_candidate\tcentered_correction_candidate\n' > "$MANIFEST"
+printf 'source\tsha256\trepository_revision\tarchitecture\tcompiler\tcompiler_version\tprofile\tbenchmark_flags\tanalysis_flags\tcommand\tkernel\trole\tdiv\tsignmask\tmultiply_shift_candidate\tcentered_correction_candidate\tinteger_simd\n' > "$MANIFEST"
 
 command_string() {
     local output=''
@@ -293,6 +362,7 @@ for CC in "${COMPILERS[@]}"; do
             SIGNMASK=0
             MAGIC=0
             CORRECTION=0
+            INTEGER_SIMD=0
 
             grep -Eqi '^[[:space:]]*(idiv(b|w|l|q)?|div(b|w|l|q)?|sdiv|udiv)([[:space:]]|$)' "$TMP_KERNEL" && DIV=1
             grep -Eqi '^[[:space:]]*(sar(b|w|l|q)?|asr)[[:space:]].*(\$|#)?(31|63)([^0-9]|$)' "$TMP_KERNEL" && SIGNMASK=1
@@ -318,17 +388,31 @@ for CC in "${COMPILERS[@]}"; do
                 [[ $HAS_CMP -eq 1 && $HAS_SELECT -eq 1 && $HAS_ADD_SUB -eq 1 ]] && CORRECTION=1
             fi
 
+            # Require both a packed integer add and a packed integer compare.
+            # This avoids treating scalar VEX instructions or vector moves as
+            # evidence that the modular correction itself was vectorized.
+            HAS_VECTOR_ADD=0
+            HAS_VECTOR_CMP=0
+            grep -Eqi '^[[:space:]]*vpadd(b|w|d|q)([[:space:]]|$)|^[[:space:]]*add[[:space:]]+v[0-9]+\.(2d|[248](b|h|s))' "$TMP_KERNEL" && HAS_VECTOR_ADD=1
+            grep -Eqi '^[[:space:]]*vpcmp[a-z0-9]*[[:space:]]|^[[:space:]]*cm(eq|ge|gt|hi|hs|le|lt)[[:space:]]+v[0-9]+\.(2d|[248](b|h|s))' "$TMP_KERNEL" && HAS_VECTOR_CMP=1
+            if [[ -n "$INTEGER_SIMD_KERNEL_REGEX" ]] \
+                && { [[ "$KERNEL_NAME" =~ $INTEGER_SIMD_KERNEL_REGEX ]] \
+                    || [[ "$SYMBOL" =~ $INTEGER_SIMD_KERNEL_REGEX ]]; }; then
+                [[ $HAS_VECTOR_ADD -eq 1 && $HAS_VECTOR_CMP -eq 1 ]] && INTEGER_SIMD=1
+            fi
+
             DISPLAY_NAME="${KERNEL_NAME//|/\\|}"
             ASM_NAME="$(basename "$ASM")"
-            printf '| `%s` | %s | `%s` | %s | %s | %s | %s | %s | [asm](%s) |\n' \
+            printf '| `%s` | %s | `%s` | %s | %s | %s | %s | %s | %s | [asm](%s) |\n' \
                 "$CC" "$PROFILE" "$DISPLAY_NAME" "$ROLE" "$(yes_no "$DIV")" \
                 "$(yes_no "$SIGNMASK")" "$([[ $MAGIC -eq 1 ]] && echo candidate || echo no)" \
-                "$([[ $CORRECTION -eq 1 ]] && echo candidate || echo no)" "$ASM_NAME" >> "$REPORT"
+                "$([[ $CORRECTION -eq 1 ]] && echo candidate || echo no)" \
+                "$(yes_no "$INTEGER_SIMD")" "$ASM_NAME" >> "$REPORT"
 
-            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
                 "$SOURCE_NAME" "$SOURCE_SHA256" "$REPO_REVISION" "$ARCH" "$CC" "$CC_VERSION" \
                 "$PROFILE" "$BENCH_TEXT" "$ANALYSIS_TEXT" "$COMMAND_TEXT" "$KERNEL_NAME" "$ROLE" \
-                "$DIV" "$SIGNMASK" "$MAGIC" "$CORRECTION" >> "$MANIFEST"
+                "$DIV" "$SIGNMASK" "$MAGIC" "$CORRECTION" "$INTEGER_SIMD" >> "$MANIFEST"
 
             rm -f -- "$TMP_KERNEL"
             TMP_KERNEL=''
@@ -336,12 +420,12 @@ for CC in "${COMPILERS[@]}"; do
 
         if [[ $found -eq 0 ]]; then
             ASM_NAME="$(basename "$ASM")"
-            printf '| `%s` | %s | not emitted/inlined (`%s`) | - | - | - | - | - | [asm](%s) |\n' \
+            printf '| `%s` | %s | not emitted/inlined (`%s`) | - | - | - | - | - | - | [asm](%s) |\n' \
                 "$CC" "$PROFILE" "$KERNEL_REGEX" "$ASM_NAME" >> "$REPORT"
-            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
                 "$SOURCE_NAME" "$SOURCE_SHA256" "$REPO_REVISION" "$ARCH" "$CC" "$CC_VERSION" \
                 "$PROFILE" "$BENCH_TEXT" "$ANALYSIS_TEXT" "$COMMAND_TEXT" "not-emitted" "-" \
-                "-" "-" "-" "-" >> "$MANIFEST"
+                "-" "-" "-" "-" "-" >> "$MANIFEST"
         fi
     done
 done
@@ -361,6 +445,7 @@ cat >> "$REPORT" <<'EOF'
 - Sign-mask requires an arithmetic right shift by exactly 31 or 63 bits.
 - Multiply plus shift is a strength-reduction candidate, not proof of compiler intent.
 - Centered correction requires a REIST/centered function plus compare, conditional selection, and add/sub instructions.
+- Integer SIMD requires both a packed integer add and a packed integer compare in a source-specific eligible kernel.
 - A missing kernel may have been inlined or optimized away; no whole-file inference is substituted.
 - Assembly shape does not by itself establish constant-time or side-channel behavior.
 EOF

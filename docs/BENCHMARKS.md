@@ -65,6 +65,149 @@ This validated comparison measures classic `%`, one-correction centered addition
 
 Barrett handles a broader reduction step than the bounded centered-addition fast path. Its presence is a baseline, not evidence that either method universally replaces the other.
 
+## `bench_reist_intrinsics` diagnostic
+
+The diagnostic measures one repeated modular batch update through three paths:
+
+| Timed path | Representation and implementation |
+|---|---|
+| `compiler_const_percent` | conventional non-negative residues and fully optimized C++ `%`, with `B` a compile-time template constant |
+| `reist_compiler_auto` | centered residues and the plain C++ one-correction loop selected explicitly |
+| `reist_automatic` | centered residues and the public default policy, including safe runtime dispatch to explicit AVX2/NEON when available |
+
+The constant-`%` baseline is emitted in a portable, AVX2, or NEON translation
+unit with the same ISA opportunity as the selected REIST implementation. It is
+therefore a strong compiler baseline: constant propagation, reciprocal/magic
+division lowering, masking for powers of two, unrolling, and
+auto-vectorization remain available. The build disables interprocedural
+optimization for the diagnostic, but does not hide the modulus from these
+kernels or suppress ordinary optimization.
+
+Every trial performs the same number of lane updates from equivalent prepared
+state. The default 12 trials cycle through all six permutations of the three
+timed paths twice, so each path occupies every timing/cache position equally.
+The benchmark reports medians, Q1, Q3, and IQR for the three durations and
+three quotients:
+
+| Reported quotient | Meaning when greater than 1 |
+|---|---|
+| `constant % / REIST automatic` | REIST `automatic` was faster |
+| `constant % / REIST compiler_auto` | REIST `compiler_auto` was faster |
+| `REIST compiler_auto / automatic` | REIST `automatic` was faster |
+
+There is no required speedup and no performance pass/fail threshold. A central
+interval wholly above 1 is described as positive, wholly below 1 as negative,
+and one crossing 1 as mixed. All points, including losses, power-of-two
+controls, and short-array overheads, remain part of the output. Timing
+differences are never correctness criteria.
+
+The fixed compile-time modulus catalog is:
+
+```text
+256, 257, 12289, 65536, 65537,
+1000000, 1000003, 1000000007, 2147483647 (INT32_MAX)
+```
+
+`256` and `65536` are deliberate power-of-two negative controls; an optimizing
+compiler can reduce their `%` operation to a mask. Neighboring non-power-of-two
+values prevent those favorable cases from being silently generalized. A
+modulus outside this catalog is rejected rather than falling back to runtime
+`%`.
+
+`automatic` may dispatch to an optional AVX2 or AArch64 NEON backend when that
+backend was built and is safe on the current CPU. Otherwise it uses the
+portable C++ path. REIST is not defined by SIMD or NEON; those are optional
+implementations. `compiler_auto` exposes whether the compiler can optimize the
+centered C++ loop in the corresponding ISA translation unit. Generated
+assembly must still be inspected before claiming which instructions a
+particular compiler emitted.
+
+An independent wide-integer oracle checks every timed result.  The preflight
+also covers boundary values, odd and even moduli, `INT32_MAX`, and array tails.
+The executable returns skip code 77 for an unoptimized build, because such a
+build cannot provide a meaningful performance comparison; absence of an
+explicit SIMD backend is not a reason to skip.
+
+This is a prepared, steady-state, repeated modular-addition microbenchmark.
+Input normalization, `prepare`, per-trial copies, result conversion, and
+validation are outside the timed region. Consequently it does not measure the
+end-to-end cost seen by an application that prepares frequently, converts
+after every update, or performs too little work to amortize setup and dispatch.
+It does not establish that REIST accelerates arbitrary `%` expressions, full
+remainders of unrelated values, multiplication-dominated arithmetic, or an
+end-to-end cryptographic application. The API is a normal C++ library with
+optional ISA intrinsics; it does not add a compiler builtin and does not cause
+the compiler to rewrite unrelated source-level `%` expressions.
+
+Historical diagnostic results that used a runtime-`B` `%` denominator remain
+provenance data only. They may describe that older comparison, but they are not
+evidence that REIST beats fully optimized compile-time-constant `%`. The new
+three-path schema-3 output is required for that narrower comparison. The
+diagnostic remains excluded from the seven-program manifest runner and
+generated paper reports.
+
+One optimized case can be run directly:
+
+```bash
+./build/bench_reist_intrinsics --elements 1000003 --repetitions 256 --modulus 1000003 --trials 12
+```
+
+`--trials` must be at least six and a multiple of six. For the predeclared
+size/modulus matrix, use the Python 3.10+ automatic runner:
+
+```bash
+python scripts/run_reist_intrinsic_scaling.py \
+  --binary build/bench_reist_intrinsics \
+  --result-dir build/intrinsic-scaling-full
+```
+
+The result directory must be new or empty. Defaults are all nine moduli, sizes
+`1,3,8,17,64,257,1024,4096,16384,65536,262144,1000003,4000003`, at least
+8,388,608 lane updates per implementation/trial, and 12 trials. Repetitions
+are computed as `ceil(target_updates / elements)`. Optional `--sizes`, `--moduli`,
+`--target-updates`, and `--trials` narrow or lengthen the run; `--moduli` still
+accepts only the fixed compile-time catalog. The driver creates a directory per
+case, validates every schema-3 CSV, retains failed cases, and writes
+`SCALING_RESULTS.csv` plus `SCALING_SUMMARY.md`. Its classifications are
+descriptive, not acceptance thresholds.
+
+### Fixed-repetition complexity sweep
+
+The throughput matrix above deliberately keeps `N × repetitions` nearly
+constant and therefore cannot characterize growth in `N`. For an empirical
+complexity sweep, keep repetitions fixed:
+
+```bash
+make intrinsic-complexity
+```
+
+or invoke `scripts/run_reist_intrinsic_complexity.py` directly with explicit
+`--sizes`, `--moduli`, `--repetitions`, and a new `--result-dir`. The runner
+randomizes case order deterministically, validates every schema-3 file, and
+writes `COMPLEXITY_RESULTS.csv` plus `COMPLEXITY_REPORT.md`. The report contains
+log-log OLS slopes with deterministic percentile-bootstrap intervals,
+doubling ratios, local exponents, and ns/update. Optional `--affinity-cpu`
+pins the runner before its benchmark children are created.
+
+The loop structure gives `Θ(N × R)` time for each measured path on a
+fixed-width word-RAM model, and thus `Θ(N)` when this runner holds `R` fixed.
+A fixed SIMD width changes the constant factor, not the asymptotic class. The
+benchmark's live array storage is also `Θ(N)` (approximately `48 × N` bytes in
+the current driver at peak). Empirical slopes do not prove a complexity bound:
+a finite fit that crosses cache levels may be above one even when the
+large-memory doubling ratio approaches two and ns/update reaches a plateau.
+
+The final 2026-08-03 x86 runs are preserved as complete schema-3 diagnostic
+trees, including all raw case files:
+
+- [archive and provenance index](../tests/results/x86/20260803_REIST_INTRINSIC_BENCHMARKS.md);
+- [117-case constant-`%`/REIST scaling matrix](../tests/results/x86/20260803_130613_320928_REIST_INTRINSIC_SCALING/SCALING_SUMMARY.md);
+- [52-case fixed-repetition complexity matrix](../tests/results/x86/20260803_135345_977433_REIST_INTRINSIC_COMPLEXITY/COMPLEXITY_REPORT.md).
+
+These archives are not inputs to the paper-report generator. A future archive
+must preserve the entire timestamped result directory so the relative report
+links continue to resolve to raw CSV, stdout, stderr, and command files.
+
 ## Diagnostic source artifacts
 
 The repaired Tree/NTT programs and standalone ARM diagnostics are buildable through CMake option `REIST_BUILD_DIAGNOSTICS`, `make diagnostics`, and CTest label `diagnostic`. They have correctness preflights, but are deliberately excluded from the seven primary manifest-runner programs and from generated paper reports. Their timings are diagnostic output, not paper evidence. The tracked root-level `results_modadd_suite_neon.csv` and all manifestless 2025 result files are retained only for provenance and must not supply current report numbers.
@@ -86,6 +229,21 @@ The ARM SIMD profile uses `-march=armv8-a+simd`; `make list` prints the selected
 ## Compiler-artifact evidence
 
 Whole-file instruction counts are misleading because benchmark drivers contain parsing, timing, I/O, allocation, and unrelated kernels. Artifact analysis therefore reports named functions individually.
+
+For the constant compiler baseline, inspect the stable C-linkage kernels in
+the matching translation units, for example:
+
+```bash
+ARTIFACT_KERNELS='^compiler_const_percent_[[:digit:]]+_portable$' \
+tools/check_compiler_artifacts.sh src/bench_reist_intrinsics_const_portable.cpp
+
+ARTIFACT_KERNELS='^compiler_const_percent_[[:digit:]]+_avx2$' \
+ARTIFACT_CXXFLAGS='-Isrc -Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -mavx2' \
+tools/check_compiler_artifacts.sh src/bench_reist_intrinsics_const_avx2.cpp
+```
+
+The portable and AVX2 files instantiate the same constant-modulus template;
+their per-TU ISA flags are the intended independent variable.
 
 The detector recognizes:
 

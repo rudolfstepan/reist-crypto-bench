@@ -218,6 +218,14 @@ add_library(reist_disassembly_examples OBJECT EXCLUDE_FROM_ALL
 target_link_libraries(reist_disassembly_examples PRIVATE reist_mod)
 
 if(BUILD_TESTING)
+    add_executable(disassembly_debug_driver examples/disassembly/debug_driver.cpp)
+    target_link_libraries(disassembly_debug_driver PRIVATE reist_mod reist_disassembly_examples)
+    add_test(NAME reist.examples.debug_driver COMMAND disassembly_debug_driver -129 257)
+    set_tests_properties(reist.examples.debug_driver PROPERTIES
+        LABELS "correctness;examples" PASS_REGULAR_EXPRESSION "REIST=\\(-1,128\\)")
+    add_test(NAME reist.examples.debug_invalid COMMAND disassembly_debug_driver -1 0)
+    set_tests_properties(reist.examples.debug_invalid PROPERTIES
+        LABELS "correctness;examples" WILL_FAIL TRUE)
     add_executable(disassembly_example_tests tests/test_disassembly_examples.cpp)
     target_link_libraries(disassembly_example_tests PRIVATE reist_mod reist_disassembly_examples)
     add_test(NAME reist.examples.disassembly COMMAND disassembly_example_tests)

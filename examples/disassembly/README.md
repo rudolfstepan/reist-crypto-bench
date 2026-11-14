@@ -61,6 +61,57 @@ AArch64; andere Zielarchitekturen bitte anhand der Listings beurteilen.
 Eine druckbare Anleitung mit einem geprüften GCC-Beispiel liegt unter
 [REIST-Compiler-Vergleich.pdf](../../docs/papers/REIST-Compiler-Vergleich.pdf).
 
+## Direkt in BigPadIDE debuggen
+
+Die `bigpad.workspace.ini` im Repository-Stamm enthält die Profile
+`REIST Debug O0`, `O1`, `O2`, `O3` und `Os`. Die vorhandenen Make-/CMake-Profile
+bleiben verfügbar. Ein bereits geöffneter Workspace sollte nach der externen
+Konfigurationsänderung erneut geöffnet werden.
+
+1. `D:\Development\reist-crypto-bench` als Ordner in BigPadIDE öffnen und
+   `REIST Debug O0` im Buildprofil-Wähler auswählen.
+2. `examples/disassembly/debug_driver.cpp` öffnen. Mit **F9** einen Haltepunkt
+   auf die markierte Anweisung in `debug_checkpoint` setzen, oder auf einen
+   der Aufrufe von `reist_division_runtime` / `reist_division_constant`.
+3. **F5** baut mit Symbolen und startet CodeLLDB. **F11** steigt in Funktionen
+   ein, **F10** führt den nächsten Schritt aus. Am Checkpoint `*result` ansehen;
+   im Aufrufer stehen `runtime` und `constant` mit allen Quotienten und Resten.
+4. Im Debugger-Tab lokale Variablen, Register und Watches vergleichen. Für
+   lesbares Assembler mit Symbolen das zugehörige `.disasm.txt` oder einzelne
+   Funktionslisting unter `build/bigpad/<Profil>/` in der IDE öffnen.
+
+Standardargumente sind `-260 257`. Unter **Erstellen → Workspace-Buildprofile
+und Skripte …** lassen sie sich etwa auf `-129 257`, `129 257` oder `128 256`
+ändern. Das Programm berechnet zuerst das Laufzeitmodul und danach immer
+die Konstantenvariante mit 257; beide Ergebnisse erscheinen in der Ausgabe.
+Ungültige Zahlen, Überlauf beim Einlesen und nicht-positive Moduli werden abgewiesen.
+
+Der Testtreiber bleibt für stabile Variablenanzeigen bei `O0`. Nur die getrennt
+übersetzten Rechenfunktionen erhalten die gewählte Optimierungsstufe; alle
+Objekte tragen DWARF-4-Debugdaten, ohne LTO. **Auch F5 im Profil O2 bleibt O2**
+für diese Funktionen. Eingebettete Funktionen, übersprungene Quellzeilen und
+wegoptimierte lokale Werte sind dort erwartbar. Der Checkpoint zeigt weiterhin
+die vollständigen Ergebnisse. Die Profile bauen über `make debug-examples`;
+G++, Python und objdump müssen über das ausgewählte Toolset/PATH verfügbar sein.
+
+```sh
+make debug-examples DEBUG_OPT=O2
+python scripts/build_debug_examples.py --optimization Os
+```
+
+Diese Debug-Builds sind wiederholbar und ersetzen nur ihre erzeugten Dateien
+nach erfolgreichem Kompilieren und einem kurzen Programmlauf. Vor einem Neubau
+eine aktive Debug-Sitzung beenden. Die EXE ist ausschließlich das Debug-Ziel;
+für den manuellen Assemblervergleich bleiben die kleinen Objekt-/Funktionslistings
+maßgeblich. Auf MinGW wird die Laufzeit statisch gelinkt, damit der Debugger keine
+zusätzlichen MinGW-DLLs im Suchpfad benötigt. Das lokale Debug-Executable mit
+Symbolen ist etwa 0,9 MB groß; die Rechenobjekte mit Symbolen etwa 8-24 KB.
+
+Mit dem LLDB 22.1.8 aus
+`D:\Development\BigPadIDE\build\debugger\codelldb-1.12.3` wurden lokale
+Quellhaltepunkt-, Variablen-, Register- und Disassembly-Abfragen an O0 und O2
+tatsächlich ausgeführt. Der BigPadIDE-Dialog selbst wurde dabei nicht automatisiert.
+
 ## Sofort ausprobieren
 
 Mit Python >= 3.10, GCC oder Clang und passendem GNU/LLVM `objdump`:
@@ -170,6 +221,12 @@ Im lokalen GCC-15.2-Lauf verwendet die konstante REIST-Division durch 257 bei
 zusammen. Sogar eine Hilfsdivision durch zwei zur Berechnung der Grenzen kann
 bei `Os` als `idiv` erscheinen. Deshalb immer die Operanden ansehen: Ein
 DIV-Zähler allein sagt nicht, ob der Compiler gerade durch B oder durch zwei teilt.
+
+Die strikten x86-CI-Erwartungen für die älteren Additions-/Polynomkerne verwenden
+deshalb ein festes `-march=x86-64 -mtune=generic`. Die separaten `-march=native`-
+Berichte bleiben erhalten: Im CI-Lauf vom 14.11.2026 wählte GCC dort für skalare
+Restschleifen von `% 1000003` tatsächlich `idiv`, obwohl der Modul konstant war.
+Das ist eine Entscheidung des Kostenmodells und kein Rechenfehler.
 
 Die seriellen Funktionen erhalten ihren Anfangszustand als Parameter und geben
 ihn bei Länge null unverändert zurück. Die Arrayfunktionen aktualisieren

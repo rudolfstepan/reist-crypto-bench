@@ -190,4 +190,58 @@ Befehl ausführen und das PDF nach \path{docs/papers/} kopieren.
 \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
 pdflatex -output-directory=build/pdf docs/papers/REIST-Compiler-Vergleich.tex
 \end{lstlisting}
+\newpage
+\normalsize
+\section*{4. Debuggen mit BigPadIDE}
+Die Datei \path{bigpad.workspace.ini} im Repository-Stamm enthält fünf
+Debug-Profile für O0, O1, O2, O3 und Os. Vorhandene Make-/CMake-Profile bleiben
+verfügbar. Einen bereits geöffneten Workspace nach der externen Änderung neu
+öffnen, damit die aktualisierten Profile geladen sind.
+
+\begin{enumerate}
+\raggedright
+\item Den Ordner \path{D:\Development\reist-crypto-bench} in BigPadIDE öffnen
+  und das Profil \texttt{REIST Debug O0} wählen.
+\item \path{examples/disassembly/debug_driver.cpp} öffnen. Die markierte
+  Anweisung in \texttt{debug\_checkpoint} mit \textbf{F9} als Haltepunkt setzen.
+  Alternativ einen REIST-Aufruf markieren.
+\item Mit \textbf{F5} bauen und CodeLLDB starten. \textbf{F11} steigt in eine
+  Funktion ein; \textbf{F10} führt den nächsten Schritt aus.
+\item Am Checkpoint \texttt{*result} ansehen. Im aufrufenden Frame enthalten
+  \texttt{runtime} und \texttt{constant} die Eingaben und alle Ergebnisse.
+  Der Debugger-Tab zeigt lokale Variablen, Register und Watch-Ausdrücke.
+\end{enumerate}
+
+\textbf{Eingaben:} Die Profile starten mit \texttt{-260 257}. Unter
+\emph{Erstellen > Workspace-Buildprofile und Skripte} andere Argumente eintragen,
+etwa \texttt{-129 257}, \texttt{129 257} oder \texttt{128 256}. Das Programm
+berechnet zuerst das Laufzeitmodul und danach separat den konstanten Modul 257.
+Ungültige Zahlen, Einleseüberläufe und nicht-positive Moduli werden abgewiesen.
+
+\textbf{Optimierten Code debuggen:} Das Profil O2 übersetzt die Rechenobjekte
+mit O2 und Debugdaten. Auch F5 erhält diese Optimierung. Der separate Treiber
+bleibt bei O0, sodass seine Ergebnisvariablen verfügbar bleiben. Es gibt kein
+LTO. Die Symbole verwenden DWARF 4. Bei optimierten Funktionen sind Inlining,
+übersprungene Quellzeilen und wegoptimierte lokale Werte erwartbar.
+
+\begin{lstlisting}
+make debug-examples DEBUG_OPT=O2
+python scripts/build_debug_examples.py --optimization Os
+\end{lstlisting}
+Diese Befehle bauen dieselben Ziele wie die Workspace-Profile. G++, Python und
+objdump müssen im gewählten Toolset/PATH verfügbar sein. Ein erfolgreicher
+Neubau ersetzt die erzeugten Dateien; eine aktive Debug-Sitzung vorher beenden.
+
+Die EXE liegt unter \path{build/bigpad/<Profil>/reist_debug.exe}. Daneben liegen
+Objekte, vollständige Disassemblies und einzelne Funktionslistings mit Symbolen.
+Für den manuellen Vergleich diese Listings in BigPadIDE öffnen. Das
+Workspace-Profil verwendet nicht den Befehl zum Disassemblieren einer ganzen
+EXE, der auch Laufzeitcode zeigen würde.
+
+\textbf{Geprüft:} Quellhaltepunkte, Ergebnisvariablen, Register und Disassembly
+wurden mit LLDB 22.1.8 aus der vorhandenen BigPadIDE-/CodeLLDB-1.12.3-Installation
+an O0 und O2 ausgeführt. Der IDE-Dialog selbst wurde nicht automatisiert.
+Die lokale MinGW-EXE ist mit Symbolen und statischer Laufzeit etwa 0,9 MB groß;
+Rechenobjekte mit Symbolen liegen bei etwa 8 bis 24 KB. Zusätzliche MinGW-DLLs
+werden dadurch für den Programmstart nicht benötigt.
 \end{document}

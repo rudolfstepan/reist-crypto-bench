@@ -51,6 +51,11 @@ jobs:
         with:
           name: disassembly-matrix-${{ matrix.name }}
           path: build/disassembly-matrix/
+      - name: Build repeatable symbol-bearing debug target
+        run: |
+          python3 scripts/build_debug_examples.py --compiler ${{ matrix.cxx }} --optimization O2
+          python3 scripts/build_debug_examples.py --compiler ${{ matrix.cxx }} --optimization O2
+          build/bigpad/O2/reist_debug.exe -129 257
       - name: Validate balanced paper runner and archive
         if: matrix.name == 'GCC'
         run: |
@@ -292,10 +297,13 @@ jobs:
           test -s compiler_reports/compiler-const-avx2-x86/manifest.tsv
           test -s compiler_reports/intrinsics-x86/report.md
           test -s compiler_reports/intrinsics-x86/manifest.tsv
-      - name: Enforce scalar and polynomial DIV expectations
+      - name: Enforce scalar and polynomial DIV expectations on a fixed x86 target
         run: |
-          python3 scripts/check_compiler_artifacts.py --compiler g++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native' --build-dir compiler_python/gcc
-          python3 scripts/check_compiler_artifacts.py --compiler clang++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native' --build-dir compiler_python/clang
+          # Native CPU cost models can legitimately prefer IDIV for constant
+          # scalar tails (observed with GCC and modulus 1000003). Keep the strict
+          # lowering regression checks reproducible while retaining native evidence.
+          python3 scripts/check_compiler_artifacts.py --compiler g++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=x86-64 -mtune=generic' --build-dir compiler_python/gcc
+          python3 scripts/check_compiler_artifacts.py --compiler clang++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=x86-64 -mtune=generic' --build-dir compiler_python/clang
       - name: Validate x86 artifact manifests
         run: |
           set -x
@@ -303,14 +311,12 @@ jobs:
           awk -F '\t' '$11 == "reist_modadd_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
           grep -Eq $'\tclassic_modadd_const_[0-9]+\tclassic\t' compiler_reports/modadd-x86/manifest.tsv
           grep -Eq $'\treist_modadd_const_[0-9]+\tREIST\t' compiler_reports/modadd-x86/manifest.tsv
-          # Constant-divisor lowering is an optimized-code expectation; Clang
-          # may legitimately retain division at O0.
-          awk -F '\t' '$7 == "O3" && $11 ~ /^classic_modadd_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
+          # Constant-divisor lowering is enforced above on the fixed target.
+          # The native manifests record the runner CPU's actual decisions.
           awk -F '\t' '$11 == "classic_poly_runtime_kernel" && $13 == "1" { found=1 } END { exit !found }' compiler_reports/poly-x86/manifest.tsv
           awk -F '\t' '$11 == "reist_poly_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
           grep -Eq $'\tclassic_poly_const_[0-9]+\tclassic\t' compiler_reports/poly-x86/manifest.tsv
           grep -Eq $'\treist_poly_const_[0-9]+\tREIST\t' compiler_reports/poly-x86/manifest.tsv
-          awk -F '\t' '$7 == "O3" && $11 ~ /^classic_poly_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
           grep -q -- '-march=native' compiler_reports/modadd-x86/manifest.tsv
           for compiler in g++ clang++; do
             awk -F '\t' -v compiler="$compiler" '$5 == compiler && $7 == "O3" && $11 ~ /^compiler_const_percent_[0-9]+_portable$/ { seen++; if ($13 != "0" || index($8, "-mavx2") != 0 || index($8, "-march=") != 0) bad=1 } END { if (seen != 9 || bad) exit 1 }' compiler_reports/compiler-const-portable-x86/manifest.tsv

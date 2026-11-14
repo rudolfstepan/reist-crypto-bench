@@ -64,6 +64,8 @@ def build(args: argparse.Namespace) -> None:
             "-fno-rtti",
             "-fno-unroll-loops",
         ]
+        if getattr(args, "debug_symbols", False):
+            flags += ["-g", "-gdwarf-4"]
         if not args.vectorize:
             flags += (
                 ["-fno-vectorize", "-fno-slp-vectorize"]
@@ -143,6 +145,11 @@ def main() -> None:
         "--optimization", choices=["O0", "O1", "O2", "O3", "Os"], default="O2"
     )
     parser.add_argument("--syntax", choices=["auto", "intel", "att"], default="auto")
+    parser.add_argument(
+        "--debug-symbols",
+        action="store_true",
+        help="include DWARF 4 source/variable information",
+    )
     parser.add_argument(
         "--vectorize", action="store_true", help="allow compiler auto-vectorization"
     )

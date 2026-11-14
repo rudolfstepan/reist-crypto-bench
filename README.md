@@ -289,6 +289,11 @@ Every profile runs correctness tests against the exact disassembled objects;
 the temporary test executable is removed. GCC and Clang matrices are also
 published as CI artifacts. See the [compiler test guide](docs/papers/REIST-Compiler-Vergleich.pdf).
 
+BigPadIDE users can select `REIST Debug O0` (or O1/O2/O3/Os) from the checked-in
+workspace profiles, set a breakpoint in `examples/disassembly/debug_driver.cpp`,
+and press F5. Arithmetic retains the selected optimization while a separate
+O0 driver keeps inputs/results inspectable. See the [debugging instructions](examples/disassembly/README.md#direkt-in-bigpadide-debuggen).
+
 The report generator and standalone checker inspect named benchmark kernels rather than classifying an entire assembly file from any incidental instruction:
 
 ```bash

@@ -4,6 +4,10 @@
 # Timed profiles must never compete for CPU resources, even under `make -j`.
 .NOTPARALLEL: run run-noopt run-optimized run-simd smoke
 
+# A repeatable symbol-bearing target for BigPadIDE workspace debug profiles.
+DEBUG_OPT ?= O0
+.PHONY: debug-examples
+
 CXX ?= g++
 PYTHON ?= python3
 TARGET_TRIPLE := $(shell $(CXX) -dumpmachine)
@@ -148,6 +152,9 @@ SANITIZER_INTRINSIC_BIN := \
 DIAGNOSTIC_BINS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%_diagnostic$(EXE_EXT),$(DIAGNOSTIC_SOURCES))
 
 all: validated diagnostics test
+
+debug-examples:
+	$(PYTHON) scripts/build_debug_examples.py --compiler "$(CXX)" --optimization $(DEBUG_OPT)
 
 validated: noopt optimized simd
 

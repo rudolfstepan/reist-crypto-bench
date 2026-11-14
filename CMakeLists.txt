@@ -210,7 +210,11 @@ add_library(reist_disassembly_examples OBJECT EXCLUDE_FROM_ALL
     examples/disassembly/02_constant_257.cpp
     examples/disassembly/03_power_of_two_256.cpp
     examples/disassembly/04_serial_257.cpp
-    examples/disassembly/05_array_257.cpp)
+    examples/disassembly/05_array_257.cpp
+    examples/disassembly/06_signed_remainders_runtime.cpp
+    examples/disassembly/07_signed_remainders_257.cpp
+    examples/disassembly/08_division_runtime.cpp
+    examples/disassembly/09_division_257.cpp)
 target_link_libraries(reist_disassembly_examples PRIVATE reist_mod)
 
 if(BUILD_TESTING)
@@ -225,6 +229,9 @@ if(BUILD_TESTING)
     set_tests_properties(reist.paper.correctness PROPERTIES LABELS "correctness;paper")
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
+        add_test(NAME reist.examples.disassembly_parser
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_disassembly_matrix.py)
+        set_tests_properties(reist.examples.disassembly_parser PROPERTIES LABELS "correctness;examples")
         add_test(NAME reist.paper.runner
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_paper_runner.py
                 $<TARGET_FILE:bench_paper_addition>)

@@ -266,9 +266,9 @@ The reporter accepts only schema-2 complete O0/O3/SIMD sets with one shared `ses
 ## Compiler artifact inspection
 
 For small, manually comparable object files without benchmark executables, see
-the [five disassembly examples](examples/disassembly/README.md). Each source
-contains only three C-linkage functions comparing `%`, bounded non-negative
-correction, and centered correction:
+the [nine disassembly examples](examples/disassembly/README.md). Each source
+contains only three C-linkage functions: bounded modular addition, general
+signed/Euclidean/REIST remainders, or complete quotient/remainder pairs:
 
 ```sh
 python scripts/build_disassembly_examples.py
@@ -276,6 +276,18 @@ python scripts/build_disassembly_examples.py
 
 This emits `.s`, `.o`, and `.disasm.txt` files under
 `build/disassembly-examples/`, without linking an executable.
+
+To compare `O0`, `O1`, `O2`, `O3`, `Os`, and `O3` with automatic vectorization,
+including negative inputs and full-width integer boundaries:
+
+```sh
+python scripts/run_disassembly_matrix.py
+```
+
+Open `build/disassembly-matrix/REPORT.md` for per-function listings and counts.
+Every profile runs correctness tests against the exact disassembled objects;
+the temporary test executable is removed. GCC and Clang matrices are also
+published as CI artifacts. See the [compiler test guide](docs/papers/REIST-Compiler-Vergleich.pdf).
 
 The report generator and standalone checker inspect named benchmark kernels rather than classifying an entire assembly file from any incidental instruction:
 

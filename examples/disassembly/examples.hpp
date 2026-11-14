@@ -37,3 +37,29 @@ void array_centered(std::int32_t *state, const std::int32_t *steps,
                     std::size_t count) noexcept;
 
 } // extern "C"
+
+// General remainders, not the bounded-addition fast path above.
+// value may be any int64_t; runtime modulus must be strictly positive.
+extern "C" {
+std::int64_t signed_remainder_runtime(std::int64_t value, std::int64_t modulus);
+std::int64_t euclidean_remainder_runtime(std::int64_t value, std::int64_t modulus);
+std::int64_t reist_remainder_runtime(std::int64_t value, std::int64_t modulus);
+std::int64_t signed_remainder_constant(std::int64_t value);
+std::int64_t euclidean_remainder_constant(std::int64_t value);
+std::int64_t reist_remainder_constant(std::int64_t value);
+
+// Quotient and remainder together. Output pointers must be non-null, distinct
+// and writable. Runtime examples throw invalid_argument for modulus <= 0.
+void signed_division_runtime(std::int64_t value, std::int64_t modulus,
+                             std::int64_t *quotient, std::int64_t *remainder);
+void euclidean_division_runtime(std::int64_t value, std::int64_t modulus,
+                                std::int64_t *quotient, std::int64_t *remainder);
+void reist_division_runtime(std::int64_t value, std::int64_t modulus,
+                            std::int64_t *quotient, std::int64_t *remainder);
+void signed_division_constant(std::int64_t value, std::int64_t *quotient,
+                              std::int64_t *remainder);
+void euclidean_division_constant(std::int64_t value, std::int64_t *quotient,
+                                 std::int64_t *remainder);
+void reist_division_constant(std::int64_t value, std::int64_t *quotient,
+                             std::int64_t *remainder);
+}

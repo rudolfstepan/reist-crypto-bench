@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Emit five small assembly/object/disassembly comparisons, without linking."""
+"""Emit small assembly/object/disassembly comparisons, without linking."""
 
 from __future__ import annotations
 
@@ -61,11 +61,8 @@ def build(args: argparse.Namespace) -> None:
             "-Wconversion",
             "-Wsign-conversion",
             "-Werror",
-            "-fno-exceptions",
             "-fno-rtti",
             "-fno-unroll-loops",
-            "-fno-asynchronous-unwind-tables",
-            "-fno-unwind-tables",
         ]
         if not args.vectorize:
             flags += (
@@ -89,6 +86,7 @@ def build(args: argparse.Namespace) -> None:
             *SOURCES,
             ROOT / "examples/disassembly/examples.hpp",
             ROOT / "src/paper_addition.hpp",
+            ROOT / "include/reist_mod.hpp",
             Path(__file__).resolve(),
         ]
         manifest["source_sha256"] = {
@@ -141,7 +139,9 @@ def main() -> None:
     parser.add_argument(
         "--example", choices=["all", *(p.stem for p in SOURCES)], default="all"
     )
-    parser.add_argument("--optimization", choices=["O2", "O3", "Os"], default="O2")
+    parser.add_argument(
+        "--optimization", choices=["O0", "O1", "O2", "O3", "Os"], default="O2"
+    )
     parser.add_argument("--syntax", choices=["auto", "intel", "att"], default="auto")
     parser.add_argument(
         "--vectorize", action="store_true", help="allow compiler auto-vectorization"

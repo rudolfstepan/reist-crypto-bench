@@ -1,7 +1,11 @@
 #include "../examples/disassembly/examples.hpp"
 
 #include <array>
+#include <bit>
+#include <fstream>
 #include <iostream>
+#include <limits>
+#include <random>
 #include <stdexcept>
 #include <vector>
 
@@ -64,10 +68,141 @@ void check_loops(std::size_t count) {
     }
 }
 
+using runtime_remainder = std::int64_t (*)(std::int64_t, std::int64_t);
+using runtime_division = void (*)(std::int64_t, std::int64_t, std::int64_t *,
+                                  std::int64_t *);
+constexpr std::array<runtime_remainder, 3> remainders{
+    signed_remainder_runtime, euclidean_remainder_runtime, reist_remainder_runtime};
+constexpr std::array<runtime_division, 3> divisions{
+    signed_division_runtime, euclidean_division_runtime, reist_division_runtime};
+
+std::array<std::int64_t, 6> check_division(std::int64_t value, std::int64_t modulus) {
+    // Unsigned magnitude is defined even for INT64_MIN; no negation of a signed
+    // minimum and no potentially overflowing q * B reconstruction is needed.
+    const auto bits = static_cast<std::uint64_t>(value);
+    const auto magnitude = value < 0 ? std::uint64_t{0} - bits : bits;
+    const auto residue =
+        static_cast<std::int64_t>(magnitude % static_cast<std::uint64_t>(modulus));
+    const std::int64_t signed_rest = value < 0 ? -residue : residue;
+    const std::int64_t euclidean =
+        value < 0 && residue != 0 ? modulus - residue : residue;
+    const std::int64_t centered =
+        euclidean >= modulus - modulus / 2 ? euclidean - modulus : euclidean;
+    const std::array expected_remainders{signed_rest, euclidean, centered};
+    const std::array constant_remainders{signed_remainder_constant,
+                                         euclidean_remainder_constant,
+                                         reist_remainder_constant};
+    const std::array constant_divisions{
+        signed_division_constant, euclidean_division_constant, reist_division_constant};
+    std::array<std::int64_t, 6> results{};
+    for (std::size_t i = 0; i < remainders.size(); ++i) {
+        const auto expected_r = expected_remainders[i];
+        // The difference is exactly 0 or +/-B, hence always representable.
+        const auto expected_q = value / modulus + (signed_rest - expected_r) / modulus;
+        auto &q = results[2 * i];
+        auto &r = results[2 * i + 1];
+        divisions[i](value, modulus, &q, &r);
+        if (remainders[i](value, modulus) != expected_r || q != expected_q ||
+            r != expected_r) {
+            throw std::runtime_error(
+                "runtime division/remainder differs from reference");
+        }
+        if (modulus == 257) {
+            std::int64_t constant_q = 0;
+            std::int64_t constant_r = 0;
+            constant_divisions[i](value, &constant_q, &constant_r);
+            if (constant_remainders[i](value) != expected_r ||
+                constant_q != expected_q || constant_r != expected_r) {
+                throw std::runtime_error(
+                    "constant division/remainder differs from reference");
+            }
+        }
+    }
+    return results;
+}
+
+void check_general_division(const char *sample_path) {
+    constexpr auto minimum = std::numeric_limits<std::int64_t>::min();
+    constexpr auto maximum = std::numeric_limits<std::int64_t>::max();
+    const std::array<std::int64_t, 17> values{
+        minimum, minimum + 1, -514, -260, -257, -129, -128,        -1,     0,
+        1,       128,         129,  256,  257,  260,  maximum - 1, maximum};
+    const std::array<std::int64_t, 10> moduli{
+        1, 2, 3, 5, 256, 257, 1000003, 2147483647, maximum - 1, maximum};
+    std::ofstream samples;
+    if (sample_path != nullptr) {
+        samples.exceptions(std::ios::failbit | std::ios::badbit);
+        samples.open(sample_path);
+        samples
+            << "value,modulus,cpp_q,cpp_r,euclidean_q,euclidean_r,reist_q,reist_r\n";
+    }
+    for (const auto modulus : moduli) {
+        for (const auto value : values) {
+            const auto result = check_division(value, modulus);
+            if (sample_path != nullptr) {
+                samples << value << ',' << modulus;
+                for (const auto item : result) {
+                    samples << ',' << item;
+                }
+                samples << '\n';
+            }
+        }
+    }
+    for (std::int64_t modulus = 1; modulus <= 257; ++modulus) {
+        for (std::int64_t value = -1028; value <= 1028; ++value) {
+            check_division(value, modulus);
+        }
+    }
+    std::mt19937_64 random(0x5245495354ULL);
+    for (int i = 0; i < 10000; ++i) {
+        const auto value = std::bit_cast<std::int64_t>(random());
+        const auto modulus =
+            static_cast<std::int64_t>(random() % static_cast<std::uint64_t>(maximum)) +
+            1;
+        check_division(value, modulus);
+        check_division(value, 257);
+    }
+    for (const std::int64_t invalid : {minimum, std::int64_t{-1}, std::int64_t{0}}) {
+        for (const auto remainder : remainders) {
+            bool rejected = false;
+            try {
+                (void)remainder(minimum, invalid);
+            } catch (const std::invalid_argument &) {
+                rejected = true;
+            }
+            if (!rejected) {
+                throw std::runtime_error("remainder accepted a non-positive modulus");
+            }
+        }
+        for (const auto division : divisions) {
+            bool rejected = false;
+            std::int64_t q = 42;
+            std::int64_t r = 43;
+            try {
+                division(minimum, invalid, &q, &r);
+            } catch (const std::invalid_argument &) {
+                rejected = true;
+            }
+            if (!rejected || q != 42 || r != 43) {
+                throw std::runtime_error(
+                    "division failed to reject before writing outputs");
+            }
+        }
+    }
+    if (sample_path != nullptr) {
+        samples.close();
+    }
+}
+
 } // namespace
 
-int main() {
+int main(int argc, char **argv) {
     try {
+        if (argc > 2) {
+            throw std::invalid_argument(
+                "usage: disassembly_example_tests [samples.csv]");
+        }
+        check_general_division(argc == 2 ? argv[1] : nullptr);
         for (std::uint32_t modulus = 1; modulus <= 64; ++modulus) {
             for (std::uint32_t a = 0; a < modulus; ++a) {
                 for (std::uint32_t b = 0; b < modulus; ++b) {
@@ -105,7 +240,7 @@ int main() {
             serial_centered(-1, nullptr, 0) != -1) {
             throw std::runtime_error("empty serial loop changed its initial state");
         }
-        std::cout << "All 15 disassembly example functions passed.\n";
+        std::cout << "All 27 disassembly example functions passed.\n";
         return 0;
     } catch (const std::exception &error) {
         std::cerr << error.what() << '\n';

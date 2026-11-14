@@ -41,10 +41,16 @@ jobs:
           --moduli 256,1000003
           --target-updates 1048576
           --trials 6
-      - name: Build small disassembly examples
+      - name: Test small disassembly examples at every optimization level
         run: >-
-          python3 scripts/build_disassembly_examples.py
-          --compiler ${{ matrix.cxx }} --output build/disassembly-examples
+          python3 scripts/run_disassembly_matrix.py
+          --compiler ${{ matrix.cxx }} --output build/disassembly-matrix
+      - name: Preserve small compiler comparisons
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disassembly-matrix-${{ matrix.name }}
+          path: build/disassembly-matrix/
       - name: Validate balanced paper runner and archive
         if: matrix.name == 'GCC'
         run: |
@@ -144,6 +150,14 @@ jobs:
         run: cmake --build build --parallel 2
       - name: Test scalar and NEON paths
         run: ctest --test-dir build --output-on-failure
+      - name: Test small AArch64 disassembly examples at every optimization level
+        run: python3 scripts/run_disassembly_matrix.py --output build/disassembly-matrix
+      - name: Preserve small AArch64 compiler comparisons
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disassembly-matrix-ARM64-GCC
+          path: build/disassembly-matrix/
       - name: Verify compiler-optimized constant modulo kernels
         run: |
           moduli='256 257 12289 65536 65537 1000000 1000003 1000000007 2147483647'

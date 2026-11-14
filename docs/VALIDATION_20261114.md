@@ -21,8 +21,19 @@
   Linux-Clang-Sanitizer-CI umfasst über CTest auch die neuen Tests.
 - ARM und FPGA wurden nicht neu vermessen. Die historischen Programme und
   Ergebnisse bleiben als solche gekennzeichnet.
+- GitHub-CI nach den Plattformkorrekturen: alle acht Jobs erfolgreich,
+  einschließlich Linux GCC/Clang, ARM64/NEON, Windows Clang/MSVC,
+  ASan/UBSan, Manifest-Runner und Compilerartefakten. Nachweis:
+  https://github.com/rudolfstepan/reist-crypto-bench/actions/runs/43618905640
+  Die ARM-Ausführung ist eine Funktionsprüfung, keine neue Paper-Messreihe.
 
-Der gemessene Arbeitsbaum war noch nicht committet. Das Archiv bewahrt deshalb
-zusätzlich zu Git-HEAD und Status die exakten Quelldateien des Messprogramms,
+Das Archiv bewahrt zusätzlich zu Git-HEAD und Status die exakten Quelldateien des Messprogramms,
 seinen Binärhash und die vollständige Build-Konfiguration. Die finalen
 Messquellen stimmen mit diesen archivierten Hashes überein.
+
+Die plattformübergreifende Prüfung führte außerdem zu drei Reparaturen:
+Die 128-Bit-Erkennung prüft jetzt echte Division/Modulo beim Linken, die
+neuen Templates vermeiden unerreichbare Rückgaben unter MSVC, und die
+ARM-Laufzeitkerne erhalten bereits normalisierte Eingaben außerhalb der
+Zeitmessung. Der Assembler-Check für konstante Divisoren gilt ausdrücklich
+für O3; unoptimiertes Clang darf bei O0 weiterhin Division erzeugen.

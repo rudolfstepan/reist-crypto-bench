@@ -1,3 +1,5 @@
--- Configuring done (0.3s)
--- Generating done (0.1s)
+-- Performing Test REIST_HAS_INT128_ARITHMETIC
+-- Performing Test REIST_HAS_INT128_ARITHMETIC - Success
+-- Configuring done (0.5s)
+-- Generating done (0.0s)
 -- Build files have been written to: D:/Development/reist-crypto-bench/build/paper-measurement

@@ -162,6 +162,7 @@ jobs:
         env:
           ARTIFACT_COMPILERS: g++
         run: |
+          set -x
           chmod +x tools/check_compiler_artifacts.sh
           ARTIFACT_CXXFLAGS='-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=armv8-a+simd' ARTIFACT_OUTDIR=compiler_reports/modadd-aarch64 tools/check_compiler_artifacts.sh src/bench_modadd_suite_neon.cpp
           ARTIFACT_OUTDIR=compiler_reports/compiler-const-portable-aarch64 tools/check_compiler_artifacts.sh src/bench_reist_intrinsics_const_portable.cpp
@@ -284,12 +285,14 @@ jobs:
           awk -F '\t' '$11 == "reist_modadd_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
           grep -Eq $'\tclassic_modadd_const_[0-9]+\tclassic\t' compiler_reports/modadd-x86/manifest.tsv
           grep -Eq $'\treist_modadd_const_[0-9]+\tREIST\t' compiler_reports/modadd-x86/manifest.tsv
-          awk -F '\t' '$11 ~ /^classic_modadd_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
+          # Constant-divisor lowering is an optimized-code expectation; Clang
+          # may legitimately retain division at O0.
+          awk -F '\t' '$7 == "O3" && $11 ~ /^classic_modadd_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
           awk -F '\t' '$11 == "classic_poly_runtime_kernel" && $13 == "1" { found=1 } END { exit !found }' compiler_reports/poly-x86/manifest.tsv
           awk -F '\t' '$11 == "reist_poly_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
           grep -Eq $'\tclassic_poly_const_[0-9]+\tclassic\t' compiler_reports/poly-x86/manifest.tsv
           grep -Eq $'\treist_poly_const_[0-9]+\tREIST\t' compiler_reports/poly-x86/manifest.tsv
-          awk -F '\t' '$11 ~ /^classic_poly_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
+          awk -F '\t' '$7 == "O3" && $11 ~ /^classic_poly_const_[0-9]+$/ && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/poly-x86/manifest.tsv
           grep -q -- '-march=native' compiler_reports/modadd-x86/manifest.tsv
           for compiler in g++ clang++; do
             awk -F '\t' -v compiler="$compiler" '$5 == compiler && $7 == "O3" && $11 ~ /^compiler_const_percent_[0-9]+_portable$/ { seen++; if ($13 != "0" || index($8, "-mavx2") != 0 || index($8, "-march=") != 0) bad=1 } END { if (seen != 9 || bad) exit 1 }' compiler_reports/compiler-const-portable-x86/manifest.tsv

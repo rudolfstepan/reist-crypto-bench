@@ -42,12 +42,13 @@ inline word<Method> add(word<Method> a, word<Method> b,
         } else if (sum < lo) {
             sum += modulus;
         }
+        return sum;
     } else {
         if (sum >= modulus) {
             sum -= modulus;
         }
+        return sum;
     }
-    return sum;
 }
 
 // All paths use the same loop structure and translation-unit ISA flags.

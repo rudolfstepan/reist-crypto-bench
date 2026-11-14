@@ -65,15 +65,23 @@ reist_add_benchmark(bench_chacha_stream src/bench_chacha_stream.cpp)
 reist_add_benchmark(bench_hashmix src/bench_hashmix.cpp)
 
 include(CheckCXXSourceCompiles)
+# Clang targeting the MSVC ABI can parse __int128 but may lack the runtime
+# division helpers. Probe actual signed/unsigned division and remainder links.
 check_cxx_source_compiles(
-    "int main() { __int128 value = 1; return static_cast<int>(value - 1); }"
-    REIST_HAS_INT128)
-if(REIST_HAS_INT128)
+    "int main(int argc, char**) {
+        volatile __int128 a = argc;
+        volatile __int128 b = argc + 1;
+        volatile unsigned __int128 u = argc;
+        volatile unsigned __int128 v = argc + 1;
+        return static_cast<int>(a / b + a % b + u / v + u % v);
+    }"
+    REIST_HAS_INT128_ARITHMETIC)
+if(REIST_HAS_INT128_ARITHMETIC)
     reist_add_benchmark(bench_montgomery src/bench_montgomery.cpp)
     reist_add_benchmark(bench_barret_reist src/bench_barret_reist.cpp)
 else()
     message(STATUS
-        "Skipping Montgomery/Barrett benchmarks: compiler has no __int128")
+        "Skipping Montgomery/Barrett: 128-bit division/remainder cannot link")
 endif()
 
 set(REIST_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")

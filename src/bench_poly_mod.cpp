@@ -244,7 +244,7 @@ Workload make_workload(std::size_t N, std::int32_t q) {
         {bounds.lo, static_cast<std::int64_t>(bounds.hi) - 1}
     };
     std::size_t position = 0;
-    for (const auto [a, b] : boundaries) {
+    for (const auto& [a, b] : boundaries) {
         if (position >= N) {
             break;
         }

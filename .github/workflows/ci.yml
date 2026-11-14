@@ -279,6 +279,7 @@ jobs:
           python3 scripts/check_compiler_artifacts.py --compiler clang++ --flags '-Iinclude -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -O3 -DNDEBUG -march=native' --build-dir compiler_python/clang
       - name: Validate x86 artifact manifests
         run: |
+          set -x
           awk -F '\t' '$11 == "classic_modadd_runtime_kernel" && $13 == "1" { found=1 } END { exit !found }' compiler_reports/modadd-x86/manifest.tsv
           awk -F '\t' '$11 == "reist_modadd_runtime_kernel" && $13 == "1" { bad=1 } END { exit bad }' compiler_reports/modadd-x86/manifest.tsv
           grep -Eq $'\tclassic_modadd_const_[0-9]+\tclassic\t' compiler_reports/modadd-x86/manifest.tsv

@@ -127,8 +127,8 @@ std::uint32_t canonical_to_nonnegative(std::int32_t value, std::int32_t B) {
 
 extern "C" [[maybe_unused]] BENCH_NOINLINE
 std::array<std::uint32_t, kStreams>
-classic_modadd_4stream_runtime_kernel(std::int32_t B, std::int64_t N) {
-    const LaneConfig config = make_lane_config(B);
+classic_modadd_4stream_runtime_kernel(
+    std::int32_t B, std::int64_t N, const LaneConfig& config) {
     const std::uint32_t modulus = static_cast<std::uint32_t>(B);
     auto state = config.initial_nonnegative;
     for (std::int64_t i = 0; i < N; ++i) {
@@ -142,8 +142,8 @@ classic_modadd_4stream_runtime_kernel(std::int32_t B, std::int64_t N) {
 
 extern "C" [[maybe_unused]] BENCH_NOINLINE
 std::array<std::int32_t, kStreams>
-reist_modadd_4stream_runtime_kernel(std::int32_t B, std::int64_t N) {
-    const LaneConfig config = make_lane_config(B);
+reist_modadd_4stream_runtime_kernel(
+    std::int32_t B, std::int64_t N, const LaneConfig& config) {
     auto state = config.initial_canonical;
     for (std::int64_t i = 0; i < N; ++i) {
         for (std::size_t lane = 0; lane < kStreams; ++lane) {
@@ -199,8 +199,8 @@ scalar_four_streams_compile_time(std::int64_t N) {
 
 #if REIST_HAVE_NEON
 extern "C" BENCH_NOINLINE std::array<std::int32_t, kStreams>
-reist_modadd_neon_4stream_runtime_kernel(std::int32_t B, std::int64_t N) {
-    const LaneConfig config = make_lane_config(B);
+reist_modadd_neon_4stream_runtime_kernel(
+    std::int32_t B, std::int64_t N, const LaneConfig& config) {
     const Bounds bounds = canonical_bounds(B);
     int32x4_t state = vld1q_s32(config.initial_canonical.data());
     const int32x4_t step = vld1q_s32(config.step_canonical.data());
@@ -370,10 +370,12 @@ bool run_compile_time_case(std::int64_t N, std::vector<Result>& results) {
 
 bool run_runtime_case(
     std::int32_t B, std::int64_t N, std::vector<Result>& results) {
+    // Normalize once outside every timed kernel, as in the scalar x86 suite.
+    const LaneConfig config = make_lane_config(B);
     const std::int64_t checks = std::min<std::int64_t>(N, 4096);
-    const auto pre_classic = classic_modadd_4stream_runtime_kernel(B, checks);
-    const auto pre_scalar = reist_modadd_4stream_runtime_kernel(B, checks);
-    const auto pre_neon = reist_modadd_neon_4stream_runtime_kernel(B, checks);
+    const auto pre_classic = classic_modadd_4stream_runtime_kernel(B, checks, config);
+    const auto pre_scalar = reist_modadd_4stream_runtime_kernel(B, checks, config);
+    const auto pre_neon = reist_modadd_neon_4stream_runtime_kernel(B, checks, config);
     if (!lane_results_match(pre_classic, pre_scalar, B)
         || !canonical_lanes_equal(pre_scalar, pre_neon)) {
         std::cerr << "PRECHECK FAILED in four-stream runtime kernels for B="
@@ -386,13 +388,13 @@ bool run_runtime_case(
     std::array<std::int32_t, kStreams> neon{};
     volatile std::int64_t timed_N = N;
     const double t_classic = time_call([&] {
-        classic = classic_modadd_4stream_runtime_kernel(B, timed_N);
+        classic = classic_modadd_4stream_runtime_kernel(B, timed_N, config);
     });
     const double t_scalar = time_call([&] {
-        scalar = reist_modadd_4stream_runtime_kernel(B, timed_N);
+        scalar = reist_modadd_4stream_runtime_kernel(B, timed_N, config);
     });
     const double t_neon = time_call([&] {
-        neon = reist_modadd_neon_4stream_runtime_kernel(B, timed_N);
+        neon = reist_modadd_neon_4stream_runtime_kernel(B, timed_N, config);
     });
 
     if (!lane_results_match(classic, scalar, B)

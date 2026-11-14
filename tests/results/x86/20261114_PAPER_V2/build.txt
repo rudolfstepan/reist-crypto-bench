@@ -1,0 +1,4 @@
+[1/1] Cleaning all built files...
+Cleaning... 2 files.
+[1/2] Building CXX object CMakeFiles/bench_paper_addition.dir/src/bench_paper_addition.cpp.obj
+[2/2] Linking CXX executable bench_paper_addition.exe

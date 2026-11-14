@@ -1,0 +1,1133 @@
+% =====================================================================
+% REIST-Division — Ausführliche deutsche Fassung (Technischer Bericht)
+% Kompilieren: pdflatex (2 Durchläufe)
+% =====================================================================
+\documentclass[11pt,a4paper]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,patterns,decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+% ---------------------------------------------------------------------
+% Seitenlayout im arXiv-Preprint-Stil
+% ---------------------------------------------------------------------
+\usepackage[a4paper,margin=2.6cm,headheight=14pt,headsep=18pt]{geometry}
+
+% ---------------------------------------------------------------------
+% Typographie im klassischen Preprint-Stil: Serifen-Überschriften
+% ---------------------------------------------------------------------
+\addtokomafont{disposition}{\rmfamily}
+\setkomafont{caption}{\small}
+\setkomafont{captionlabel}{\small\bfseries}
+\setcapindent{0pt}
+
+% ---------------------------------------------------------------------
+% Kopf- und Fußzeilen (schlicht, arXiv-üblich)
+% ---------------------------------------------------------------------
+\usepackage{scrlayer-scrpage}
+\clearpairofpagestyles
+\ihead{\footnotesize\scshape REIST-Division: Zentrierte Restarithmetik}
+\ohead{\footnotesize\scshape R.~Stepan}
+\cfoot{\small\pagemark}
+\pagestyle{scrheadings}
+
+% ---------------------------------------------------------------------
+% Farben: ein Blauton in drei Helligkeitsstufen (geordnete Stufen O0/O3/SIMD)
+% ---------------------------------------------------------------------
+\definecolor{stufeO0}{RGB}{198,219,239}
+\definecolor{stufeO3}{RGB}{107,174,214}
+\definecolor{stufeSIMD}{RGB}{33,113,181}
+\definecolor{klassikgrau}{RGB}{150,150,150}
+\definecolor{reistblau}{RGB}{33,113,181}
+\definecolor{codegrau}{RGB}{245,245,245}
+
+% ---------------------------------------------------------------------
+% Listings (C++)
+% ---------------------------------------------------------------------
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{black!60},
+  backgroundcolor=\color{codegrau},
+  frame=single,
+  framerule=0pt,
+  numbers=left,
+  numberstyle=\tiny\color{black!50},
+  xleftmargin=2em,
+  breaklines=true,
+  showstringspaces=false,
+  captionpos=b
+}
+
+% ---------------------------------------------------------------------
+% Mathematische Umgebungen
+% ---------------------------------------------------------------------
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{beispiel}[definition]{Beispiel}
+\theoremstyle{plain}
+\newtheorem{satz}[definition]{Satz}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{korollar}[definition]{Korollar}
+\theoremstyle{remark}
+\newtheorem{bemerkung}[definition]{Bemerkung}
+
+\setlength{\emergencystretch}{1.5em}
+
+% ---------------------------------------------------------------------
+% Abstract im arXiv-Stil: zentrierte Überschrift, beidseitig eingerückt
+% ---------------------------------------------------------------------
+\renewenvironment{abstract}{%
+  \begin{center}\normalfont\bfseries\abstractname\end{center}%
+  \vspace{-0.4em}%
+  \begin{list}{}{\setlength{\leftmargin}{2em}\setlength{\rightmargin}{2em}}%
+  \item\relax\small
+}{\end{list}}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+
+\begin{document}
+
+% ---------------------------------------------------------------------
+% Titelblock (kompakt, arXiv-Stil)
+% ---------------------------------------------------------------------
+\begin{center}
+  {\LARGE\bfseries REIST-Division\par}
+  \vspace{0.5em}
+  {\large Eine implementierungsorientierte Formulierung zentrierter Restarithmetik:\\
+   Theorie, Architekturanalyse und empirische Evaluation auf ARMv8-A, x86-64 und FPGA\par}
+  \vspace{1.6em}
+  {Rudolf Stepan\par}
+  \vspace{0.2em}
+  {\small Unabhängiger Forscher, Wien \,\textperiodcentered\, ORCID: 0009-0004-2842-2579\par}
+  \vspace{0.8em}
+  {\small Messrevision: 14. November 2026\\Historische Ausgabe: DOI 10.5281/zenodo.21206471\par}
+\end{center}
+\vspace{1.2em}
+\thispagestyle{plain}
+
+% =====================================================================
+\begin{abstract}
+\noindent
+Zentrierte Restdarstellungen sind in der Zahlentheorie klassisch; der Beitrag
+dieser Arbeit ist ihre implementierungsorientierte Formulierung für additive
+modulare Zustände. Bei bereits zentrierten Operanden genügt nach jeder Addition
+höchstens eine $\pm B$-Korrektur. Auch nicht-negative, bereits reduzierte
+Operanden erlauben eine beschränkte Korrektur ohne allgemeinen Restoperator.
+Die neue CPU-Evaluation vom November 2026 trennt deshalb den Bereichsvorteil
+von der Repräsentationswahl: 630 Fälle vergleichen optimiertes \texttt{\%},
+nicht-negative Ein-Korrektur-Addition und zentrierte Addition bei gleichen
+Wortbreiten, fünf Eingabemustern, konstanten und Laufzeitmoduli sowie getrennten
+Messgrenzen für vorbereitete Kerne und Verarbeitung einschließlich Vorbereitung.
+Zwölf ausbalancierte Versuche je Methode zeigen lastabhängige Gewinne und
+Verluste; eine universelle Überlegenheit der Zentrierung folgt nicht.
+Die historischen ARM-, x86- und FPGA-Ergebnisse bleiben als getrennte
+Provenienz dokumentiert. Neue Aussagen beziehen sich ausschließlich auf den
+validierten lokalen x86-Lauf in Abschnitt~\ref{sec:neuevaluation}.
+\end{abstract}
+
+\begin{list}{}{\setlength{\leftmargin}{2em}\setlength{\rightmargin}{2em}}
+\item\relax\small\textbf{Schlagwörter:} ganzzahlige Division, zentrierter Rest, balancierte Arithmetik, modulare Addition, SIMD, branchless, gitterbasierte Kryptographie, ARMv8-A, x86-64.
+\end{list}
+
+\newpage
+{\small\tableofcontents}
+\newpage
+
+% =====================================================================
+\section{Einleitung}
+\label{sec:einleitung}
+
+Die ganzzahlige Division legt eine Restkonvention fest. In der
+Programmierpraxis wird oft ein nicht-negativer Rest im Intervall $[0,B)$
+erwartet. Wird eine Aktualisierung direkt mit einem allgemeinen Restoperator
+formuliert, kann dessen Reduktionspfad die Laufzeit bestimmen. Bei bekannten
+Operandenbereichen ist dieser Pfad jedoch sowohl mit nicht-negativen als auch
+mit zentrierten Vertretern vermeidbar. Balancierte Restdarstellungen sind
+mathematisch klassisch \cite{niven,knuth}; hier werden ihre konkreten
+Implementierungseigenschaften für modulare Addition untersucht.
+
+Diese Arbeit stellt die REIST-Division als kompakte, implementierungsorientierte Formulierung vor: Modulare Werte werden in einem zentrierten Intervall dargestellt und über eine vorzeichenbehaftete Korrekturregel aktualisiert. Der Rest wird dabei nicht als passives Residuum verstanden, sondern als expliziter Korrekturterm, der Richtung und Betrag einer Abweichung kodiert und als Zustandsvariable durch iterative Schleifen geführt wird. Diese Sichtweise liefert zugleich eine natürliche Modellierungssprache für Fehlerrückkopplung und Phasenausrichtung in Logistik, Scheduling, digitaler Signalverarbeitung, Regelungstechnik und hardwarenahen Korrekturschleifen.
+
+REIST ist kein allgemeiner Divisionsalgorithmus, sondern eine Divisionsformulierung, deren praktischer Nutzen in der wiederholten Reduktion additiver modularer Zustände liegt --- im Folgenden \emph{zustandsbehaftete zentrierte modulare Akkumulation} genannt. Die Voraussetzung ist ein bekannter Operandenbereich; sie gilt auch für unabhängige Paare bereits reduzierter Koeffizienten. Die Kontrollmessungen zur allgemeinen Restberechnung in Abschnitt~\ref{sec:kontrollen} betreffen dagegen unbeschränkte Eingaben.
+
+\subsection{Beitrag und Einordnung}
+
+Zentrierte Restsysteme sind seit langem bekannt; der Beitrag dieser Arbeit liegt daher nicht in einem neuen algebraischen Objekt, sondern in fünf Punkten:
+
+\begin{enumerate}
+\item einer geschlossenen formalen Darstellung der zentrierten Division mit Beweisen der zentralen Eigenschaften (Abschnitt~\ref{sec:theorie});
+\item einer systematischen Abgrenzung gegenüber Balanced Modulo, Barrett- und Montgomery-Reduktion sowie gegenüber dem, was moderne Compiler für den Restoperator bereits leisten (Abschnitt~\ref{sec:abgrenzung});
+\item einer Implementierungsanalyse der beschränkten Korrekturpfade und ihrer
+Vektorisierbarkeit; die historische Mikroarchitekturanalyse betrifft den
+Vergleich mit allgemeinen Restoperatoren, keine allgemeine Überlegenheit
+gegenüber nicht-negativer Korrektur (Abschnitte~\ref{sec:implementierung}
+und~\ref{sec:mikroarchitektur});
+\item einer neuen, reproduzierbaren Drei-Baseline-Evaluation auf x86
+(Abschnitt~\ref{sec:neuevaluation}), zusätzlich zu den getrennt erhaltenen
+historischen Messungen auf zwei CPU-Architekturen;
+\item einer Hardware-Evaluation auf einem FPGA, die die REIST-Korrektur gegen ein herstellergeneriertes Divisions-IP in Zyklen, Fläche und Taktfrequenz vermisst \cite{fpgarepo} (Abschnitt~\ref{sec:fpga}).
+\end{enumerate}
+
+Viele Beispiele stammen aus der gitterbasierten Kryptographie und der modularen Arithmetik; REIST ist jedoch keine kryptographiespezifische Konstruktion und insbesondere kein kryptographisches Primitiv. Ihr Kernbereich ist die Ganzzahlarithmetik mit vorzeichenbehafteten Resten und die Modellierung zyklischer, rückgekoppelter Prozesse, in denen \enquote{zu viel} und \enquote{zu wenig} symmetrische Korrekturzustände sind. Kryptographische Workloads dienen primär als Belastungstest und als ergiebige Quelle modulo-intensiver Operationen.
+
+In hochoptimierten kryptographischen Bibliotheken wird die modulare \emph{Multiplikation} üblicherweise durch Montgomery- \cite{montgomery} oder Barrett-Reduktion \cite{barrett} beschleunigt. Die vorliegenden Benchmarks konkurrieren nicht mit diesen Verfahren. Der Vergleich erfolgt gegen den vom Compiler bereitgestellten Modulo-Operator, um den architektonischen Effekt des Ersatzes divisionsbasierter Restbehandlung durch eine vorzeichenbehaftete Korrekturregel zu isolieren; eine Überlegenheit gegenüber modernen modularen Reduktionsverfahren wird nicht behauptet.
+
+\subsection{Aufbau der Arbeit}
+
+Abschnitt~\ref{sec:klassisch} analysiert die Asymmetrie der klassischen Division. Abschnitt~\ref{sec:theorie} definiert die REIST-Division und beweist ihre formalen Eigenschaften. Abschnitt~\ref{sec:abgrenzung} ordnet REIST in die Landschaft bestehender Verfahren ein. Abschnitt~\ref{sec:implementierung} beschreibt die Implementierung; Abschnitt~\ref{sec:anwendungen} ordnet Anwendungsdomänen jenseits der Hardware als Modellierungsperspektive ein. Die Abschnitte~\ref{sec:aufbau} und~\ref{sec:ergebnisse} dokumentieren den experimentellen Aufbau und die Ergebnisse auf CPUs, Abschnitt~\ref{sec:mikroarchitektur} liefert die mikroarchitektonische Erklärung. Abschnitt~\ref{sec:fpga} ergänzt die Hardware-Evaluation auf einem FPGA. Abschnitt~\ref{sec:limitationen} diskutiert Grenzen, Abschnitt~\ref{sec:erweiterungen} zukünftige Arbeiten; Abschnitt~\ref{sec:schluss} fasst zusammen.
+
+% =====================================================================
+\section{Die klassische Division und ihre Asymmetrie}
+\label{sec:klassisch}
+
+Für ganze Zahlen $T$ und $B > 0$ liefert die klassische (euklidische) Division \cite{knuth} eindeutige ganze Zahlen $q$ und $r$ mit
+\begin{equation}
+T = qB + r, \qquad 0 \le r < B.
+\label{eq:klassisch}
+\end{equation}
+Der Quotient ist $q = \lfloor T/B \rfloor$; der Rest liegt stets im halboffenen Intervall $[0, B)$.
+
+Die Konvention wählt nicht-negative Vertreter derselben Restklassen (Abbildung~\ref{fig:intervalle}, oben). Eine kleine negative Verschiebung kann darin als großer positiver Vertreter erscheinen. Das beschränkt weder die zulässige Bewegungsrichtung noch die implementierbaren Aktualisierungen: Addition und Subtraktion sind in beiden Darstellungen möglich. Die zentrierte Darstellung macht den betragskleinsten vorzeichenbehafteten Vertreter unmittelbar sichtbar; ein Vorteil in einer Regelanwendung erfordert zusätzlich deren konkrete Fehlersignaldefinition.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.95]
+  % --- Klassisches Intervall ---
+  \draw[-{Stealth}] (-5.5,2.2) -- (5.5,2.2) node[right] {$\Z$};
+  \draw[line width=3pt,klassikgrau] (0,2.2) -- (4,2.2);
+  \fill[klassikgrau] (0,2.2) circle (2.5pt);
+  \draw[klassikgrau,fill=white,thick] (4,2.2) circle (2.5pt);
+  \node[below] at (0,2.05) {$0$};
+  \node[below] at (4,2.05) {$B$};
+  \node[below] at (-2,2.05) {$-B/2$};
+  \node[below] at (2,2.05) {$B/2$};
+  \foreach \x in {-4,-2,2} \draw (\x,2.14) -- (\x,2.26);
+  \node[above,align=center,font=\small] at (0,2.55) {klassisches Restintervall $[0,\,B)$};
+  % --- REIST Intervall ---
+  \draw[-{Stealth}] (-5.5,0) -- (5.5,0) node[right] {$\Z$};
+  \draw[line width=3pt,reistblau] (-2,0) -- (2,0);
+  \fill[reistblau] (-2,0) circle (2.5pt);
+  \draw[reistblau,fill=white,thick] (2,0) circle (2.5pt);
+  \node[below] at (-2,-0.15) {$-B/2$};
+  \node[below] at (2,-0.15) {$+B/2$};
+  \node[below] at (0,-0.15) {$0$};
+  \foreach \x in {-4,4} \draw (\x,-0.06) -- (\x,0.06);
+  \node[below] at (-4,-0.15) {$-B$};
+  \node[below] at (4,-0.15) {$+B$};
+  \node[above,align=center,font=\small] at (0,0.35) {zentriertes REIST-Restintervall $[-B/2,\,B/2)$};
+\end{tikzpicture}
+\caption{Restintervalle im Vergleich. Oben: Die klassische Division bildet alle Abweichungen einseitig in $[0, B)$ ab; die Null liegt am Rand. Unten: REIST zentriert das Intervall um null; positive und negative Korrekturen sind gleichberechtigt (ausgefüllter Punkt: enthalten, offener Punkt: ausgeschlossen).}
+\label{fig:intervalle}
+\end{figure}
+
+Neben der Modellierungsasymmetrie hat die Konvention einen konkreten Preis auf der Maschinenebene. Dabei sind drei Ebenen zu trennen: Mathematisch wird häufig der euklidische Rest in $[0, B)$ verwendet; C/C++ definiert den vorzeichenbehafteten \texttt{\%}-Operator dagegen über die \emph{abgeschnittene} Division, deren Rest das Vorzeichen des Dividenden trägt; soll daraus ein nicht-negativer (oder zentrierter) Rest erzeugt werden, entsteht auf der Maschinenebene zusätzlicher Korrekturaufwand. Selbst wenn der Compiler die Division durch eine bekannte Konstante in eine Multiplikations-Shift-Sequenz übersetzt \cite{granlund}, verbleibt ein vorzeichenabhängiger Korrekturpfad (typisch eine Sign-Mask-Berechnung \texttt{a >> 31}) in der Abhängigkeitskette. Abschnitt~\ref{sec:mikroarchitektur} quantifiziert diese Kosten.
+
+% =====================================================================
+\section{Die REIST-Division}
+\label{sec:theorie}
+
+\subsection{Definition}
+
+\begin{definition}[REIST-Division]
+\label{def:reist}
+Seien $T \in \Z$ und $B \in \Z$, $B > 0$. Die \emph{REIST-Division} von $T$ durch $B$ ist das eindeutige Paar $(q, r) \in \Z^2$ mit
+\begin{equation}
+T = qB + r, \qquad -\frac{B}{2} \le r < \frac{B}{2}.
+\label{eq:reistdef}
+\end{equation}
+$r$ heißt \emph{REIST-Rest} (zentrierter Rest), $q$ \emph{REIST-Quotient}.
+\end{definition}
+
+REIST verwendet also ein zentriertes, halboffenes Restintervall $[-B/2,\, B/2)$ (Abbildung~\ref{fig:intervalle}, unten). Eine praktische Konstruktion aus dem nicht-negativen Rest ist
+\begin{equation}
+r = \Bigl( \bigl(T + \lfloor B/2 \rfloor\bigr) \bmod B \Bigr) - \lfloor B/2 \rfloor,
+\label{eq:konstruktion}
+\end{equation}
+wobei $\bmod$ den nicht-negativen Rest bezeichnet. Für gerades $B$ liefert \eqref{eq:konstruktion} exakt das Intervall $[-B/2,\, B/2)$; der Wert $+B/2$ tritt nie auf, wodurch der Mittelpunktsfall deterministisch aufgelöst ist. Für ungerades $B$ ergibt sich das symmetrische Intervall $[-(B-1)/2,\, (B-1)/2]$, und die Darstellung ist stets eindeutig, da $|r| = B/2$ nicht auftreten kann.
+
+\begin{bemerkung}[Spiegelvariante]
+\label{bem:variante}
+In der Literatur und in Implementierungen findet sich ebenso die gespiegelte Konvention $(-B/2,\, B/2]$, bei der Mittelpunktsfälle auf $+B/2$ statt $-B/2$ abgebildet werden; die historischen CPU-Listings orientierten sich an dieser Variante. Für ungerades $B$ stimmen beide Konventionen überein; für gerades $B$ unterscheiden sie sich nur in der Behandlung des Falls $|r| = B/2$. Die mathematischen Aussagen lassen sich mit angepassten Grenzen auf beide Konventionen übertragen. Die alten CPU-Listings verwendeten jedoch bei ungeradem $B$ eine falsche untere Grenze: $s=-2$ wurde für $B=5$ zu $3$. Das ist keine zulässige Spiegelkonvention. Diese Revision korrigiert die Listings; historische Laufzeitmessungen werden dadurch nicht zu Messungen der korrigierten Implementierung. Kanonisch verwendet diese Arbeit $[-B/2,\, B/2)$, konsistent mit \eqref{eq:konstruktion}.
+\end{bemerkung}
+
+Die Interpretation des Restes als Korrekturterm lautet:
+\begin{itemize}
+\item $r > 0$: das System liegt vor (Überschuss),
+\item $r < 0$: das System liegt zurück (Defizit),
+\item $r = 0$: exakte Ausrichtung.
+\end{itemize}
+
+\subsection{Zusammenhang mit der Rundung}
+
+\begin{satz}[Rundungsdarstellung des Quotienten]
+\label{satz:rundung}
+Für $T \in \Z$, $B > 0$ ist der REIST-Quotient aus Definition~\ref{def:reist} gegeben durch
+\begin{equation}
+q = \left\lfloor \frac{T}{B} + \frac{1}{2} \right\rfloor.
+\label{eq:rundung}
+\end{equation}
+\end{satz}
+
+\begin{proof}
+Sei $q = \lfloor T/B + 1/2 \rfloor$. Nach Definition der Gaußklammer gilt
+$q \le T/B + 1/2 < q + 1$, also $-1/2 \le T/B - q < 1/2$. Multiplikation mit $B > 0$ liefert $-B/2 \le T - qB < B/2$, d.\,h. $r = T - qB$ erfüllt die Intervallbedingung in \eqref{eq:reistdef}. Da das Intervall $[-B/2, B/2)$ genau $B$ aufeinanderfolgende ganze Zahlen enthält und damit aus jeder Restklasse modulo $B$ genau einen Vertreter, ist das Paar $(q,r)$ eindeutig.
+\end{proof}
+
+Der REIST-Quotient ist also die auf die nächste ganze Zahl gerundete rationale Zahl $T/B$, wobei Mittelpunktsfälle (nur bei geradem $B$ möglich) aufgerundet werden. Für ungerades $B$ ist \eqref{eq:rundung} exakt die eindeutige Rundung zur nächsten ganzen Zahl. Während die klassische Division den Quotienten \emph{abschneidet} bzw. \emph{abrundet}, \emph{rundet} REIST --- die gesamte Struktur der zentrierten Restklasse ist eine unmittelbare Folge dieser anderen Quotientenwahl.
+
+\subsection{Formale Eigenschaften}
+\label{sec:eigenschaften}
+
+\begin{satz}[Eindeutigkeit]
+\label{satz:eindeutigkeit}
+Für gegebene $T \in \Z$ und $B > 0$ existiert genau ein Paar $(q, r)$ mit $T = qB + r$ und $r \in [-B/2,\, B/2)$.
+\end{satz}
+
+\begin{proof}
+Existenz und Eindeutigkeit folgen aus dem Beweis von Satz~\ref{satz:rundung}: Das Intervall enthält aus jeder Restklasse modulo $B$ genau einen Vertreter.
+\end{proof}
+
+\begin{satz}[Betragsminimalität des Restes]
+\label{satz:minimal}
+Die Quotientenwahl \eqref{eq:rundung} minimiert den Betrag des Restes: Für jede alternative Wahl $q' \in \Z$ gilt
+\begin{equation}
+|T - qB| \le |T - q'B|.
+\end{equation}
+\end{satz}
+
+\begin{proof}
+Die Funktion $q' \mapsto |T - q'B| = B \cdot |T/B - q'|$ wird minimiert durch die ganze Zahl $q'$, die $T/B$ am nächsten liegt --- das ist gerade die Rundung \eqref{eq:rundung}. (Im Mittelpunktsfall $T/B = k + 1/2$ sind beide Nachbarn gleich weit entfernt; REIST wählt deterministisch $q = k+1$.)
+\end{proof}
+
+Die klassische Division besitzt diese Eigenschaft nicht: Für $T = 17$, $B = 10$ liefert sie $r = 7$, während der betragsminimale Rest $r = -3$ ist.
+
+\begin{satz}[Additive Konsistenz]
+\label{satz:additiv}
+Seien $T_1 = q_1 B + r_1$ und $T_2 = q_2 B + r_2$ REIST-Zerlegungen. Dann gilt
+\begin{equation}
+T_1 + T_2 = (q_1 + q_2)B + (r_1 + r_2), \qquad r_1 + r_2 \in [-B,\, B),
+\end{equation}
+und der REIST-Rest von $T_1 + T_2$ entsteht aus $r_1 + r_2$ durch höchstens eine Korrektur um $\pm B$.
+\end{satz}
+
+\begin{proof}
+Aus $r_1, r_2 \in [-B/2, B/2)$ folgt $r_1 + r_2 \in [-B,\, B)$. Liegt die Summe bereits in $[-B/2, B/2)$, ist nichts zu tun. Liegt sie in $[B/2,\, B)$, führt eine Subtraktion von $B$ in das Intervall $[-B/2,\, 0)$; liegt sie in $[-B,\, -B/2)$, führt eine Addition von $B$ in $[0,\, B/2)$. In beiden Fällen genügt genau eine Korrektur.
+\end{proof}
+
+Aus Satz~\ref{satz:additiv} folgt die Eigenschaft, auf der die Implementierung dieser Arbeit beruht; sie sei als eigenständige Aussage festgehalten:
+
+\begin{korollar}[Implementierungsinvariante]
+\label{kor:invariante}
+Seien der Zustand $r$ und die Schrittweite $x$ zentrierte Vertreter, $r, x \in [-B/2,\, B/2)$. Dann gilt $r + x \in [-B,\, B)$, und höchstens eine Korrektur um $\pm B$ führt die Summe in das Intervall $[-B/2,\, B/2)$ zurück. Die Invariante $r \in [-B/2,\, B/2)$ bleibt damit über beliebig viele additive Aktualisierungen erhalten, ohne dass im Schleifenkörper eine Division oder Restoperation ausgeführt wird.
+\end{korollar}
+
+\begin{proof}
+Unmittelbar aus Satz~\ref{satz:additiv}; die Erhaltung über beliebig viele Schritte folgt durch Induktion, da die korrigierte Summe wieder ein zentrierter Vertreter ist.
+\end{proof}
+
+Korollar~\ref{kor:invariante} verlangt lediglich, dass $B$ während der Akkumulationsphase fest ist und dass die Eingaben zentriert vorliegen --- nicht aber, dass $B$ zur Übersetzungszeit bekannt wäre: Der Modul kann zur Laufzeit gewählt werden, ohne dass im Schleifenkörper eine Division entsteht. Diese Unterscheidung wird in Abschnitt~\ref{sec:compiler} wichtig.
+
+\begin{bemerkung}[Nicht-negative Vergleichsbaseline]
+Auch für $p,x\in\{0,\ldots,B-1\}$ gilt $0\le p+x\le2B-2$; falls $p+x\ge B$, genügt eine Subtraktion von $B$. Für einen nicht-negativen Zustand und einen zentrierten, vorzeichenbehafteten Schritt liegt die Summe in $(-B,2B)$; eine Addition bei negativem Wert oder eine Subtraktion ab $B$ genügt ebenfalls. Division ist daher bei bekannten Operandenbereichen in beiden Repräsentationen vermeidbar. Der Vergleich mit einem allgemeinen Restoperator isoliert diesen Bereichsvorteil nicht von der Repräsentationswahl. Eine faire Ergänzung muss beide beschränkten Korrekturkerne bei gleicher Abhängigkeitsstruktur, Wortbreite und Überlaufabsicherung messen.
+\end{bemerkung}
+
+\begin{satz}[Fehlerterm und beste Approximation]
+\label{satz:fehler}
+Mit $e = r/B$ gilt $|e| \le 1/2$. Der REIST-Quotient ist die beste ganzzahlige Approximation von $T/B$:
+\begin{equation}
+\left| \frac{T}{B} - q \right| \;\le\; \left| \frac{T}{B} - q' \right| \quad \text{für alle } q' \in \Z.
+\end{equation}
+\end{satz}
+
+\begin{proof}
+Unmittelbar aus Satz~\ref{satz:minimal} nach Division durch $B$.
+\end{proof}
+
+\begin{bemerkung}[Statistik der Reste]
+\label{bem:statistik}
+Unter Gleichverteilung über alle $B$ Restklassen gilt exakt
+\[
+\E[r_{\mathrm{nichtneg}}]=\frac{B-1}{2},\qquad
+\E[r_{\mathrm{zentriert}}]=
+\begin{cases}0,&B\text{ ungerade},\\-1/2,&B\text{ gerade},\end{cases}
+\]
+und für beide Darstellungen $\Var(r)=(B^2-1)/12$. Für die korrekte Spiegelkonvention beträgt der Mittelwert bei geradem $B$ stattdessen $+1/2$. Diese Mittelwerte beschreiben Repräsentanten, keine physikalischen Fehler. Eine exakte modulare Zustandsfolge bleibt unter dem Wechsel des Vertretersystems kongruent; daraus folgt weder eine kumulative Drift noch deren Beseitigung. Für eine Rückkopplung außerhalb modularer Arithmetik muss das dynamische Modell gesondert spezifiziert werden.
+
+\end{bemerkung}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\textwidth, height=6.2cm,
+  xlabel={Iteration $n$}, ylabel={Rest $r_n$},
+  xmin=0.5, xmax=12.5, ymin=-6.5, ymax=10.5,
+  ymajorgrids, grid style={black!12},
+  axis line style={black!40},
+  legend style={draw=none, fill=none, at={(0.5,1.02)}, anchor=south, legend columns=2, font=\small},
+  tick label style={font=\small}, label style={font=\small},
+]
+\addplot[color=klassikgrau, thick, mark=*, mark size=1.8pt]
+  coordinates {(1,3) (2,6) (3,9) (4,2) (5,5) (6,8) (7,1) (8,4) (9,7) (10,0) (11,3) (12,6)};
+\addlegendentry{nicht-negativ: $0\le r_n<10$}
+\addplot[color=reistblau, thick, mark=*, mark size=1.8pt]
+  coordinates {(1,3) (2,-4) (3,-1) (4,2) (5,-5) (6,-2) (7,1) (8,4) (9,-3) (10,0) (11,3) (12,-4)};
+\addlegendentry{zentriert: $-5\le r_n<5$}
+\addplot[color=black!45, dashed, domain=0.5:12.5] {4.5};
+\addplot[color=black!45, dashed, domain=0.5:12.5] {-0.5};
+\end{axis}
+\end{tikzpicture}
+\caption{Restfolge $r_n=3n\bmod10$ in zwei Vertretersystemen. Gestrichelt: Mittelwerte über eine vollständige Periode von zehn Schritten, $4{,}5$ bzw. $-0{,}5$, nicht über den dargestellten Ausschnitt von zwölf Schritten. Der Mittelpunkt bei $n=5$ ist kanonisch $-5$. Beide Folgen repräsentieren dieselben Restklassen; die Abbildung belegt keine Driftreduktion.}
+
+\label{fig:drift}
+\end{figure}
+
+\subsection{Algebraische Interpretation}
+
+Als Vertretersystem der Restklassen $\Z/B\Z$ ist das zentrierte Intervall dem klassischen vollständig gleichwertig: Die Abbildung $r \mapsto r \bmod B$ ist eine Bijektion zwischen $[-B/2, B/2) \cap \Z$ und $[0, B) \cap \Z$, die die Ringstruktur respektiert. REIST definiert also keinen neuen Ring, sondern wählt das \emph{betragsminimale Vertretersystem} (\emph{least absolute residues} \cite{niven}) und macht diese Wahl zur Grundlage der Implementierung. Der Mehrwert liegt nicht in der Algebra, sondern in zwei Konsequenzen der Wahl:
+\begin{enumerate}
+\item \textbf{Numerisch:} Vertreter mit minimalem Betrag begrenzen die Größe gespeicherter Ganzzahlen. Eine Verringerung von Rundungsfehlern folgt daraus für exakte RNS-/CRT-Arithmetik nicht; bei begrenzter Wortbreite sind Überlauf und Rekonstruktion separat zu untersuchen.
+\item \textbf{Architektonisch:} Die Korrektur in das zentrierte Intervall ist eine symmetrische $\pm B$-Operation, die sich verzweigungsfrei mit Vergleichen und Masken formulieren lässt (Abschnitt~\ref{sec:implementierung}).
+\end{enumerate}
+
+\subsection{Beispiele}
+
+\begin{beispiel}[Betragsminimierung]
+Sei $T = 17$, $B = 10$. Klassisch: $17 = 1 \cdot 10 + 7$, also $r = 7$. REIST: $17 = 2 \cdot 10 - 3$, also $r = -3$ --- der betragskleinste Vertreter der Restklasse.
+\end{beispiel}
+
+\begin{beispiel}[Übereinstimmung und Abweichung]
+Sei $B = 12$. Für $T = 28$ gilt klassisch wie REIST $r = 4$ (da $4 < 6$). Für $T = 34$ wählt REIST $34 = 3 \cdot 12 - 2$, also $r = -2$, während klassisch $r = 10$ resultiert.
+\end{beispiel}
+
+\begin{beispiel}[Mittelpunktsfall bei geradem Modul]
+Sei $T = 5$, $B = 10$. Beide Kandidaten $r = 5$ ($q=0$) und $r = -5$ ($q=1$) haben Betrag $B/2$. Die Konvention $[-B/2, B/2)$ wählt deterministisch $r = -5$, $q = 1$; die Spiegelvariante aus Bemerkung~\ref{bem:variante} wählte $r = +5$, $q = 0$.
+\end{beispiel}
+
+% =====================================================================
+\section{Abgrenzung zu bestehenden Verfahren}
+\label{sec:abgrenzung}
+
+\subsection{Balanced Modulo}
+
+Zentrierte Restsysteme sind klassisch \cite{niven,knuth} und werden etwa in gitterbasierten Verfahren verwendet \cite{kyber,dilithium}. \emph{Balanced Modulo} bezeichnet eine Restkonvention, keine notwendigerweise nachträgliche Implementierung. Sie erlaubt auch persistente zentrierte Zustände und bereichsbeschränkte Additionen. REIST verwendet dieses bekannte Vertretersystem als Implementierungsmuster; der Name begründet keinen eigenständigen mathematischen Neuheitsanspruch. Die wesentliche Vorbedingung der Ein-Korrektur-Regel ist der bekannte Operandenbereich.
+
+\subsection{Barrett- und Montgomery-Reduktion}
+
+Barrett- \cite{barrett} und Montgomery-Reduktion \cite{montgomery} sind die Standardverfahren zur Beschleunigung der modularen \emph{Multiplikation}: Sie ersetzen die Division nach einem Produkt durch Multiplikationen und Shifts bzw. durch eine Darstellung im Montgomery-Raum. REIST adressiert ein anderes, komplementäres Problem --- die \emph{additionsdominierte} Aktualisierung, bei der gar kein Produkt reduziert werden muss, sondern eine Summe im Zielintervall gehalten wird. In einer NTT-Pipeline können beide koexistieren: Montgomery/Barrett für die Butterfly-Multiplikationen, zentrierte $\pm B$-Korrekturen für die Additions- und Subtraktionsschritte. Tabelle~\ref{tab:vergleich} fasst die Einordnung zusammen.
+
+\begin{table}[htbp]
+\centering
+\caption{Einordnung der REIST-Division gegenüber bestehenden Verfahren.}
+\label{tab:vergleich}
+\footnotesize
+\begin{tabular}{lllll}
+\toprule
+Verfahren & Restintervall & Kernoperationen & Branchless & Hauptanwendung \\
+\midrule
+REIST & $[-B/2,\, B/2)$ & ADD, CMP, MASK & ja & modulare Addition, Zähler \\
+Klassisches Modulo & $[0,\, B)$ & DIV bzw. Ersatz & teilweise & allgemeine Arithmetik \\
+Beschränkte Addition & $[0,\, B)$ & ADD, CMP, MASK & möglich & modulare Addition \\
+Balanced Modulo & zentriert & je Implementierung & möglich & symmetrische Restklassen \\
+Barrett & $[0,\, B)$ & MUL, SHR & ja & modulare Multiplikation \\
+Montgomery & $[0,\, B)$ & MUL, ADD & ja & modulare Multiplikation \\
+RNS/CRT & je Kanal & Rekonstruktion & abhängig & Parallelmoduli-Systeme \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Verhältnis zur Compiler-Optimierung}
+\label{sec:compiler}
+
+Ein naheliegender Einwand lautet, moderne Compiler optimierten \texttt{x \% konst} ohnehin. Das trifft zu, grenzt den Beitrag von REIST aber nur genauer ein. Compiler ersetzen die Division durch eine bekannte Konstante automatisch durch Multiplikations-Shift-Sequenzen (\emph{magic multiply}, \cite{granlund}) und erzeugen für den vorzeichenbehafteten Restoperator maskenbasierte, weitgehend verzweigungsfreie Korrekturen. Ein typisches Muster (x86-64, GCC/Clang, \texttt{-O3}) für \texttt{a \% 2452345}:
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[language={},caption={Vom Compiler erzeugtes Muster für \texttt{a \% konst} (schematisch).},label={lst:magic}]
+rax = (a * 1836446189) >> 52   ; magic multiply + shift
+edx = a >> 31                  ; Sign-Mask (Vorzeichenpfad)
+q   = rax - edx                ; Quotient (trunkiert)
+r   = a - q * 2452345          ; Rest gemaess C-Semantik
+\end{lstlisting}
+\end{minipage}
+
+REIST ersetzt diese Optimierung nicht, sondern setzt auf ihr auf: In der zentrierten Darstellung entfällt bei Additionsaktualisierungen die Restberechnung vollständig (Satz~\ref{satz:additiv}) --- und mit ihr der vorzeichenabhängige Korrekturpfad (\texttt{a >> 31}), der in den untersuchten allgemeinen Restpfaden auftritt. Das verkürzt die Abhängigkeitskette, senkt den Registerdruck und verbessert die Ausnutzung von Instruktionsparallelität (ILP) auf superskalaren Kernen. Die Assembler-Inspektion der Benchmark-Suite (Abschnitt~\ref{sec:asm}) bestätigt beide Seiten: Die klassischen Varianten enthalten Magic-Multiply- \emph{und} Sign-Mask-Muster, die REIST-Varianten nur Additions-, Vergleichs- und Maskenoperationen.
+
+Ein zur Übersetzungszeit bekannter Divisor ermöglicht vorab bestimmte reziproke Konstanten. Bei dynamischem $B$ kann ein allgemeiner Restpfad eine Division verwenden; bei schleifeninvariantem $B$ sind jedoch auch zur Laufzeit vorberechnete reziproke Reduktionen möglich. Erkannte Wertebereiche können weitere Vereinfachungen erlauben. Die zentrierte Korrektur benötigt keine Übersetzungszeit-Konstante, sondern einen während der Phase stabilen positiven Modul und die dokumentierten Operandenbereiche. Ein allgemeiner Leistungsvorsprung bei dynamischen Moduli wird hier nicht nachgewiesen.
+
+% =====================================================================
+\section{Implementierung}
+\label{sec:implementierung}
+
+\subsection{Skalare Korrekturregel}
+
+Verbleiben Zwischenwerte im zentrierten Intervall, lässt sich eine modulare Additionsaktualisierung ohne Restoperation ausdrücken --- Korollar~\ref{kor:invariante} garantiert, dass eine einzige $\pm B$-Korrektur pro Addition genügt und die Invariante dauerhaft erhalten bleibt. Listing~\ref{lst:scalar} zeigt die korrigierte Referenzform. Voraussetzungen: $1\le B\le\mathrm{INT64\_MAX}$, $N\ge0$ und $-\lfloor B/2\rfloor\le\mathtt{step}\le\lfloor(B-1)/2\rfloor$. Dann bleibt auch die ungekürzte Summe im darstellbaren Bereich des vorzeichenbehafteten Typs:
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Korrigierte skalare Referenzform; keine neue Zeitmessung. Der Zustand $r$ verbleibt dauerhaft im zentrierten Intervall; pro Schritt fällt höchstens eine $\pm B$-Korrektur an.},label={lst:scalar}]
+int64_t reist_sym(int64_t B, int64_t N, int64_t step) {
+    const int64_t lo = -(B / 2);
+    const int64_t hi = (B - 1) / 2;
+    int64_t r = 0;
+    for (int64_t i = 0; i < N; ++i) {
+        r += step;
+        if (r > hi)      r -= B;
+        else if (r < lo) r += B;
+    }
+    return r;
+}
+\end{lstlisting}
+\end{minipage}
+
+Die historische Vergleichsvariante berechnet \texttt{r = (r + step) \% B}. Für negative Eingaben ist zusätzlich zu beachten, dass C/C++ den Rest mit dem Vorzeichen des Dividenden liefert; Werte verschiedener Konventionen sind erst nach konsistenter Normalisierung vergleichbar. Die hier korrigierten Grenzen enthalten für jedes positive $B$ genau $B$ ganze Zahlen, einschließlich $B=1$. Eine bedingte Quelltextform garantiert weder Sprungfreiheit noch konstante Laufzeit; die konkrete Übersetzung ist zu prüfen.
+
+\subsection{Verzweigungsfreie Korrektur}
+
+Für vektorisierbare Schleifen wird die Korrektur ohne Kontrollfluss formuliert. Listing~\ref{lst:branchless} zeigt den polynomiellen Additionskern (koeffizientenweise $z_i = a_i + b_i \bmod q$, einen zentralen additiven Schritt gitterbasierter Verfahren \cite{kyber,dilithium}):
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Korrigierte polynomielle Referenzform für zentrierte Eingangskoeffizienten und positiven 32-Bit-Modul. Die Vergleiche liefern 0/1-Flags; die Korrektur erfolgt arithmetisch ohne Sprünge.},label={lst:branchless}]
+void reist_poly_add(const int32_t* a, const int32_t* b,
+                    int32_t* out, int32_t n, int32_t q) {
+    const int32_t lo = -(q / 2);
+    const int32_t hi = (q - 1) / 2;
+    for (int32_t i = 0; i < n; ++i) {
+        int32_t r  = a[i] + b[i];
+        int32_t gt = (r > hi); // beide Flags vor Korrektur
+        int32_t lt = (r < lo);
+        r -= gt * q;
+        r += lt * q;
+        out[i] = r;
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+Äquivalent ist die Maskenform \texttt{r -= B \& mask}, bei der \texttt{mask} aus dem Vergleich als Bitmaske (0 oder $-1$) gewonnen wird. Beide Formen enthalten keine datenabhängigen Sprünge und keine Division; sie bestehen ausschließlich aus Operationen, die auf allen SIMD-Lanes verfügbar sind.
+
+\subsection{SIMD-Vektorisierung}
+
+Da die Korrektur nur ADD, CMP und Maskierung verwendet, überträgt sie sich unmittelbar auf Vektorregister. Listing~\ref{lst:neon} zeigt den NEON-Kern (vier 32-Bit-Lanes):
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={NEON-Variante des REIST-Zählers: lane-weise Addition und maskenbasierte $\pm B$-Korrektur auf vier Werten gleichzeitig (korrigierte schematische Referenzform).},label={lst:neon}]
+int32x4_t r   = vdupq_n_s32(0);
+int32x4_t st  = vdupq_n_s32(step);
+int32x4_t hi  = vdupq_n_s32((B - 1) / 2);
+int32x4_t lo  = vdupq_n_s32(-(B / 2));
+int32x4_t Bv  = vdupq_n_s32(B);
+for (int64_t i = 0; i < rounds; ++i) {
+    r = vaddq_s32(r, st);               // 4 Lanes: r += step
+    uint32x4_t mgt = vcgtq_s32(r, hi);
+    uint32x4_t mlt = vcltq_s32(r, lo);
+    int32x4_t cg = vandq_s32(Bv, vreinterpretq_s32_u32(mgt));
+    int32x4_t cl = vandq_s32(Bv, vreinterpretq_s32_u32(mlt));
+    r = vsubq_s32(r, cg);               // r -= B & maske
+    r = vaddq_s32(r, cl);               // r += B & maske
+}
+\end{lstlisting}
+\end{minipage}
+
+Die vier Lanes enthalten unabhängige Zustandsketten mit jeweils \texttt{rounds} Schritten. Das sind viermal so viele Updates, keine Beschleunigung derselben einzelnen abhängigen Kette. Es gelten dieselben Bereichsvoraussetzungen wie skalar, hier für positive 32-Bit-Moduli; der Vergleich muss einen skalaren Kern mit vier unabhängigen Ketten verwenden.
+
+Gängige SIMD-Erweiterungen (ARM NEON, x86 AVX2) stellen \emph{keine} ganzzahlige Vektordivision bereit; eine modulo-basierte Schleife kann daher nicht direkt vektorisiert werden, sondern fällt auf skalare Restberechnungen oder aufwendige Multiplikationssequenzen zurück. Die REIST-Korrektur skaliert dagegen mit der Vektorbreite (Abbildung~\ref{fig:simdlanes}).
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  lane/.style={draw=black!50, fill=reistblau!18, minimum width=1.85cm, minimum height=0.62cm, font=\footnotesize},
+  op/.style={draw=black!50, fill=white, minimum width=1.85cm, minimum height=0.62cm, font=\footnotesize},
+  ser/.style={draw=black!50, fill=klassikgrau!30, minimum width=1.6cm, minimum height=0.62cm, font=\footnotesize},
+  node distance=2mm
+]
+% ---- SIMD side ----
+\node[font=\small\bfseries] (simdtitle) at (0,3.1) {REIST (NEON, 4 Lanes)};
+\foreach \i/\x in {0/-3.0, 1/-1.0, 2/1.0, 3/3.0} {
+  \node[lane] (a\i) at (\x,2.3) {\texttt{ADD}};
+  \node[lane] (c\i) at (\x,1.55) {\texttt{CMP}$\to$Maske};
+  \node[lane] (s\i) at (\x,0.8) {\texttt{SUB/ADD} $\pm B$};
+  \draw[-{Stealth}] (a\i) -- (c\i);
+  \draw[-{Stealth}] (c\i) -- (s\i);
+}
+\node[font=\footnotesize, align=center] at (0,0.15) {4 Ergebnisse / Takt-Sequenz};
+% ---- scalar side ----
+\node[font=\small\bfseries] at (0,-0.9) {klassisches Modulo (skalar)};
+\node[ser] (m1) at (-3.4,-1.7) {\texttt{MUL}};
+\node[ser] (m2) at (-1.7,-1.7) {\texttt{SHR}};
+\node[ser] (m3) at (0,-1.7) {Sign-Mask};
+\node[ser] (m4) at (1.7,-1.7) {\texttt{SUB}};
+\node[ser] (m5) at (3.4,-1.7) {\texttt{MUL{+}SUB}};
+\draw[-{Stealth}] (m1) -- (m2);
+\draw[-{Stealth}] (m2) -- (m3);
+\draw[-{Stealth}] (m3) -- (m4);
+\draw[-{Stealth}] (m4) -- (m5);
+\node[font=\footnotesize, align=center] at (0,-2.35) {eine skalare Kette; reziproke Reduktion separat vektorisierbar};
+\end{tikzpicture}
+\caption{Schematische Datenpfade. Oben: vier unabhängige Korrekturketten. Unten: ein skalarer allgemeiner Restpfad. Dies ist kein Vergleich gleicher Parallelität. Obwohl NEON/AVX2 keine ganzzahlige Vektordivision bereitstellen, lassen sich passende reziproke Reduktionen aus mehreren Vektoroperationen zusammensetzen.}
+\label{fig:simdlanes}
+\end{figure}
+
+% =====================================================================
+\section{Anwendungsdomänen als Modellierungsperspektive}
+\label{sec:anwendungen}
+
+Der messbare Kern dieser Arbeit liegt in der zentrierten Restarithmetik (Abschnitt~\ref{sec:theorie}), der additiven Zustandsinvariante (Korollar~\ref{kor:invariante}), ihrer verzweigungsfreien SIMD-Implementierung (Abschnitt~\ref{sec:implementierung}) und dem FPGA-Rechenpfad (Abschnitt~\ref{sec:fpga}). Der vorliegende Abschnitt gehört nicht zu diesem Kern: Er belegt keine Messergebnisse, sondern skizziert, wo sich die Interpretation des Restes als vorzeichenbehafteter Korrekturterm als Modellierungssicht anbietet. Alle genannten Domänen teilen dasselbe Muster: Ein zyklischer oder rückgekoppelter Prozess weicht von einem Sollraster ab, und die effizienteste Korrektur kann in \emph{beide} Richtungen zeigen.
+
+\begin{itemize}
+\item \textbf{Lieferketten und Logistik:} Positiver Rest $\mathrel{\hat{=}}$ Überbestand, negativer $\mathrel{\hat{=}}$ Unterbestand; Sicherheitsbestände werden zu symmetrischen Puffern um den Sollwert, statt Defizite als große positive \enquote{Nachbestellreste} zu kodieren.
+\item \textbf{Zyklische Systeme und Scheduling:} Negativer Rest kodiert Verzögerung, positiver Verfrühung; die betragskleinste Korrektur (Satz~\ref{satz:minimal}) minimiert den Betrag des gewählten Vertreters, ohne allein eine Aussage über zeitliche Drift zu begründen.
+\item \textbf{Digitale Signalverarbeitung:} Phasenfehler in Phasenregelschleifen sind inhärent zyklisch und vorzeichenbehaftet \cite{oppenheim}; das zentrierte Intervall ist direkt als Phasenfenster $[-\pi, \pi)$ interpretierbar, die Korrektur wählt automatisch den kürzeren Weg um den Einheitskreis.
+\item \textbf{Regelungstechnik und Robotik:} Rückgekoppelte Systeme arbeiten mit vorzeichenbehafteten Fehlern \cite{astrom}; für zyklische Größen (Winkelencoder) ist die betragsminimale Korrektur wörtlich der kürzeste physische Weg.
+\item \textbf{Prädiktive Modellierung:} Ein zentriert mitgeführter Fehlerkorrekturterm verhindert einseitige Bias-Akkumulation über viele Iterationen (Bemerkung~\ref{bem:statistik}).
+\item \textbf{Ressourcenverteilung:} Ein negativer Rest erfasst Unterallokation explizit als Zustand; Über- und Unterlast werden direkt vergleichbare Größen.
+\end{itemize}
+
+% =====================================================================
+\section{Historischer experimenteller Aufbau}
+\label{sec:aufbau}
+
+\subsection{Benchmark-Suite}
+
+Die folgenden historischen CPU-Zahlen stammen aus den Berichten der
+Benchmark-Suite \texttt{reist-crypto-bench} \cite{repo} vom 17. Dezember 2025.
+Sie werden zur Provenienz erhalten und sind keine Messwerte der korrigierten
+Implementierung. Ihr Quellstand, Eingabevertrag und ihre Ergebnisprüfungen
+begrenzen die Interpretation. Für neue CPU-Aussagen gilt ausschließlich
+Abschnitt~\ref{sec:neuevaluation} mit neu gebauten, geprüften Kernen und neuen
+Laufzeitmessungen. Kongruenz modulo $B$ ersetzt nicht die Prüfung des
+kanonischen Wertebereichs.
+
+\subsection{Systeme}
+
+\begin{table}[htbp]
+\centering
+\caption{Testsysteme.}
+\label{tab:systeme}
+\small
+\begin{tabular}{lll}
+\toprule
+ & ARM-System & x86-System \\
+\midrule
+Prozessor & Apple M2 Pro & Intel Core i9-14900K \\
+Architektur & ARMv8-A (aarch64) & x86-64 \\
+SIMD & NEON/ASIMD (128 Bit) & AVX2 (256 Bit) \\
+Speicher & 16 GB & 64 GB \\
+Betriebssystem & macOS & Windows \\
+Compiler & clang++ & GCC/Clang (MinGW) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Übersetzungsstufen}
+
+Jeder Benchmark wird in drei Stufen übersetzt und gemessen:
+
+\begin{itemize}
+\item \textbf{O0} (\texttt{-O0 -fno-tree-vectorize}): unoptimierte Referenz. Sie zeigt die \emph{algorithmische} Struktur ohne Compiler-Unterstützung und dient als Kontrolle, welcher Anteil der Gewinne der Formulierung selbst und welcher der Optimierung zuzuschreiben ist.
+\item \textbf{O3} (\texttt{-O3 -march=native -mtune=native}): produktionsübliche skalare Optimierung einschließlich automatischer Vektorisierung, wo der Compiler sie findet.
+\item \textbf{SIMD} (\texttt{-O3} + explizite Intrinsics): handvektorisierte Varianten (NEON bzw. AVX2), wo anwendbar.
+\end{itemize}
+
+\subsection{Workloads}
+
+\begin{enumerate}
+\item \textbf{Modularer Additionszähler} (\texttt{bench\_modadd\_suite}): $r \leftarrow (r + s) \bmod B$ über $N = 5 \cdot 10^7$ Iterationen; Moduli 257, 997, 10\,007, $10^6{+}3$, $10^7{+}19$, $10^9{+}7$ (Nicht-Zweierpotenzen, konstant zur Übersetzungszeit).
+\item \textbf{Polynomielle modulare Addition} (\texttt{bench\_poly\_mod}): koeffizientenweise $z_i = (a_i + b_i) \bmod q$ über Polynome mit 1024 Koeffizienten und 50\,000 Wiederholungen; Moduli $10^6{+}3$ bis $10^9{+}7$. Dies ist ein zentraler additiver Kern gitterbasierter Verfahren (NTRU, Kyber, Dilithium) --- neben Multiplikation, Reduktion und Datenbewegung, die in vollständigen NTT-Pipelines ebenfalls kostenbestimmend sind; die Arithmetikkosten dieser Schemata auf ARM-Plattformen stehen auch im Zentrum systematischer Benchmarks der NIST-Standardisierungskandidaten \cite{howe2022arm}.
+\item \textbf{Reine Restberechnung} (\texttt{bench\_modular}): $r = T \bmod B$ für zufällige 64-Bit-Werte --- als Negativkontrolle, denn hier existiert kein Zustand, der im Intervall gehalten werden könnte.
+\item \textbf{ARX-Workloads} (\texttt{bench\_chacha\_stream}): ChaCha20-artige Erzeugung des Keystreams \cite{chacha} (nur ADD--ROTATE--XOR, keine Modulo-Operationen) --- als zweite Negativkontrolle.
+\item \textbf{Hash-Mixing} (\texttt{bench\_hashmix}): Mischfunktionen mit multiplikativer Diffusion und Restoperationen --- als Beispiel einer Workload-Klasse, in der die zentrierte Darstellung strukturell \emph{nicht} passt.
+\end{enumerate}
+
+Angegeben werden Speedups als Quotient $t_{\text{klassisch}} / t_{\text{REIST}}$; Werte über 1 bedeuten einen Vorteil für REIST.
+
+% =====================================================================
+\section{Historische Ergebnisse}
+\label{sec:ergebnisse}
+
+\subsection{Modularer Additionszähler}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\textwidth, height=6.6cm,
+  ybar, bar width=7pt,
+  ylabel={Speedup ($t_{\text{klassisch}}/t_{\text{REIST}}$)},
+  symbolic x coords={257, 997, 10007, $10^6{+}3$, $10^7{+}19$, $10^9{+}7$},
+  xtick=data, xlabel={Modulus $B$},
+  ymin=0, ymax=5.2,
+  ymajorgrids, grid style={black!12},
+  axis line style={black!40},
+  area legend,
+  legend style={draw=none, fill=none, at={(0.5,1.02)}, anchor=south, legend columns=3, font=\small, column sep=10pt, /tikz/every even column/.append style={column sep=4pt}},
+  tick label style={font=\small}, label style={font=\small},
+]
+\addplot[fill=stufeO0, draw=black!40] coordinates
+  {(257,1.765) (997,1.782) (10007,1.662) ($10^6{+}3$,2.127) ($10^7{+}19$,1.826) ($10^9{+}7$,1.854)};
+\addplot[fill=stufeO3, draw=black!40] coordinates
+  {(257,2.134) (997,2.183) (10007,2.174) ($10^6{+}3$,2.278) ($10^7{+}19$,2.212) ($10^9{+}7$,2.144)};
+\addplot[fill=stufeSIMD, draw=black!40] coordinates
+  {(257,4.211) (997,4.149) (10007,4.174) ($10^6{+}3$,4.390) ($10^7{+}19$,4.236) ($10^9{+}7$,4.285)};
+\legend{O0, O3, SIMD (NEON)}
+\draw[black!50, dashed] (axis cs:257,1) -- (axis cs:$10^9{+}7$,1);
+\end{axis}
+\end{tikzpicture}
+\caption{Modularer Additionszähler auf ARMv8-A (Apple M2 Pro): Speedup von REIST gegenüber klassischem Modulo je Modulus und Übersetzungsstufe. Die gestrichelte Linie markiert Gleichstand ($1{,}0\times$). Die Gewinne sind über alle Moduli stabil; die NEON-Variante skaliert nahezu mit der Lane-Zahl.}
+\label{fig:modadd-arm}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\textwidth, height=6.6cm,
+  ybar, bar width=7pt,
+  ylabel={Speedup ($t_{\text{klassisch}}/t_{\text{REIST}}$)},
+  symbolic x coords={257, 997, 10007, $10^6{+}3$, $10^7{+}19$, $10^9{+}7$},
+  xtick=data, xlabel={Modulus $B$},
+  ymin=0, ymax=10.2,
+  ymajorgrids, grid style={black!12},
+  axis line style={black!40},
+  area legend,
+  legend style={draw=none, fill=none, at={(0.5,1.02)}, anchor=south, legend columns=3, font=\small, column sep=10pt, /tikz/every even column/.append style={column sep=4pt}},
+  tick label style={font=\small}, label style={font=\small},
+]
+\addplot[fill=stufeO0, draw=black!40] coordinates
+  {(257,3.252) (997,3.190) (10007,3.269) ($10^6{+}3$,2.957) ($10^7{+}19$,3.166) ($10^9{+}7$,2.920)};
+\addplot[fill=stufeO3, draw=black!40] coordinates
+  {(257,7.924) (997,8.370) (10007,8.832) ($10^6{+}3$,8.544) ($10^7{+}19$,8.663) ($10^9{+}7$,8.858)};
+\addplot[fill=stufeSIMD, draw=black!40] coordinates
+  {(257,7.089) (997,7.904) (10007,7.939) ($10^6{+}3$,8.738) ($10^7{+}19$,8.129) ($10^9{+}7$,8.126)};
+\legend{O0, O3, SIMD (AVX2)}
+\draw[black!50, dashed] (axis cs:257,1) -- (axis cs:$10^9{+}7$,1);
+\end{axis}
+\end{tikzpicture}
+\caption{Modularer Additionszähler auf x86-64 (Intel Core i9-14900K): Speedup je Modulus und Übersetzungsstufe. Bereits die skalare O3-Variante erreicht $7{,}9$--$8{,}9\times$; die explizite AVX2-Variante liegt gleichauf, da die serielle Zählerabhängigkeit die Vektorisierung hier begrenzt.}
+\label{fig:modadd-x86}
+\end{figure}
+
+Auf ARM (Abbildung~\ref{fig:modadd-arm}) erreicht REIST $1{,}7$--$2{,}1\times$ bereits ohne jede Compiler-Optimierung (O0) --- der Gewinn entsteht also aus der Formulierung selbst, nicht aus der Optimierung. Mit O3 steigen die Werte auf $2{,}1$--$2{,}3\times$, mit expliziter NEON-Vektorisierung auf $4{,}1$--$4{,}4\times$. Auf x86-64 (Abbildung~\ref{fig:modadd-x86}) sind die Effekte größer: $2{,}9$--$3{,}3\times$ (O0) und $7{,}9$--$8{,}9\times$ (O3). Die Gewinne sind über drei Größenordnungen des Modulus stabil --- konsistent damit, dass weder die Magic-Multiply-Sequenz noch die $\pm B$-Korrektur nennenswert vom Zahlenwert des Modulus abhängt.
+
+\subsection{Polynomielle modulare Addition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\textwidth, height=6.6cm,
+  ybar, bar width=9pt,
+  ylabel={Speedup ($t_{\text{klassisch}}/t_{\text{REIST}}$)},
+  symbolic x coords={$10^6{+}3$, $10^7{+}19$, $10^8{+}7$, $10^9{+}7$},
+  xtick=data, xlabel={Modulus $q$},
+  ymin=0, ymax=5.4,
+  ymajorgrids, grid style={black!12},
+  axis line style={black!40},
+  area legend,
+  legend style={draw=none, fill=none, at={(0.5,1.02)}, anchor=south, legend columns=3, font=\small, column sep=10pt, /tikz/every even column/.append style={column sep=4pt}},
+  tick label style={font=\small}, label style={font=\small},
+]
+\addplot[fill=stufeO0, draw=black!40] coordinates
+  {($10^6{+}3$,0.710) ($10^7{+}19$,0.721) ($10^8{+}7$,0.707) ($10^9{+}7$,0.697)};
+\addplot[fill=stufeO3, draw=black!40] coordinates
+  {($10^6{+}3$,4.449) ($10^7{+}19$,4.362) ($10^8{+}7$,4.355) ($10^9{+}7$,4.459)};
+\addplot[fill=stufeSIMD, draw=black!40] coordinates
+  {($10^6{+}3$,4.463) ($10^7{+}19$,4.364) ($10^8{+}7$,4.353) ($10^9{+}7$,4.413)};
+\legend{O0, O3, SIMD (NEON)}
+\draw[black!50, dashed] (axis cs:$10^6{+}3$,1) -- (axis cs:$10^9{+}7$,1);
+\end{axis}
+\end{tikzpicture}
+\caption{Polynomielle modulare Addition auf ARMv8-A: Ohne Optimierung (O0) ist die verzweigungsfreie REIST-Form langsamer ($\approx 0{,}7\times$), da die arithmetische Korrektur mehr Instruktionen kostet als der unoptimierte Restoperator. Mit O3 vektorisiert der Compiler den REIST-Kern automatisch; O3 und explizites NEON fallen zusammen ($4{,}3$--$4{,}5\times$).}
+\label{fig:poly-arm}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\textwidth, height=6.6cm,
+  ybar, bar width=9pt,
+  ylabel={Speedup ($t_{\text{klassisch}}/t_{\text{REIST}}$)},
+  symbolic x coords={$10^6{+}3$, $10^7{+}19$, $10^8{+}7$, $10^9{+}7$},
+  xtick=data, xlabel={Modulus $q$},
+  ymin=0, ymax=18.5,
+  ymajorgrids, grid style={black!12},
+  axis line style={black!40},
+  area legend,
+  legend style={draw=none, fill=none, at={(0.5,1.02)}, anchor=south, legend columns=3, font=\small, column sep=10pt, /tikz/every even column/.append style={column sep=4pt}},
+  tick label style={font=\small}, label style={font=\small},
+]
+\addplot[fill=stufeO0, draw=black!40] coordinates
+  {($10^6{+}3$,1.110) ($10^7{+}19$,1.086) ($10^8{+}7$,1.058) ($10^9{+}7$,1.048)};
+\addplot[fill=stufeO3, draw=black!40] coordinates
+  {($10^6{+}3$,12.590) ($10^7{+}19$,12.533) ($10^8{+}7$,12.759) ($10^9{+}7$,12.401)};
+\addplot[fill=stufeSIMD, draw=black!40] coordinates
+  {($10^6{+}3$,16.739) ($10^7{+}19$,16.986) ($10^8{+}7$,16.629) ($10^9{+}7$,13.077)};
+\legend{O0, O3, SIMD (AVX2)}
+\draw[black!50, dashed] (axis cs:$10^6{+}3$,1) -- (axis cs:$10^9{+}7$,1);
+\end{axis}
+\end{tikzpicture}
+\caption{Polynomielle modulare Addition auf x86-64: $12{,}4$--$12{,}8\times$ (O3) bzw. bis $17{,}0\times$ (AVX2). Der datenparallele Kern ohne serielle Abhängigkeit ist der Idealfall der REIST-Korrektur: acht 32-Bit-Lanes werden pro Instruktion korrigiert, während die klassische Variante pro Koeffizient die Restsequenz durchläuft.}
+\label{fig:poly-x86}
+\end{figure}
+
+Die polynomielle Addition ist der datenparallele Idealfall: kein serieller Zustand, 1024 unabhängige Koeffizienten pro Durchlauf. Auf ARM (Abbildung~\ref{fig:poly-arm}) erreicht REIST $4{,}3$--$4{,}5\times$; bemerkenswert ist, dass die O3-Autovektorisierung bereits das NEON-Niveau erreicht: Der verzweigungsfreie Kern aus Listing~\ref{lst:branchless} ist so regelmäßig, dass der Compiler ihn selbstständig vektorisiert. Auf x86-64 (Abbildung~\ref{fig:poly-x86}) ergeben sich $12{,}4$--$12{,}8\times$ (O3) und bis zu $17{,}0\times$ (AVX2).
+
+Der O0-Fall auf ARM fällt aus dem Rahmen: Dort ist REIST mit $\approx 0{,}7\times$ langsamer als die klassische Variante. Ohne Optimierung zahlt die branchless-Form ihre zusätzlichen Instruktionen (zwei Vergleiche, zwei Multiplikationen) voll aus, während der Restoperator von der Hardware-Divisionseinheit profitiert. Die Gewinne der REIST-Formulierung entstehen hier also erst im Zusammenspiel mit Optimierung und Vektorisierung.
+
+\subsection{Negativ- und Neutralkontrollen}
+\label{sec:kontrollen}
+
+\begin{table}[htbp]
+\centering
+\caption{Kontrollmessungen: Workloads ohne strukturellen Ansatzpunkt für REIST. Speedup $t_{\text{klassisch}}/t_{\text{REIST}}$; Werte $<1$ bedeuten eine Verlangsamung.}
+\label{tab:kontrollen}
+\small
+\begin{tabular}{llccc}
+\toprule
+Workload & System & O0 & O3 & SIMD \\
+\midrule
+Reine Restberechnung & ARM & $0{,}86\times$ & $1{,}02\times$ & $1{,}01\times$ \\
+Reine Restberechnung & x86-64 & $0{,}68\times$ & $0{,}96\times$ & $0{,}85\times$ \\
+\addlinespace
+Hash-Mixing ($q = 10^6{+}3$) & ARM & $0{,}47\times$ & $0{,}79\times$ & $0{,}83\times$ \\
+Hash-Mixing ($q = 10^6{+}3$) & x86-64 & $0{,}64\times$ & $0{,}81\times$ & $0{,}75\times$ \\
+\addlinespace
+ChaCha20-Keystream & ARM & \multicolumn{3}{c}{Durchsatz unverändert (Abweichung $\le 1\,\%$)} \\
+ChaCha20-Keystream & x86-64 & \multicolumn{3}{c}{Durchsatz unverändert (Abweichung $\le 10\,\%$)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tabelle~\ref{tab:kontrollen} dokumentiert die Fälle, in denen REIST keinen Vorteil bietet:
+
+\begin{itemize}
+\item \textbf{Reine Restberechnung} ($r = T \bmod B$ für zufällige $T$): REIST und klassisches Modulo sind bei O3 praktisch gleich schnell (Unterschied $\le 4\,\%$). Hier fehlen die beschränkten Operandenbereiche der additiven Korrektur; diese Beobachtung gilt für die untersuchten allgemeinen Restpfade. REIST ist ein Optimierer für \emph{additive Aktualisierungen}, nicht für die allgemeine Restberechnung.
+\item \textbf{ARX-Workloads} (ChaCha20): Algorithmen, die ausschließlich Addition, Rotation und XOR auf Zweierpotenz-Ringen verwenden \cite{chacha}, enthalten keine Modulo-Operationen gegen allgemeine Moduli; der Keystream-Durchsatz bleibt unverändert.
+\item \textbf{Hash-Mixing}: In Mischfunktionen mit multiplikativer Diffusion ist REIST durchgängig 15--25\,\% langsamer. Die statistische Diffusion dieser Funktionen beruht gerade auf den Überlauf- und Wraparound-Eigenschaften des klassischen nicht-negativen Rings; der vorzeichenbehaftete Korrekturterm fügt hier Arbeit hinzu, ohne Struktur zu ersparen.
+\end{itemize}
+
+\subsection{Multicore- und Skalierungsdiagnostik (Apple M2 Pro)}
+
+Ergänzend zur Kernmessung dokumentiert die Suite eine Multicore-Diagnostik auf dem M2 Pro (10 Threads, $10^8$ Iterationen, thread-lokale Daten): Reine Addition skaliert unter NEON mit $3{,}26\times$ gegenüber skalar, eine Barrett-artige arithmetikdichte Last mit $4{,}95\times$, die vollständige Reduktion mit Zentrierung (REIST-Tree-artig) mit $3{,}33\times$; der Speicherbandbreiten-Kontrolltest liegt bei $3{,}49\times$. Die SIMD-Skalierung der REIST-Korrektur liegt damit im erwarteten Bereich der Plattform und ist kein Messartefakt; zugleich saturiert die Last alle Kerne, d.\,h. SIMD- und Thread-Parallelität kombinieren sich.
+
+% =====================================================================
+\section{Historische mikroarchitektonische Analyse}
+\label{sec:mikroarchitektur}
+
+\subsection{Latenzen der beteiligten Operationen}
+
+Moderne CPUs führen ganzzahlige Divisionen in weitgehend seriellen Divisionseinheiten aus; Addition und Multiplikation sind dagegen kurzlatent, mehrfach vorhanden und out-of-order ausführbar \cite{fog}. Abbildung~\ref{fig:latenzen} stellt die Größenordnungen gegenüber.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.8\textwidth, height=5.2cm,
+  xbar, bar width=10pt,
+  xlabel={typische Latenz (Takte, Größenordnung)},
+  symbolic y coords={{IDIV (64 Bit)}, {Branch-Miss}, {MUL}, {CMP/Maske}, {ADD}},
+  ytick=data,
+  xmin=0, xmax=44,
+  xmajorgrids, grid style={black!12},
+  axis line style={black!40},
+  tick label style={font=\small}, label style={font=\small},
+  nodes near coords, nodes near coords style={font=\footnotesize},
+  point meta=explicit symbolic,
+]
+\addplot[fill=reistblau!55, draw=black!40] coordinates {
+  (1,{ADD}) [1]
+  (1,{CMP/Maske}) [1]
+  (4,{MUL}) [3--4]
+  (15,{Branch-Miss}) [10--20]
+  (30,{IDIV (64 Bit)}) [20--40]
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Größenordnung der Latenzen beteiligter Operationen auf aktuellen Kernen (zusammengefasst nach \cite{fog}; exakte Werte variieren je Mikroarchitektur). Die REIST-Korrektur verwendet ausschließlich die oberen drei Klassen; klassische Restpfade enthalten die unteren beiden zumindest strukturell.}
+\label{fig:latenzen}
+\end{figure}
+
+\subsection{Abhängigkeitsketten und ILP}
+
+Der entscheidende Effekt liegt nicht in einer einzelnen Instruktion, sondern in der Länge und Form der Abhängigkeitskette pro Aktualisierung:
+
+\begin{itemize}
+\item \textbf{Klassisch} (konstanter Divisor, O3): Magic-Multiply $\to$ Shift $\to$ Sign-Mask $\to$ Subtraktion $\to$ Rückmultiplikation $\to$ Subtraktion (Listing~\ref{lst:magic}). Die Sign-Mask hängt am Eingangswert und verlängert den kritischen Pfad; das Ergebnis wird für die nächste Iteration benötigt.
+\item \textbf{REIST}: Addition $\to$ Vergleich $\to$ maskierte $\pm B$-Korrektur. Die Maskierung hängt vom Vergleich ab; unabhängige Lanes oder getrennte Vergleiche können parallel ausgeführt werden.
+\end{itemize}
+
+Der Wegfall des Sign-Mask-Pfades reduziert Registerdruck und Datenabhängigkeiten und gibt superskalaren Kernen mehr Spielraum zur parallelen Ausführung. Als grobes Kostenmodell:
+\begin{equation}
+C_{\mathrm{REIST}} \approx L_{\mathrm{ADD}} + L_{\mathrm{CMP}} + L_{\mathrm{MASK}}
+\quad\text{gegenüber}\quad
+C_{\mathrm{MOD}} \approx L_{\mathrm{Magic}} + L_{\mathrm{SignMask}} + L_{\mathrm{Korrektur}},
+\end{equation}
+wobei die Kosten von Übersetzung, Zielarchitektur, Wertebereich und Vergleichskern abhängen. In den berichteten Messungen ist der Korrekturpfad gegenüber dem dortigen Restpfad schneller. Daraus folgt keine allgemeine Ungleichung gegenüber jeder Implementierung nicht-negativer modularer Addition. Auch ein dynamischer, schleifeninvarianter Divisor erzwingt bei vorberechneten reziproken Parametern nicht in jedem Schritt eine Divisionsinstruktion.
+
+\subsection{Verzweigungsverhalten}
+
+Klassischer Modulo-Code für vorzeichenbehaftete Werte enthält häufig bedingte Korrekturen zur Erzwingung von $r \ge 0$. Jede datenabhängige Verzweigung riskiert Fehlvorhersagen mit Pipeline-Flushes von 10--20 Takten. Die REIST-Korrektur ist strikt maskenbasiert (Listings~\ref{lst:branchless} und~\ref{lst:neon}): Es existiert kein datenabhängiger Sprung, die Fehlvorhersagerate des Korrekturpfads ist strukturell null. Dieselbe Eigenschaft ist die Voraussetzung der Vektorisierung, denn SIMD-Lanes kennen keinen divergenten Kontrollfluss.
+
+\subsection{Assembler-Inspektion}
+\label{sec:asm}
+
+Die Benchmark-Suite erzeugt zu jedem Kern die übersetzte Assembler-Datei und klassifiziert sie automatisch. Die Befunde (x86-64, O0/O3) bestätigen die Analyse:
+
+\begin{itemize}
+\item In keiner der übersetzten Varianten mit konstantem Divisor erscheint eine \texttt{DIV}-Instruktion --- der Compiler ersetzt sie durchgängig durch Magic-Multiply-Sequenzen. Der Vergleich \enquote{REIST vs. Modulo} ist also tatsächlich ein Vergleich \enquote{Korrekturregel vs. optimierter Restpfad}, nicht \enquote{gegen naive Division}.
+\item Die klassischen Kerne enthalten bei O3 Sign-Mask-Muster (\texttt{sar}/\texttt{shr} des Eingangswerts); die REIST-Kerne nicht.
+\item Die REIST-Kerne bestehen aus ADD/CMP/Masken-Sequenzen, die bei O3 auf Vektorregister abgebildet werden (Autovektorisierung der polynomiellen Addition).
+\end{itemize}
+
+% =====================================================================
+\section{Historische Hardware-Evaluation: FPGA}
+\label{sec:fpga}
+
+Die CPU-Messungen zeigen, dass die REIST-Korrektur den optimierten Restpfad des Compilers schlägt. Auf einem FPGA lässt sich darüber hinaus fragen, wie die Korrektur gegen dedizierte Divisions-Hardware abschneidet: in Taktzyklen, Chipfläche und erreichbarer Taktfrequenz. Dazu wurde eine eigenständige Benchmark-Engine in VHDL implementiert und auf einem Gowin-GW2A-18-FPGA (Tang Primer 20K) vermessen \cite{fpgarepo}. Als Referenz dient kein handgeschriebener Divider, sondern das herstellergenerierte \emph{Gowin Integer Division}-Soft-IP \cite{gowin}, also die Komponente, die ein Entwickler für $a \bmod B$ tatsächlich instanziieren würde; hier in der 32-Bit-Konfiguration mit Pipeline-Latenz 2 (Durchsatz 1 Ergebnis/Takt).
+
+Die Messung reiht sich damit in eine aktive Forschungslinie zu Hardwareimplementierungen der gitterbasierten Kryptographie ein. Insbesondere die Arbeiten von Howe et al. zeigen durchgängig, dass Fläche, Taktfrequenz und die Struktur der modularen Arithmetik die bestimmenden Entwurfsgrößen solcher Implementierungen sind --- von kompakten gitterbasierten Signaturen \cite{howe2015} und Verschlüsselung über Standard-Gittern \cite{howe2016dac} über Schlüsselkapselung auf eingebetteten Plattformen \cite{howe2018tches} bis zur gezielten Ausnutzung von Parallelität in FrodoKEM-Hardware \cite{howe2021frodo}. Die vorliegende Evaluation isoliert aus diesem Kontext einen einzelnen Baustein --- die Reduktion in additiven modularen Aktualisierungen --- und vermisst ihn unter kontrollierten Bedingungen.
+
+\subsection{Der REIST-Rechenpfad in Hardware}
+
+Der REIST-Datenpfad setzt die Korrekturregel aus Satz~\ref{satz:additiv} unmittelbar in Logik um: zwei Komparatoren, ein Addierer/Subtrahierer, ein Multiplexer. Listing~\ref{lst:vhdl} zeigt den kombinatorischen Kern:
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=VHDL, caption={Der kombinatorische REIST-Korrekturschritt (\texttt{reist\_core.vhd}, gekürzt). Ein Guard-Bit ($W$ downto $0$) stellt sicher, dass weder $acc+x$ noch die $\pm B$-Korrektur überlaufen. Die floor/ceil-Aufteilung behandelt gerade und ungerade Moduli einheitlich.},label={lst:vhdl}]
+-- lo = -floor(B/2),  hi = lo + B = ceil(B/2)
+half <= shift_right(b, 1);
+lo   <= -half;
+hi   <= b - half;
+
+r <= sum - b when sum >= hi else
+     sum + b when sum <  lo else
+     sum;
+\end{lstlisting}
+\end{minipage}
+
+Die Hardware verwendet das Intervall $[-\lfloor B/2 \rfloor,\, \lceil B/2 \rceil)$ --- für gerades $B$ exakt die kanonische Konvention $[-B/2,\, B/2)$ aus Definition~\ref{def:reist}, für ungerades $B$ das identische symmetrische Vertretersystem. Die Korrektheit des Kerns wird in der Simulation gegen die Software-Referenzimplementierung geprüft (Testbench \texttt{tb\_reist\_core}), bevor auf der Hardware gemessen wird.
+
+Der Modul $b$ ist dabei ein \emph{Laufzeiteingang} des Kerns, keine Synthesekonstante: Dieselbe instanziierte Einheit verarbeitet in der Benchmark-Engine nacheinander alle vier Moduli. Die Hardware belegt damit unmittelbar, dass die REIST-Korrektur keinen zur Übersetzungszeit fixierten Divisor benötigt (vgl. Korollar~\ref{kor:invariante} und Abschnitt~\ref{sec:compiler}).
+
+Vorzeichenbehaftete, um null zentrierte Darstellungen sind der Hardware gitterbasierter Kryptographie dabei nicht fremd: Fehlerterme werden dort aus symmetrischen, um null zentrierten diskreten Gaußverteilungen gezogen, deren flächen- und laufzeiteffiziente (und seitenkanalresistente) Sampler ein eigenes, gut untersuchtes Entwurfsfeld bilden \cite{howe2016tc,khalid2018}. Die REIST-Einheit setzt dieselbe Symmetrie in der Reduktionsstufe fort, sodass zentriert erzeugte Werte ohne Darstellungswechsel akkumuliert werden können.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  blk/.style={draw=black!50, fill=reistblau!15, minimum width=2.1cm, minimum height=0.75cm, font=\small, align=center},
+  io/.style={font=\small\ttfamily},
+  node distance=4mm and 9mm
+]
+\node[blk] (add) {Addierer\\ \texttt{acc + x}};
+\node[blk, right=of add] (cmp) {Komparatoren\\ $\ge hi$? $< lo$?};
+\node[blk, right=of cmp] (mux) {MUX\\ $s{-}B \,/\, s \,/\, s{+}B$};
+\node[blk, right=of mux, fill=white] (reg) {Register\\ \texttt{acc}};
+\draw[-{Stealth}] (add) -- (cmp);
+\draw[-{Stealth}] (cmp) -- (mux);
+\draw[-{Stealth}] (mux) -- (reg);
+\draw[-{Stealth}] (reg.south) -- ++(0,-0.55) -| (add.south);
+\node[io, above=1mm of add] {$x$ (zentriert)};
+\node[font=\footnotesize, below=7.5mm of cmp] {Rückkopplung: 1 Takt pro Aktualisierung};
+\end{tikzpicture}
+\caption{REIST-Akkumulator in Hardware: Addierer, Komparatoren und Multiplexer bilden eine kurze kombinatorische Stufe; die Rückkopplung schließt in einem Takt. Ein Divisions-IP an derselben Stelle müsste seine volle Pipeline-Latenz in jeder Iteration der Abhängigkeitskette abwarten.}
+\label{fig:fpgapfad}
+\end{figure}
+
+\subsection{Messaufbau}
+
+Wie bei den CPU-Messungen ist der entscheidende Punkt, dass modulare Akkumulation eine Abhängigkeitskette bildet: Jeder Schritt benötigt das Ergebnis des vorigen ($acc \leftarrow \mathrm{reduce}(acc + x)$); ein gepipelintes Divisions-IP kann Iterationen daher nicht überlappen und zahlt seine volle Latenz in jedem Schritt. Die Benchmark-Engine misst deshalb drei Pfade über jeweils $N = 1024$ modulare Additionen und die Moduli 251, 256, 1009 und 65\,521 (ungerade/gerade, klein/groß):
+
+\begin{enumerate}
+\item \textbf{REIST:} zentrierter Akkumulator in der Abhängigkeitskette --- ein Takt pro Schritt;
+\item \textbf{IP, Abhängigkeitskette:} dieselbe Kette, reduziert durch das Divisions-IP (ausgeben, Latenz abwarten, zurückführen);
+\item \textbf{IP, unabhängiger Strom:} voneinander unabhängige Reduktionen, die die IP-Pipeline füllen --- der Bestfall des IP.
+\end{enumerate}
+
+Die Zyklenzähler werden auf der Hardware erfasst und über UART ausgegeben; die Ergebnisse sind über alle vier Moduli identisch, da weder Korrektur noch IP-Latenz vom Zahlenwert abhängen. Für Fläche und Taktfrequenz isolieren zwei Mess-Tops mit \emph{identischem} Rahmen (LFSR-Stimulus $\to$ Eingangsregister $\to$ Addierer $\to$ Reduktionseinheit $\to$ Ausgangsregister) den Beitrag der Reduktionseinheit; die beiden Projekte unterscheiden sich ausschließlich in dieser Einheit.
+
+\subsection{Ergebnisse}
+
+\begin{table}[htbp]
+\centering
+\caption{FPGA-Ergebnisse (Gowin GW2A-18, Tang Primer 20K): Zyklen pro Aktualisierung (auf Hardware gemessen, $N = 1024$, alle Moduli identisch) sowie Fläche und Taktfrequenz der isolierten Reduktionseinheiten (Place-and-Route-Berichte, identischer Messrahmen).}
+\label{tab:fpga}
+\small
+\begin{tabular}{lrrl}
+\toprule
+Metrik & REIST & Divisions-IP & Verhältnis \\
+\midrule
+Takte/Schritt, Abhängigkeitskette & 1 & 4 & $4\times$ \\
+Takte/Ergebnis, unabhängiger Strom & 1 & $\approx 1$ & $\approx 1\times$ \\
+\addlinespace
+Logikzellen (LUT + ALU) & 101 & 1276 & $12{,}6\times$ kleiner \\
+Register (FF) & 85 & 194 & $2{,}3\times$ weniger \\
+DSP-Blöcke & 0 & 0 & --- \\
+Maximale Taktfrequenz & 161{,}8 MHz & 8{,}1 MHz & $20\times$ höher \\
+Logikstufen im kritischen Pfad & 8 & 189 & $23{,}6\times$ kürzer \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tabelle~\ref{tab:fpga} fasst die Messungen zusammen. Betrachtet man nur Taktzyklen, gewinnt REIST in der Abhängigkeitskette ($1$ gegen $4$ Takte) und liegt beim unabhängigen Durchsatz gleichauf. Hinzu kommen jedoch Fläche und Taktfrequenz: Das Divisions-IP packt die 32-Bit-Division in zwei Pipeline-Stufen, sodass jede Stufe ein sehr langer kombinatorischer Pfad ist (189 Logikstufen) --- es erreicht nur 8{,}1\,MHz. Die REIST-Korrektur ist ein Komparator und ein Addierer (8 Logikstufen) und schließt bei 161{,}8\,MHz. In Echtzeit pro Aktualisierung (Abbildung~\ref{fig:fpgawall}) verschwindet damit auch das scheinbare Unentschieden beim unabhängigen Durchsatz.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.8\textwidth, height=6.4cm,
+  ybar, bar width=17pt,
+  ymode=log, log origin=infty,
+  ylabel={Zeit pro Aktualisierung (ns, log.)},
+  symbolic x coords={Abhängigkeitskette, unabhängiger Strom},
+  xtick=data,
+  ymin=1, ymax=1500,
+  ymajorgrids, grid style={black!12},
+  axis line style={black!40},
+  area legend,
+  legend style={draw=none, fill=none, at={(0.5,1.02)}, anchor=south, legend columns=2, font=\small, column sep=10pt},
+  tick label style={font=\small}, label style={font=\small},
+  nodes near coords, nodes near coords style={font=\footnotesize},
+  point meta=explicit symbolic,
+]
+\addplot[fill=reistblau!70, draw=black!40] coordinates
+  {(Abhängigkeitskette,6.2) [6{,}2] (unabhängiger Strom,6.2) [6{,}2]};
+\addplot[fill=klassikgrau!60, draw=black!40] coordinates
+  {(Abhängigkeitskette,494) [494] (unabhängiger Strom,124) [124]};
+\legend{REIST (1 Takt @ 161{,}8 MHz), Divisions-IP (@ 8{,}1 MHz)}
+\end{axis}
+\end{tikzpicture}
+\caption{Echtzeit pro modularer Aktualisierung auf dem FPGA (logarithmische Skala): Zyklen und Taktfrequenz kombiniert. In der vermessenen akkumulativen Rückkopplungskette ergibt sich unter den gewählten IP-Parametern (32 Bit, Latenz 2) eine rund $80$-fach geringere Zeit pro Aktualisierung; selbst im Bestfall des IP (gefüllte Pipeline, unabhängige Eingaben) bleibt ein Faktor von rund $20$. Die Aussage gilt für diese Zielstruktur und Messkonfiguration; andere IP-Parameter und Implementierungen erfordern eigene Messungen (Abschnitt~\ref{sec:latenztradeoff}).}
+\label{fig:fpgawall}
+\end{figure}
+
+\subsection{Ein begrenztes Modell des Pipeline-Kompromisses}
+\label{sec:latenztradeoff}
+Für einen festen kombinatorischen Datenpfad mit Verzögerung $D$, der ideal auf $L$ aufeinanderfolgende Pipeline-Stufen verteilt wird, gilt $T_{\mathrm{clk}}\ge D/L$. Eine abhängige Rückkopplung, die alle $L$ Stufen abwartet, hat damit mindestens
+\[
+T_{\mathrm{Schritt}}\ge L T_{\mathrm{clk}}\ge D.
+\]
+Dieses Modell erklärt, warum eine höhere Taktfrequenz nicht automatisch die Latenz einer abhängigen Kette senkt. Es ist kein Beweis gegen alle Divider-Konfigurationen: Netzstruktur, Spezialisierung auf einen beschränkten Eingabebereich, Retiming, Registeraufwand und Platzierung können sich ändern. Das Modell begründet weder eine universelle Flächenschranke noch einen allgemeinen Faktor zugunsten der zentrierten Darstellung.
+
+Die gemessenen vier Takte pro IP-Kettenschritt enthalten die konfigurierte IP-Latenz von zwei Takten sowie Ausgabe- und Rückführungsaufwand. Die berichteten Flächen und Frequenzen gelten für diese konkrete Konfiguration. Für eine belastbare Verallgemeinerung fehlen ein Parametersweep und eine ebenfalls beschränkte nicht-negative Additionskorrektur als Hardware-Baseline.
+
+\subsection{Einordnung}
+
+Die FPGA-Messung bestätigt die These der Arbeit auf einer zweiten, von CPUs unabhängigen Plattform: Der Vorteil der zentrierten Korrektur ist kein Artefakt von Compilern oder Instruktionssätzen, sondern eine Eigenschaft des Rechenwegs. Wie bei den CPU-Messungen gilt die Abgrenzung unverändert: Die REIST-Einheit ersetzt ausschließlich die \emph{Reduktion} in modularer Addition und Akkumulation. Sie ist kein allgemeiner Divider; für echte Division bleibt ein Divisions-IP erforderlich, und für $(a \cdot b) \bmod B$ wäre ein DSP-Multiplizierer mit einer REIST-, Barrett- oder Montgomery-Reduktion zu paaren. Die geringe Größe der Einheit (101 Logikzellen, keine DSP-Blöcke) macht sie zugleich zu einem brauchbaren Baustein für NTT-Beschleuniger mit zentrierten Koeffizientenbereichen und für Koprozessor-Integration, zumal Hardware-Entwürfe gitterbasierter Verfahren ihre Leistung wesentlich über die Vervielfachung paralleler Arithmetikeinheiten skalieren \cite{howe2021frodo} und eine kleine Reduktionseinheit entsprechend oft instanziiert werden kann.
+
+% =====================================================================
+\section{Limitationen}
+\label{sec:limitationen}
+
+Die Ergebnisse aus den Abschnitten~\ref{sec:kontrollen} und~\ref{sec:fpga} sowie die Analyse aus Abschnitt~\ref{sec:mikroarchitektur} definieren den Geltungsbereich der Methode. REIST ist eine gezielte, keine universelle Optimierung:
+
+\begin{enumerate}
+\item \textbf{Kein Ersatz für Montgomery/Barrett:} Für multiplikationslastige modulare Arithmetik bleiben etablierte Reduktionsverfahren angemessen. Direkte Vergleiche mit handoptimierten Montgomery-/Barrett-Implementierungen liegen außerhalb des Umfangs dieser Arbeit; die Referenz ist der Compiler-Modulo-Operator.
+\item \textbf{Stabiler Modul und Erstzentrierung:} Ein Modulwechsel oder unbeschränkte Eingaben erfordern die Wiederherstellung des Wertebereichs. Dafür können Restoperator, reziproke Reduktion oder andere geeignete Verfahren verwendet werden; eine Hardware-Division ist nicht zwingend. Die Ein-Korrektur-Regel gilt erst nach dieser Normalisierung.
+\item \textbf{Vergleichsbaseline und alte Listings:} Bereichsbeschränkte nicht-negative Addition vermeidet ebenfalls allgemeine Restberechnungen. Die historische Evaluation enthält keine vollständige, gleichwertige Baseline dieser Art. Abschnitt~\ref{sec:neuevaluation} ergänzt sie mit neu geprüften und gemessenen Kernen.
+\item \textbf{Bereich statt Persistenz allein:} Die schnelle Korrektur gilt für bereits reduzierte Eingaben, auch bei unabhängiger koeffizientenweiser Addition. Allgemeine Restberechnungen profitieren davon nicht automatisch.
+
+\item \textbf{ARX-basierte Verfahren:} Algorithmen ohne Modulo-Operationen (ChaCha20, BLAKE, SipHash u.\,a.) bieten keinen Ansatzpunkt.
+\item \textbf{Diffusionslastige Workloads:} Hash-Mixing-Funktionen, deren Statistik auf den Wraparound-Eigenschaften des nicht-negativen Rings beruht, verlangsamen sich um 15--25\,\%.
+\item \textbf{Memory-bound-Schleifen:} In speicherbandbreitenlimitierten Schleifen sind arithmetische Einsparungen zweitrangig; die Speicherlatenz bestimmt die Gesamtleistung.
+\item \textbf{Unoptimierte Übersetzung:} Ohne Compiler-Optimierung kann die branchless-Form langsamer sein als der Restoperator (polynomielle Addition, ARM, O0: $\approx 0{,}7\times$); die Methode entfaltet sich im Zusammenspiel mit O3/SIMD.
+\item \textbf{Kompatibilität:} REIST erzeugt andere Reste als die klassische Division. Bestehende Systeme, die explizit $r \in [0, B)$ erwarten, müssen angepasst werden; Anwendungen mit bewusst asymmetrischen Fehlertermen (z.\,B. Clipping, Kompression) können andere Ergebnismuster zeigen.
+\item \textbf{Seitenkanäle:} Die Korrekturregeln sind verzweigungsfrei implementierbar; Konstantzeiteigenschaften hängen jedoch von der konkreten Implementierung (und dem Compiler) ab und werden hier nicht beansprucht.
+\end{enumerate}
+
+% =====================================================================
+\section{Mögliche Erweiterungen}
+\label{sec:erweiterungen}
+
+\begin{description}
+\item[Compiler-Integration.] Die automatische Erkennung REIST-geeigneter Muster --- modulare Zähler und Akkumulatoren mit compile-time-konstantem oder zur Laufzeit schleifeninvariantem Modul --- in LLVM oder GCC könnte verzweigungsfreie, SIMD-fähige Signed-Remainder-Arithmetik ohne Quelltextänderung erzeugen. Die Assembler-Befunde aus Abschnitt~\ref{sec:asm} zeigen, dass die nötigen Bausteine (Magic Multiply, Maskenkorrektur) bereits im Repertoire der Codegeneratoren liegen.
+\item[Hardware-Ausbau.] Eine Studie über Wortbreiten, Eingabebereiche und passende Korrektur- sowie Divider-Baselines muss Fläche und Latenz jeweils messen. Ein Produkt zweier zentrierter Werte liegt im Allgemeinen nicht in $[-B,B)$; dafür genügt eine einzige $\pm B$-Korrektur nicht. Ein Multiplikationspfad benötigt einen geeigneten allgemeinen Reduktionsschritt.
+\item[RNS- und CRT-Systeme.] In exakter Ganzzahlarithmetik entsteht durch die Vertreterwahl kein Rundungsfehler. Mögliche Vorteile bei begrenzter Wortbreite sind unter expliziten Überlauf- und Rekonstruktionsannahmen zu prüfen.
+
+\item[NTT-Varianten.] Eine durchgängig zentrierte NTT --- Montgomery/Barrett für die Multiplikationen, $\pm B$-Korrekturen für die Add/Sub-Schichten --- könnte die hier gemessenen Additionsgewinne in reale Transformationspipelines übertragen.
+\item[Formale Driftanalyse.] Die Fehlerstatistik aus Bemerkung~\ref{bem:statistik} legt eine formale Analyse des Langzeitverhaltens in Regelschleifen und Akkumulatoren nahe, einschließlich nicht-gleichverteilter Eingaben.
+\end{description}
+
+% =====================================================================
+\input{paper-v2-results.tex}
+
+\section{Schlussfolgerung}
+\label{sec:schluss}
+
+Die REIST-Division fasst den Rest der ganzzahligen Division als bidirektionalen Korrekturterm statt als einseitiges Residuum auf. Mathematisch ist sie die konsequente Wahl des betragsminimalen Vertretersystems, verbunden mit der Quotientenwahl durch Rundung (Satz~\ref{satz:rundung}); als solche ist sie klassisch. Ihr praktischer Wert beruht auf drei zusammenhängenden Eigenschaften: Das zentrierte Intervall macht die additive Aktualisierung zu einer einzigen $\pm B$-Korrektur (Satz~\ref{satz:additiv}); diese Korrektur ist verzweigungsfrei formulierbar; und die verzweigungsfreie Form ist vektorisierbar.
+
+Die neue CPU-Evaluation zeigt, warum Restoperator und bereichsbeschränkte
+Baseline getrennt zu betrachten sind. Ein vermiedener allgemeiner Restoperator
+belegt noch keinen Vorteil gegenüber nicht-negativer Korrektur. Die Ergebnisse
+sind abhängig von Eingabeverteilung, Abhängigkeitsstruktur, Modulusbindung und
+Messgrenze. Zentrierte Darstellung bleibt eine mögliche Implementierungswahl;
+ihre Überlegenheit muss im jeweiligen Einsatzfall gemessen werden.
+Die historischen ARM- und FPGA-Befunde wurden nicht neu vermessen und werden
+nicht durch die neue x86-Matrix bestätigt oder ersetzt. Insbesondere folgen
+weder universelle Modulo-Beschleunigungen noch Ende-zu-Ende-Gewinne vollständiger
+Kryptosysteme aus den hier untersuchten Additionskernen.
+
+% =====================================================================
+\begin{thebibliography}{99}
+
+\bibitem{knuth} D. E. Knuth, \emph{The Art of Computer Programming, Vol.~2: Seminumerical Algorithms}, 3.~Aufl. Reading, MA: Addison-Wesley, 1997.
+
+\bibitem{niven} I. Niven, H. S. Zuckerman und H. L. Montgomery, \emph{An Introduction to the Theory of Numbers}, 5.~Aufl. New York: Wiley, 1991.
+
+
+\bibitem{montgomery} P. L. Montgomery, \enquote{Modular multiplication without trial division}, \emph{Mathematics of Computation}, Bd.~44, Nr.~170, S.~519--521, 1985.
+
+\bibitem{barrett} P. Barrett, \enquote{Implementing the Rivest Shamir and Adleman public key encryption algorithm on a standard digital signal processor}, in \emph{Advances in Cryptology --- CRYPTO~'86}, LNCS~263, Springer, 1987, S.~311--323.
+
+\bibitem{granlund} T. Granlund und P. L. Montgomery, \enquote{Division by invariant integers using multiplication}, in \emph{Proc. ACM SIGPLAN PLDI}, 1994, S.~61--72.
+
+\bibitem{kyber} R. Avanzi et al., \enquote{CRYSTALS-Kyber: Algorithm Specifications and Supporting Documentation}, NIST Post-Quantum Cryptography Standardization, 2021.
+
+\bibitem{dilithium} L. Ducas et al., \enquote{CRYSTALS-Dilithium: A lattice-based digital signature scheme}, \emph{IACR Trans. CHES}, Bd.~2018, Nr.~1, S.~238--268, 2018.
+
+\bibitem{chacha} D. J. Bernstein, \enquote{ChaCha, a variant of Salsa20}, Workshop Record of SASC, 2008.
+
+\bibitem{fog} A. Fog, \emph{Instruction Tables: Lists of Instruction Latencies, Throughputs and Micro-Operation Breakdowns}, Technical University of Denmark, fortlaufend aktualisiert.
+
+\bibitem{astrom} K. J. \AA{}str\"om und R. M. Murray, \emph{Feedback Systems: An Introduction for Scientists and Engineers}. Princeton: Princeton University Press, 2012.
+
+\bibitem{oppenheim} A. V. Oppenheim und R. W. Schafer, \emph{Discrete-Time Signal Processing}, 2.~Aufl. Upper Saddle River, NJ: Prentice Hall, 1999.
+
+\bibitem{repo} R. Stepan, \emph{reist-crypto-bench: Cryptographic Benchmark Suite for REIST Division} (Quellcode, Messprotokolle, Assembler-Inspektion), \url{https://github.com/rudolfstepan/reist-crypto-bench}, 2025.
+
+\bibitem{fpgarepo} R. Stepan, \emph{REIST FPGA Benchmark Engine} (VHDL-Quellen, Testbenches, Gowin-Projekte und Messberichte, Verzeichnisse \texttt{rtl/reist} und \texttt{boards/tang\_primer\_20k/reist}), \url{https://github.com/rudolfstepan/6502-sbc-fpga}, 2025.
+
+\bibitem{gowin} Gowin Semiconductor, \emph{Gowin Integer Division IP: User Guide}, Dokumentation zum Soft-IP-Generator der GowinEDA-Toolchain.
+
+\bibitem{howe2015} J. Howe, T. P\"oppelmann, M. O'Neill, E. O'Sullivan und T. G\"uneysu, \enquote{Practical lattice-based digital signature schemes}, \emph{ACM Transactions on Embedded Computing Systems}, Bd.~14, Nr.~3, Art.~41, 2015.
+
+\bibitem{howe2016dac} J. Howe, C. Moore, M. O'Neill, F. Regazzoni, T. G\"uneysu und K. Beeden, \enquote{Lattice-based encryption over standard lattices in hardware}, in \emph{Proc. 53rd Annual Design Automation Conference (DAC)}, 2016, Art.~162.
+
+\bibitem{howe2016tc} J. Howe, A. Khalid, C. Rafferty, F. Regazzoni und M. O'Neill, \enquote{On practical discrete Gaussian samplers for lattice-based cryptography}, \emph{IEEE Transactions on Computers}, Bd.~67, Nr.~3, S.~322--334, 2018.
+
+\bibitem{khalid2018} A. Khalid, J. Howe, C. Rafferty, F. Regazzoni und M. O'Neill, \enquote{Compact, scalable, and efficient discrete Gaussian samplers for lattice-based cryptography}, in \emph{Proc. IEEE International Symposium on Circuits and Systems (ISCAS)}, 2018, S.~1--5.
+
+\bibitem{howe2018tches} J. Howe, T. Oder, M. Krausz und T. G\"uneysu, \enquote{Standard lattice-based key encapsulation on embedded devices}, \emph{IACR Transactions on Cryptographic Hardware and Embedded Systems}, Bd.~2018, Nr.~3, S.~372--393, 2018.
+
+\bibitem{howe2021frodo} J. Howe, M. Martinoli, E. Oswald und F. Regazzoni, \enquote{Exploring parallelism to improve the performance of FrodoKEM in hardware}, \emph{Journal of Cryptographic Engineering}, Bd.~11, 2021, doi: 10.1007/s13389-021-00258-7.
+
+\bibitem{howe2022arm} J. Howe und B. Westerbaan, \enquote{Benchmarking and analysing the NIST PQC lattice-based signature scheme standards on the ARM Cortex M7}, in \emph{Progress in Cryptology --- AFRICACRYPT 2023} (zuerst vorgestellt auf der NIST Fourth PQC Standardization Conference, 2022), LNCS, Springer, 2023.
+
+\end{thebibliography}
+
+\end{document}

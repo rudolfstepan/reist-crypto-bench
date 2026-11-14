@@ -22,7 +22,7 @@
 #define HAVE_AVX2 0
 #endif
 
-using Clock = std::chrono::high_resolution_clock;
+using Clock = std::chrono::steady_clock;
 static volatile std::int64_t g_sink = 0;
 
 #if !defined(__SIZEOF_INT128__)

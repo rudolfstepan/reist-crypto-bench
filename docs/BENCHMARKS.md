@@ -1,5 +1,11 @@
 # REIST benchmark programs
 
+For new paper claims, use the [v2 additive evaluation](PAPER_BENCHMARK_V2_DE.md).
+It adds the missing bounded non-negative baseline and balanced repeated
+measurements, including preparation costs. The seven-program workflow described
+below remains a historical/control workflow; its single timing blocks do not
+provide the statistical methodology of v2.
+
 This document describes what each benchmark can and cannot establish. The normative arithmetic convention is the canonical centered interval `[-B/2,B/2)` from the [2026 German paper](<REIST-Division - Eine implementierungsorientierte Formulierung zentrierter Restarithmetik.pdf>), DOI [10.5281/zenodo.21206471](https://doi.org/10.5281/zenodo.21206471). See [PAPER_CORRECTIONS_DE.md](PAPER_CORRECTIONS_DE.md) for the corrected odd-modulus boundaries.
 
 ## Interpretation rules

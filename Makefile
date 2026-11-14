@@ -321,6 +321,12 @@ report:
 	$(PYTHON) scripts/generate_benchmark_report.py --compiler "$(CXX)" \
 		$(RUN_RESULT_OPTION) $(REPORT_ARGS)
 
+# New balanced paper evaluation, independent of the historical O0/O3 reports.
+paper:
+	$(PYTHON) scripts/run_paper_benchmarks.py --result-dir "tests/results/$(if $(filter aarch64 arm64,$(HOST_ARCH)),arm,x86)/$(RUN_SESSION)_PAPER_V2"
+
+.PHONY: paper
+
 compiler-artifacts: optimized
 	$(PYTHON) scripts/check_compiler_artifacts.py --build-dir $(BUILD_DIR) \
 		--compiler "$(CXX)" --flags "$(CPPFLAGS) $(COMMON_FLAGS) $(OPT_FLAGS)"

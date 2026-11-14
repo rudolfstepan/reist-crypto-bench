@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-using Clock = std::chrono::high_resolution_clock;
+using Clock = std::chrono::steady_clock;
 
 static volatile std::uint64_t g_sink = 0;
 

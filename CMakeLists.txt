@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(ReistCryptoBench VERSION 1.0 LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(REIST_ENABLE_SANITIZERS "Enable AddressSanitizer and UBSan" OFF)
 option(REIST_WARNINGS_AS_ERRORS "Treat compiler warnings as build failures" OFF)
 option(REIST_BUILD_DIAGNOSTICS
@@ -54,6 +56,8 @@ function(reist_add_benchmark target source)
 endfunction()
 
 # These are the validated, reportable programs.
+reist_add_benchmark(bench_paper_addition src/bench_paper_addition.cpp)
+set_property(TARGET bench_paper_addition PROPERTY INTERPROCEDURAL_OPTIMIZATION FALSE)
 reist_add_benchmark(bench_modadd_suite src/bench_modadd_suite.cpp)
 reist_add_benchmark(bench_poly_mod src/bench_poly_mod.cpp)
 reist_add_benchmark(bench_modular src/bench_modular.cpp)
@@ -192,6 +196,18 @@ endif()
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(paper_addition_tests tests/test_paper_addition.cpp)
+    target_link_libraries(paper_addition_tests PRIVATE reist_mod)
+    target_include_directories(paper_addition_tests PRIVATE src)
+    add_test(NAME reist.paper.correctness COMMAND paper_addition_tests)
+    set_tests_properties(reist.paper.correctness PROPERTIES LABELS "correctness;paper")
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME reist.paper.runner
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_paper_runner.py
+                $<TARGET_FILE:bench_paper_addition>)
+        set_tests_properties(reist.paper.runner PROPERTIES LABELS "paper" TIMEOUT 120)
+    endif()
     add_executable(reist_unit_tests tests/test_reist.cpp)
     target_link_libraries(reist_unit_tests PRIVATE reist_mod)
 

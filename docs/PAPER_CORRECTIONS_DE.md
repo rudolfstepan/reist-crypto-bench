@@ -1,3 +1,32 @@
+# Neue Messfassung, 14. November 2026
+
+Die LaTeX-Quelle wurde aus `meine_paper/REIST_Division` wiederhergestellt und
+ist nun im Repository enthalten. Die [aktualisierte Langfassung](papers/REIST-Division-DE-Langfassung.pdf)
+trennt historische Befunde von der neuen CPU-Auswertung. Die
+[Methodendokumentation](PAPER_BENCHMARK_V2_DE.md) beschreibt die faire
+nicht-negative Vergleichsbaseline, wiederholte Messungen, Eingabeverteilungen
+und Vorbereitungsgrenzen. Der [neue Auswertungsbericht](papers/REIST-Benchmark-Update-2026.pdf)
+wird aus dem vollständig archivierten x86-Lauf erzeugt. ARM und FPGA wurden
+nicht neu vermessen. Die folgenden Notizen dokumentieren frühere Revisionen.
+
+# Korrigierte lokale Manuskriptfassung, 24. Oktober 2026
+
+Die wiedergefundene LaTeX-Quelle aus der zentralen Paper-Sammlung liegt jetzt
+unter [papers/REIST-Division-DE-Langfassung.tex](papers/REIST-Division-DE-Langfassung.tex).
+Die daraus gebaute [korrigierte lokale PDF](papers/REIST-Division-DE-Langfassung.pdf)
+übernimmt die unten dokumentierten kanonischen Grenzen. Sie korrigiert außerdem
+Reststatistik, Driftinterpretation, Vergleichsbaselines und das zu allgemeine
+Pipeline-Argument. Die nicht belegbare Zhang/Qi-Referenz mit einer zu einem
+anderen Artikel gehörenden DOI wurde entfernt.
+
+Die ursprüngliche veröffentlichte PDF und ihre DOI bleiben historische Belege.
+Die korrigierten skalaren/polynomiellen Listings bestehen 2.130.523 Prüfungen;
+die alten Leistungsmessungen wurden für diese Textrevision nicht wiederholt.
+Der folgende ältere Hinweis auf damals fehlende Satzquellen beschreibt den
+Stand vor ihrer Wiederauffindung und wird als Erratum erhalten.
+
+---
+
 # Umsetzungsnotiz und Erratum zur deutschen Paperfassung
 
 Stand: 2026

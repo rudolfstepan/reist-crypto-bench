@@ -1,3 +1,6 @@
 # Benchmark archives are hash-bound byte artifacts. Preserve their generated
 # line endings and do not treat CRLF as trailing whitespace during diff checks.
 tests/results/** -text whitespace=-trailing-space
+
+# PDFs are binary artifacts even when their compressed streams use ASCII85.
+*.pdf binary

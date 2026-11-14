@@ -1,0 +1,24 @@
+AKTUALISIERUNG 24.10.2026
+Die zugeordneten Dateien in C:/Users/rudol/Documents/eBooks/meine_paper
+sind jetzt symbolische Dateilinks auf Projektoriginale, keine Kopien.
+Die Übersicht Sammlung-INDEX.html zeigt identische Inhalte nur einmal.
+Sammlung-Quellen.csv dokumentiert die tatsächlichen Linkziele und Hashes.
+Der folgende ältere Hinweis auf Kopien beschreibt den früheren Stand.
+
+ZENTRALE PAPER-SAMMLUNG
+
+Projekt: reist-crypto-bench
+Quellverzeichnis: D:\Development\reist-crypto-bench\docs
+
+Zusätzliche, nach Projekten geordnete Kopien der Papers liegen hier:
+C:\Users\rudol\Documents\eBooks\meine_paper\reist-crypto-bench
+
+Zentrale Sammlung: C:\Users\rudol\Documents\eBooks\meine_paper
+Übersicht: C:\Users\rudol\Documents\eBooks\meine_paper\Sammlung-INDEX.html
+Quellen und SHA256-Prüfsummen: C:\Users\rudol\Documents\eBooks\meine_paper\Sammlung-Quellen.csv
+
+Die Originaldateien und bearbeitbaren Quellen bleiben im Projekt erhalten.
+Ältere Revisionen sind im Ziel unter Archiv eingeordnet.
+Die Sammlung besteht aus Kopien; Änderungen werden nicht automatisch synchronisiert.
+
+Stand der Zusammenstellung: 2026-10-23

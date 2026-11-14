@@ -1,5 +1,24 @@
 # REIST Division benchmark suite
 
+## November 2026 paper evaluation
+
+The new primary additive evaluation compares optimized `%`, bounded
+non-negative correction, and centered correction with equal word widths,
+balanced repeated trials, five input patterns, constant/runtime moduli,
+and separate kernel/preparation-inclusive measurements. It replaces the
+single-shot additive comparisons as the basis for new paper claims.
+The historical seven-program workflow below remains available for controls
+and reproduction; its results must not be mixed with the new experiment.
+
+- [Methodology and reproduction (German)](docs/PAPER_BENCHMARK_V2_DE.md)
+- [Complete 630-case x86 archive](tests/results/x86/20261114_PAPER_V2/REPORT.md)
+- [Updated manuscript](docs/papers/REIST-Division-DE-Langfassung.pdf)
+- [New evaluation report](docs/papers/REIST-Benchmark-Update-2026.pdf)
+
+```sh
+python scripts/run_paper_benchmarks.py --result-dir tests/results/x86/NEW_PAPER_V2 --native
+```
+
 This repository evaluates the implementation pattern described in Rudolf Stepan's 2026 paper on REIST Division: keep an additive modular state in a centered residue interval and restore that interval after every update with at most one `+/-B` correction.
 
 REIST is not a new ring, a general-purpose division algorithm, or a cryptographic primitive. Its intended fast path is narrower: repeated modular addition or subtraction with a positive modulus that remains stable for an accumulation phase and with centered inputs. Montgomery and Barrett reduction remain the appropriate tools for multiplication-dominated modular arithmetic.

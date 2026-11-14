@@ -1,0 +1,134 @@
+[
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DREIST_HAVE_AVX2_BACKEND=1 -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\reist_intrinsics.dir\\src\\reist_intrinsics_dispatch.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\reist_intrinsics_dispatch.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/reist_intrinsics_dispatch.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/reist_intrinsics.dir/src/reist_intrinsics_dispatch.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DREIST_HAVE_AVX2_BACKEND=1 -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -mavx2 -o CMakeFiles\\reist_intrinsics.dir\\src\\reist_intrinsics_avx2.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\reist_intrinsics_avx2.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/reist_intrinsics_avx2.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/reist_intrinsics.dir/src/reist_intrinsics_avx2.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_paper_addition.dir\\src\\bench_paper_addition.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_paper_addition.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_paper_addition.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_paper_addition.dir/src/bench_paper_addition.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_modadd_suite.dir\\src\\bench_modadd_suite.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_modadd_suite.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_modadd_suite.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_modadd_suite.dir/src/bench_modadd_suite.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_poly_mod.dir\\src\\bench_poly_mod.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_poly_mod.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_poly_mod.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_poly_mod.dir/src/bench_poly_mod.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_modular.dir\\src\\bench_modular.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_modular.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_modular.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_modular.dir/src/bench_modular.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_chacha_stream.dir\\src\\bench_chacha_stream.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_chacha_stream.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_chacha_stream.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_chacha_stream.dir/src/bench_chacha_stream.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_hashmix.dir\\src\\bench_hashmix.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_hashmix.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_hashmix.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_hashmix.dir/src/bench_hashmix.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_montgomery.dir\\src\\bench_montgomery.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_montgomery.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_montgomery.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_montgomery.dir/src/bench_montgomery.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_barret_reist.dir\\src\\bench_barret_reist.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_barret_reist.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_barret_reist.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_barret_reist.dir/src/bench_barret_reist.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_mont_vs_reist_tree_ntt.dir\\src\\bench_mont_vs_reist_tree_ntt.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_mont_vs_reist_tree_ntt.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_mont_vs_reist_tree_ntt.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_mont_vs_reist_tree_ntt.dir/src/bench_mont_vs_reist_tree_ntt.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_reist_arm.dir\\src\\bench_reist_arm.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_reist_arm.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_reist_arm.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_reist_arm.dir/src/bench_reist_arm.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_tree_reist.dir\\src\\bench_tree_reist.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_tree_reist.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_tree_reist.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_tree_reist.dir/src/bench_tree_reist.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -mavx2 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_tree_reist_avx2.dir\\src\\bench_tree_reist_avx2.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_tree_reist_avx2.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_tree_reist_avx2.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_tree_reist_avx2.dir/src/bench_tree_reist_avx2.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_tree_reist_neon.dir\\src\\bench_tree_reist_neon.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_tree_reist_neon.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_tree_reist_neon.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_tree_reist_neon.dir/src/bench_tree_reist_neon.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\reist_neon_diag_mt.dir\\src\\reist_neon_diag_mt.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\reist_neon_diag_mt.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/reist_neon_diag_mt.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/reist_neon_diag_mt.dir/src/reist_neon_diag_mt.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DREIST_INTRINSIC_BENCH_OPTIMIZED=1 -DREIST_BENCH_HAVE_AVX2_CONST=1 -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_reist_intrinsics.dir\\src\\bench_reist_intrinsics.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_reist_intrinsics.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_reist_intrinsics.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_reist_intrinsics.dir/src/bench_reist_intrinsics.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DREIST_INTRINSIC_BENCH_OPTIMIZED=1 -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\bench_reist_intrinsics.dir\\src\\bench_reist_intrinsics_const_portable.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_reist_intrinsics_const_portable.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_reist_intrinsics_const_portable.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_reist_intrinsics.dir/src/bench_reist_intrinsics_const_portable.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -DREIST_INTRINSIC_BENCH_OPTIMIZED=1 -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -mavx2 -o CMakeFiles\\bench_reist_intrinsics.dir\\src\\bench_reist_intrinsics_const_avx2.cpp.obj -c D:\\Development\\reist-crypto-bench\\src\\bench_reist_intrinsics_const_avx2.cpp",
+  "file": "D:/Development/reist-crypto-bench/src/bench_reist_intrinsics_const_avx2.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/bench_reist_intrinsics.dir/src/bench_reist_intrinsics_const_avx2.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/src -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\paper_addition_tests.dir\\tests\\test_paper_addition.cpp.obj -c D:\\Development\\reist-crypto-bench\\tests\\test_paper_addition.cpp",
+  "file": "D:/Development/reist-crypto-bench/tests/test_paper_addition.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/paper_addition_tests.dir/tests/test_paper_addition.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\reist_unit_tests.dir\\tests\\test_reist.cpp.obj -c D:\\Development\\reist-crypto-bench\\tests\\test_reist.cpp",
+  "file": "D:/Development/reist-crypto-bench/tests/test_reist.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/reist_unit_tests.dir/tests/test_reist.cpp.obj"
+},
+{
+  "directory": "D:/Development/reist-crypto-bench/build/paper-measurement",
+  "command": "C:\\msys64\\mingw64\\bin\\c++.exe -ID:/Development/reist-crypto-bench/include -march=native -O3 -DNDEBUG -std=gnu++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror -o CMakeFiles\\reist_intrinsic_tests.dir\\tests\\test_reist_intrinsics.cpp.obj -c D:\\Development\\reist-crypto-bench\\tests\\test_reist_intrinsics.cpp",
+  "file": "D:/Development/reist-crypto-bench/tests/test_reist_intrinsics.cpp",
+  "output": "D:/Development/reist-crypto-bench/build/paper-measurement/CMakeFiles/reist_intrinsic_tests.dir/tests/test_reist_intrinsics.cpp.obj"
+}
+]

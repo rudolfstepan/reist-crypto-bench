@@ -41,6 +41,11 @@ jobs:
           --moduli 256,1000003
           --target-updates 1048576
           --trials 6
+      - name: Validate balanced paper runner and archive
+        if: matrix.name == 'GCC'
+        run: |
+          python3 scripts/run_paper_benchmarks.py --build-dir build-paper-runner --result-dir paper-runner-smoke --quick --trials 6
+          python3 scripts/verify_paper_archive.py paper-runner-smoke
       - name: Validate fixed-repetition complexity runner
         if: matrix.name == 'GCC'
         run: >-

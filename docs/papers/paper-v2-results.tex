@@ -1,0 +1,57 @@
+\section{Neue CPU-Evaluation vom 14. November 2026}
+\label{sec:neuevaluation}
+Die neue Evaluation vergleicht drei gleich breite Additionskerne: den
+Restoperator \texttt{\%}, nicht-negative Addition mit bedingter Subtraktion
+und die kanonisch zentrierte $\pm B$-Korrektur. Alle Operanden sind 32 Bit
+breit; $1\le B\le 2^{31}-1$ verhindert Überlauf in beiden Darstellungen.
+Konstante Template-Moduli und Laufzeitmoduli werden getrennt ausgewertet.
+Alle drei Methoden erhalten dieselben Compiler- und ISA-Optionen.
+
+Der vollständige Lauf umfasst 630 Fälle und 12 Versuche
+je Methode, mit allen sechs Ausführungsreihenfolgen gleich häufig und
+einem vollständigen Warm-up. Fünf Eingabemuster decken positive, negative,
+alternierende, grenznahe und pseudozufällige Schritte ab. Eine unabhängige
+64-Bit-Referenz prüft alle Ausgaben und zählt die Korrekturen außerhalb
+der Zeitmessung. Serielle Zustände, unabhängige Arrays und polynomielle
+Addition werden getrennt betrachtet.
+
+Gemessen wurde mit GCC 15.2.0, CMake Release, \texttt{-O3 -DNDEBUG}
+und \texttt{-march=native} unter Windows auf dem Intel Core i9-14900K.
+Der Prozess war an logische CPU 0 gebunden. Turbo, Temperatur und
+Hintergrundlast wurden nicht kontrolliert. ARM und FPGA wurden nicht neu vermessen.
+Die Zahlen gelten für diese Übersetzung und diesen Lauf.
+
+\begin{center}\small
+\begin{tabular}{llrrr}\toprule
+Last & Bindung & Fälle & \% / zentriert & beschränkt / zentriert \\\midrule
+serial & constant & 30 & 2.880 & 1.282 \\
+serial & runtime & 30 & 5.144 & 0.962 \\
+array & constant & 90 & 1.230 & 0.853 \\
+array & runtime & 90 & 10.778 & 0.802 \\
+polynomial & constant & 30 & 1.125 & 0.664 \\
+polynomial & runtime & 30 & 11.791 & 0.677 \\
+\bottomrule\end{tabular}\end{center}
+Die Tabelle zeigt den Median der fallweisen Medianquotienten, ohne
+die entartete Kontrolle $B=1$. Ein Quotient größer eins begünstigt die
+zentrierte Darstellung. Diese deskriptive Zusammenfassung über unterschiedliche
+Lasten ist kein gemeinsamer Anwendungsspeedup. Rohwerte und Quartile
+jedes einzelnen Falls bleiben im Archiv erhalten; Quartile sind keine
+Konfidenzintervalle. Verluste werden nicht entfernt.
+
+Der Vergleich mit dem Restoperator allein überschätzt den Nachweis eines
+Repräsentationsvorteils. Die beschränkte nicht-negative Baseline ist in
+den zusammengefassten Array- und Polynomfällen schneller als die zentrierte
+Variante. Bei seriellen konstanten Moduli zeigt die Zusammenfassung einen
+Vorteil für centered; bei seriellen Laufzeitmoduli keinen allgemeinen Vorteil.
+Die neue Messung stützt daher keine universelle Überlegenheit der Zentrierung.
+
+Zusätzliche Fälle mit 65536 Zuständen und 1, 4, 16 oder 256 Updates
+messen Normalisierung, Allokation und Rückkonvertierung mit. Eingabeerzeugung,
+Validierung und abschließende Freigabe bleiben außerhalb. Diese Grenze ist
+eine lokale Verarbeitungskette und kein vollständiges Kryptosystem.
+Ein allgemeiner Amortisationspunkt wird nicht aus aggregierten Werten abgeleitet.
+
+\noindent\textbf{Reproduktion:} Quellcode, Build-Kommandos, Hashes und alle
+Rohdaten stehen im Repository unter \path{tests/results/x86/20261114_PAPER_V2}.
+Die Methodik erläutert \path{docs/PAPER_BENCHMARK_V2_DE.md}.
+Das Skript \path{scripts/run_paper_benchmarks.py} baut und misst die Matrix.

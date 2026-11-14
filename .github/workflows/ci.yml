@@ -41,6 +41,10 @@ jobs:
           --moduli 256,1000003
           --target-updates 1048576
           --trials 6
+      - name: Build small disassembly examples
+        run: >-
+          python3 scripts/build_disassembly_examples.py
+          --compiler ${{ matrix.cxx }} --output build/disassembly-examples
       - name: Validate balanced paper runner and archive
         if: matrix.name == 'GCC'
         run: |

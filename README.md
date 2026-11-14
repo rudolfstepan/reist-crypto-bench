@@ -265,6 +265,18 @@ The reporter accepts only schema-2 complete O0/O3/SIMD sets with one shared `ses
 
 ## Compiler artifact inspection
 
+For small, manually comparable object files without benchmark executables, see
+the [five disassembly examples](examples/disassembly/README.md). Each source
+contains only three C-linkage functions comparing `%`, bounded non-negative
+correction, and centered correction:
+
+```sh
+python scripts/build_disassembly_examples.py
+```
+
+This emits `.s`, `.o`, and `.disasm.txt` files under
+`build/disassembly-examples/`, without linking an executable.
+
 The report generator and standalone checker inspect named benchmark kernels rather than classifying an entire assembly file from any incidental instruction:
 
 ```bash

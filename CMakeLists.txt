@@ -203,7 +203,21 @@ if(REIST_BUILD_DIAGNOSTICS)
 endif()
 
 include(CTest)
+
+# Object-only examples for manual disassembly; no example executable is linked.
+add_library(reist_disassembly_examples OBJECT EXCLUDE_FROM_ALL
+    examples/disassembly/01_runtime.cpp
+    examples/disassembly/02_constant_257.cpp
+    examples/disassembly/03_power_of_two_256.cpp
+    examples/disassembly/04_serial_257.cpp
+    examples/disassembly/05_array_257.cpp)
+target_link_libraries(reist_disassembly_examples PRIVATE reist_mod)
+
 if(BUILD_TESTING)
+    add_executable(disassembly_example_tests tests/test_disassembly_examples.cpp)
+    target_link_libraries(disassembly_example_tests PRIVATE reist_mod reist_disassembly_examples)
+    add_test(NAME reist.examples.disassembly COMMAND disassembly_example_tests)
+    set_tests_properties(reist.examples.disassembly PROPERTIES LABELS "correctness;examples")
     add_executable(paper_addition_tests tests/test_paper_addition.cpp)
     target_link_libraries(paper_addition_tests PRIVATE reist_mod)
     target_include_directories(paper_addition_tests PRIVATE src)

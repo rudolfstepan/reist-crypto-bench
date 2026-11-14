@@ -315,3 +315,11 @@ jobs:
           curl --fail --silent --show-error --location --retry 3 --output /dev/null "$base/rtl/reist/reist_core.vhd"
           curl --fail --silent --show-error --location --retry 3 --output /dev/null "$base/sim/tb/tb_reist_core.vhd"
           curl --fail --silent --show-error --location --retry 3 --output /dev/null "$base/boards/tang_primer_20k/reist/reist_bench.gprj"
+      - name: Preserve compiler evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-evidence
+          path: |
+            compiler_reports/
+            compiler_python/
